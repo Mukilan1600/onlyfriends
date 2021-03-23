@@ -1,0 +1,19 @@
+{
+  "name": "onlyfriends",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mukilan1600/onlyfriends.git"
+  },
+  "author": "Mukilan IK",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mukilan1600/onlyfriends/issues"
+  },
+  "homepage": "https://github.com/Mukilan1600/onlyfriends#readme"
+}
