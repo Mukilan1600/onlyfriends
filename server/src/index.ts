@@ -1,17 +1,14 @@
-import { Router } from 'express';
-import Server from './Server/Server'
 import dotenv from 'dotenv'
+
+import Server from './Server/Server'
+import logger from './Logger/Logger'
 
 dotenv.config();
 
 const server = new Server();
 
-const router = Router()
-router.get("/",(req,res) => res.send("Hello"));
-server.addRoutes(router)
-
 const PORT = process.env.PORT
 
 server.start(PORT,() => {
-    console.log("Started...")
+    logger.info(`Server is running on port ${PORT}`)
 })
