@@ -10,11 +10,11 @@ class Server {
         this.app = express()
     }
 
-    public addRoutes(router: Router){
+    public addRoutes(router: Router): void{
         this.app.use(router);
     }
 
-    public start(port: number|string, cb: () => void) {
+    public start(port: number|string, cb: () => void): void {
         this.app.listen(port, cb);
     }
 
