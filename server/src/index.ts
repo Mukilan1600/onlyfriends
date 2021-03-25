@@ -7,6 +7,7 @@ import APIRoutes from './api'
 
 dotenv.config();
 
+require("./database/MongoDB")
 const server = new Server();
 
 server.addRoutes(APIRoutes, "/api");

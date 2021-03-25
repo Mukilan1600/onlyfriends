@@ -1,6 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import { ensureLoggedIn } from "connect-ensure-login";
+import logger from "../../Logger/Logger";
 
 const router = Router();
 
@@ -29,5 +30,16 @@ router.get(
     res.json(req.user);
   }
 );
+
+router.get("/logout", (req,res) => {
+  req.logOut();
+  req.session.destroy((err) => {
+    if(err){
+      logger.error(err)
+      return res.status(500).send({msg: "Internal server error"})
+    }
+    return res.redirect("/")
+  });
+})
 
 export default router;
