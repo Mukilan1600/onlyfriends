@@ -2,6 +2,8 @@ import { Router } from "express";
 import passport from "passport";
 import { ensureLoggedIn } from "connect-ensure-login";
 import logger from "../../Logger/Logger";
+import jwt from "jsonwebtoken";
+import User, { IUser } from "../../database/Models/User";
 
 const router = Router();
 
@@ -20,7 +22,11 @@ router.get(
     scope: ["profile"],
   }),
   (req, res) => {
-    res.redirect("/api/auth/profile");
+    const user = req.user as IUser;
+    const jwtTok = jwt.sign({ oauthId: user.oauthId }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    res.redirect(`/api/auth/profile?jwtTok=${jwtTok}`);
   }
 );
 router.get(
@@ -31,15 +37,28 @@ router.get(
   }
 );
 
-router.get("/logout", (req,res) => {
-  req.logOut();
-  req.session.destroy((err) => {
-    if(err){
-      logger.error(err)
-      return res.status(500).send({msg: "Internal server error"})
+router.get("/logout", ensureLoggedIn({ redirectTo: "/" }), (req, res) => {
+  const user = req.user as IUser;
+  User.findOneAndUpdate(
+    { oauthId: user.oauthId },
+    { online: false, lastSeen: Date.now() },
+    {useFindAndModify: false},
+    (err) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).send({ msg: "Internal server error" });
+      }
+
+      req.logOut();
+      req.session.destroy((err) => {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send({ msg: "Internal server error" });
+        }
+        return res.redirect("/");
+      });
     }
-    return res.redirect("/")
-  });
-})
+  );
+});
 
 export default router;
