@@ -1,5 +1,6 @@
 import { Schema, Model, model, Document } from "mongoose";
 import logger from "../../Logger/Logger";
+import Chat, {IChat} from "./Chat";
 
 export interface IUser extends Document {
   oauthId: string;
@@ -9,8 +10,11 @@ export interface IUser extends Document {
   online: Boolean;
   lastSeen: number;
   friendRequests: [IUser];
-  friends: [IUser];
-  chat: [{ type: Schema.Types.ObjectId; ref: "Chat" }];
+  friends: [{
+    user: IUser,
+    chat: IChat,
+  }];
+  chat: [IChat];
 }
 
 const userSchema = new Schema({
@@ -32,7 +36,12 @@ const userSchema = new Schema({
     default: Date.now(),
   },
   friends: {
-    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    type: [
+      {
+        user: { type: Schema.Types.ObjectId, ref: "User" },
+        chat: { type: Schema.Types.ObjectId, ref: "Chat" },
+      },
+    ],
     default: [],
   },
   friendRequests: {
@@ -67,6 +76,16 @@ export const findOrCreate = async (id: string, newUserDetails: any) => {
 };
 
 // Friends
+export const getFriendsList = async (userId: string) => {
+  try{
+    const user = await User.findOne({oauthId: userId}).populate("friends.user")
+    if(user)
+      return user.friends;
+  }catch(err){
+    logger.error(err, {service: "User.getFriendsList"});
+  }
+}
+
 export const sendFriendRequest = async (from: string, to: string) => {
   try {
     const user = await User.findOne({ oauthId: from });
@@ -74,17 +93,51 @@ export const sendFriendRequest = async (from: string, to: string) => {
       const toUser = await User.findOneAndUpdate(
         {
           oauthId: to,
+          'friends.user': {$ne: user}
         },
         { $addToSet: { friendRequests: user } },
-        { useFindAndModify: false }
+        { useFindAndModify: false, returnOriginal: false }
       )
-        .populate({ path: "friendRequests", select: "name online lastSeen avatarUrl socketId" })
+        .populate({
+          path: "friendRequests",
+          select: "name online lastSeen avatarUrl socketId oauthId",
+        })
         .exec();
-      console.log(toUser);
       return toUser;
     }
     return null;
   } catch (err) {
-    logger.error(err);
+    logger.error(err, {service: "User.sendfriendrequest"});
   }
 };
+
+export const acceptFriendRequest = async (from: string, to: string) => {
+  try {
+    const user = await User.findOne({ oauthId: from });
+    if (user) {
+      const toUser = await User.findOneAndUpdate(
+        {
+          oauthId: to,
+          friendRequests:  user
+        },
+        { $pull: { friendRequests: user._id } },
+        { useFindAndModify: false, returnOriginal: false }
+        );
+      if(toUser){
+        const newChat = new Chat({
+          type: "personal",
+          participants: [user, toUser],
+        })
+        user.friends.push({user: toUser, chat: newChat})
+        toUser.friends.push({user: user, chat: newChat});
+        user.save();
+        toUser.save();
+        newChat.save();
+        return toUser
+      }
+    }
+    return null;
+  } catch (err) {
+    logger.error(err, {service: "User.acceptfriendrequest"});
+  }
+}

@@ -2,7 +2,7 @@ import { Server } from "http";
 import socketio from "socket.io";
 import logger from "../Logger/Logger";
 import jwt from "jsonwebtoken";
-import User, {sendFriendRequest} from "../database/Models/User";
+import User, {acceptFriendRequest, sendFriendRequest} from "../database/Models/User";
 
 interface Socket extends socketio.Socket{
     oauthId?:string
@@ -49,8 +49,30 @@ class WebSocket {
                 }
             }catch(err){
                 socket.emit("error");
+                logger.error(err, {service: "socket.add_friend"});
+
             }
         })
+
+        socket.on("accept_friend_request", async ({userId}) => {
+          try{
+            await acceptFriendRequest(userId, socket.oauthId);
+          }catch(err){
+            socket.emit("error");
+            logger.error(err, {service: "socket.accept_friend_request"});
+
+          }
+        })
+
+        socket.on("disconnect", async () => {
+          try{
+            await User.findOneAndUpdate({oauthId: socket.oauthId}, {online: false, lastSeen: Date.now()})
+          }catch(err){
+            socket.emit("error")
+            logger.error(err, {service: "socket.disconnect"});
+          }
+        })
+
         logger.info(`Incoming socket connection Id: ${socket.id}`);
     });
   }
