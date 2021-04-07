@@ -2,7 +2,7 @@ import { Server } from "http";
 import socketio from "socket.io";
 import logger from "../Logger/Logger";
 import jwt from "jsonwebtoken";
-import User, {acceptFriendRequest, sendFriendRequest} from "../database/Models/User";
+import User, {acceptFriendRequest, getFriendsList, sendFriendRequest} from "../database/Models/User";
 
 interface Socket extends socketio.Socket{
     oauthId?:string
@@ -56,7 +56,13 @@ class WebSocket {
 
         socket.on("accept_friend_request", async ({userId}) => {
           try{
-            await acceptFriendRequest(userId, socket.oauthId);
+            const {user} = await acceptFriendRequest(userId, socket.oauthId);
+            if(user){
+              const userFriends = await getFriendsList(user.oauthId)
+              const toUserFriends = await getFriendsList(socket.oauthId)
+              socket.to(user.socketId).emit("friends_list", userFriends);
+              socket.emit("friends_list", toUserFriends);
+            }
           }catch(err){
             socket.emit("error");
             logger.error(err, {service: "socket.accept_friend_request"});

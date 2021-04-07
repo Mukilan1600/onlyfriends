@@ -78,7 +78,7 @@ export const findOrCreate = async (id: string, newUserDetails: any) => {
 // Friends
 export const getFriendsList = async (userId: string) => {
   try{
-    const user = await User.findOne({oauthId: userId}).populate("friends.user")
+    const user = await User.findOne({oauthId: userId}).populate("friends.user",'oauthId name online lastSeen avatarUrl')
     if(user)
       return user.friends;
   }catch(err){
@@ -130,13 +130,14 @@ export const acceptFriendRequest = async (from: string, to: string) => {
         })
         user.friends.push({user: toUser, chat: newChat})
         toUser.friends.push({user: user, chat: newChat});
-        user.save();
-        toUser.save();
-        newChat.save();
-        return toUser
+        await user.save();
+        await toUser.save();
+        await newChat.save();
+        return {user}
       }
+      return {user: null}
     }
-    return null;
+    return {user: null};
   } catch (err) {
     logger.error(err, {service: "User.acceptfriendrequest"});
   }
