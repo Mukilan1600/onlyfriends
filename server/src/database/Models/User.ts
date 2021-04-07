@@ -9,12 +9,12 @@ export interface IUser extends Document {
   socketId: string;
   online: Boolean;
   lastSeen: number;
-  friendRequests: [IUser];
-  friends: [{
+  friendRequests: IUser[];
+  friends: {
     user: IUser,
     chat: IChat,
-  }];
-  chat: [IChat];
+  }[];
+  chat: IChat[];
 }
 
 const userSchema = new Schema({
@@ -113,7 +113,7 @@ export const sendFriendRequest = async (from: string, to: string) => {
 
 export const acceptFriendRequest = async (from: string, to: string) => {
   try {
-    const user = await User.findOne({ oauthId: from });
+    const user = await User.findOneAndUpdate({ oauthId: from });
     if (user) {
       const toUser = await User.findOneAndUpdate(
         {
@@ -129,6 +129,7 @@ export const acceptFriendRequest = async (from: string, to: string) => {
           participants: [user, toUser],
         })
         user.friends.push({user: toUser, chat: newChat})
+        user.friendRequests = [...user.friendRequests].filter(id => id !== toUser._id)
         toUser.friends.push({user: user, chat: newChat});
         await user.save();
         await toUser.save();
