@@ -26,7 +26,7 @@ router.get(
     const jwtTok = jwt.sign({ oauthId: user.oauthId }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
-    res.redirect(`/api/auth/profile?jwtTok=${jwtTok}`);
+    res.redirect(`${process.env.CLIENT}/?jwtTok=${jwtTok}`);
   }
 );
 router.get(
