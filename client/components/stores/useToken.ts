@@ -13,7 +13,7 @@ const getTokenFromStorage = () => {
 
 export default create(
   combine({ jwtTok: getTokenFromStorage() }, (setState) => ({
-      setToken: (jwtTok) => {
+      setToken: (jwtTok: string) => {
         try{
             localStorage.setItem("jwtTok", jwtTok);
         }catch{

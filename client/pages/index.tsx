@@ -1,7 +1,7 @@
 import React from 'react'
 import useSaveQueryParamsToken from '../components/stores/useSaveQueryParamsToken'
 
-export default function Login() {
+const Login: React.FC = () => {
     useSaveQueryParamsToken();
     return (
         <div>
@@ -9,3 +9,5 @@ export default function Login() {
         </div>
     )
 }
+
+export default Login;
