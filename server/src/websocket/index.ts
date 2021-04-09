@@ -2,15 +2,24 @@ import { Server } from "http";
 import socketio from "socket.io";
 import logger from "../Logger/Logger";
 import jwt from "jsonwebtoken";
-import User, {acceptFriendRequest, getFriendsList, sendFriendRequest} from "../database/Models/User";
+import User, {
+  acceptFriendRequest,
+  getFriendsList,
+  sendFriendRequest,
+} from "../database/Models/User";
 
-interface Socket extends socketio.Socket{
-    oauthId?:string
+interface Socket extends socketio.Socket {
+  oauthId?: string;
+}
+
+const AuthError = {
+  code: 401,
+  msg: "Authentication error"
 }
 
 class WebSocket {
   private io: socketio.Server;
-  constructor(server: Server, sessionMiddleware: any) {
+  constructor(server: Server) {
     this.io = require("socket.io")(server, {
       cors: {
         origin: "*",
@@ -18,17 +27,17 @@ class WebSocket {
         credentials: true,
       },
     }).use((socket: Socket, next: any) => {
-      if (socket.handshake.query && socket.handshake.query.jwtTok) {
+      if (socket.handshake.query && socket.handshake.query.jwtTok && socket.handshake.query.jwtTok!=="null") {
         const token = socket.handshake.query.jwtTok as string;
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded: any) => {
           if (err) {
-            return next(new Error("Authentication error"));
+            return next(new Error(JSON.stringify(AuthError)));
           }
           socket.oauthId = decoded.oauthId;
           next();
         });
       } else {
-        next(new Error("Authentication error"));
+        next(new Error(JSON.stringify(AuthError)));
       }
     });
     this.initializeSocketListeners();
@@ -36,50 +45,59 @@ class WebSocket {
 
   private initializeSocketListeners() {
     this.io.on("connection", (socket: Socket) => {
-        if(!this.AuthenticateUserAndDropPreviousConnections(socket.id, socket.oauthId)){
-            socket.disconnect();
-            return;
+      if (
+        !this.AuthenticateUserAndDropPreviousConnections(
+          socket.id,
+          socket.oauthId
+        )
+      ) {
+        socket.disconnect(true);
+        return;
+      }
+      // Friends
+      socket.on("add_friend", async ({ userId }) => {
+        try {
+          const user = await sendFriendRequest(socket.oauthId, userId);
+          if (user) {
+            socket
+              .to(user.socketId)
+              .emit("friend_requests", user.friendRequests);
+          }
+        } catch (err) {
+          socket.emit("error");
+          logger.error(err, { service: "socket.add_friend" });
         }
-        // Friends
-        socket.on("add_friend", async ({userId}) => {
-            try{
-                const user = await sendFriendRequest(socket.oauthId, userId)
-                if(user){
-                  socket.to(user.socketId).emit("friend_requests", user.friendRequests)
-                }
-            }catch(err){
-                socket.emit("error");
-                logger.error(err, {service: "socket.add_friend"});
+      });
 
-            }
-        })
-
-        socket.on("accept_friend_request", async ({userId}) => {
-          try{
-            const {user} = await acceptFriendRequest(userId, socket.oauthId);
-            if(user){
-              const userFriends = await getFriendsList(user.oauthId)
-              const toUserFriends = await getFriendsList(socket.oauthId)
-              socket.to(user.socketId).emit("friends_list", userFriends);
-              socket.emit("friends_list", toUserFriends);
-            }
-          }catch(err){
-            socket.emit("error");
-            logger.error(err, {service: "socket.accept_friend_request"});
-
+      socket.on("accept_friend_request", async ({ userId }) => {
+        try {
+          const { user } = await acceptFriendRequest(userId, socket.oauthId);
+          if (user) {
+            const userFriends = await getFriendsList(user.oauthId);
+            const toUserFriends = await getFriendsList(socket.oauthId);
+            socket.to(user.socketId).emit("friends_list", userFriends);
+            socket.emit("friends_list", toUserFriends);
           }
-        })
+        } catch (err) {
+          socket.emit("error");
+          logger.error(err, { service: "socket.accept_friend_request" });
+        }
+      });
 
-        socket.on("disconnect", async () => {
-          try{
-            await User.findOneAndUpdate({oauthId: socket.oauthId}, {online: false, lastSeen: Date.now()})
-          }catch(err){
-            socket.emit("error")
-            logger.error(err, {service: "socket.disconnect"});
-          }
-        })
+      socket.on("disconnect", async () => {
+        try {
+          await User.findOneAndUpdate(
+            { oauthId: socket.oauthId },
+            { online: false, lastSeen: Date.now() },
+            { useFindAndModify: false }
+          );
+        } catch (err) {
+          socket.emit("error");
+          logger.error(err, { service: "socket.disconnect" });
+        }
+      });
 
-        logger.info(`Incoming socket connection Id: ${socket.id}`);
+      logger.info(`Incoming socket connection Id: ${socket.id}`);
     });
   }
 
@@ -99,7 +117,7 @@ class WebSocket {
       if (doc.socketId) {
         const prevSocket = this.io.sockets.sockets.get(doc.socketId);
         if (prevSocket !== undefined) {
-          prevSocket.disconnect();
+          prevSocket.disconnect(true);
         }
       }
       return true;

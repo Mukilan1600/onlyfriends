@@ -35,7 +35,7 @@ class Server {
   }
 
   private initializeWebSocket() {
-    new WebSocket(this.server, this.sessionMiddleware);
+    new WebSocket(this.server);
   }
 
   public addRoutes(router: Router, basePath?: string): void {
