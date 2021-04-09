@@ -1,51 +1,62 @@
 import { useRouter } from "next/router";
 import React, { createContext, useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import useToken from "../stores/useToken";
 
-type ConnectionStatus = "connecting" | "connected" | "closed-by-server" | "disconnected"
+type ConnectionStatus =
+  | "connecting"
+  | "connected"
+  | "closed-by-server"
+  | "disconnected";
 
-const WebSocketContext = createContext({
+export const WebSocketContext = createContext<{
+  socket: Socket;
+  socketStatus: ConnectionStatus;
+}>({
   socket: null,
   socketStatus: "connecting",
 });
 
 interface ConnectionError {
-  code: number,
-  msg: string
+  code: number;
+  msg: string;
 }
 
 const WebSocketProvider: React.FC<{}> = ({ children }) => {
-  const [socketStatus, setSocketStatus] = useState<ConnectionStatus>("connecting");
+  const [socketStatus, setSocketStatus] = useState<ConnectionStatus>(
+    "connecting"
+  );
   const [socket, setSocket] = useState(null);
   const { jwtTok, clearTokens } = useToken();
   const router = useRouter();
 
   useEffect(() => {
-    if(socket || !jwtTok) return;
+    if (socket || !jwtTok) return;
 
     const newSocket = io(process.env.NEXT_PUBLIC_SERVER, { query: { jwtTok } });
     newSocket.on("disconnect", (msg) => {
-      if(msg==="io server disconnect"){
+      if (msg === "io server disconnect") {
         setSocketStatus("closed-by-server");
-      }else{
-        setSocketStatus("disconnected")
+      } else {
+        setSocketStatus("disconnected");
       }
       setSocket(null);
     });
     newSocket.on("connect_error", (msg) => {
       const error: ConnectionError = JSON.parse(msg.message);
-      if(error.code === 401){
+      if (error.code === 401) {
         clearTokens();
         setSocket(null);
         router.push("/login");
-      }else{
+      } else {
         setSocket(null);
       }
     });
-    setSocketStatus("connected")
+    setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok]);
+
+  if (socketStatus === "closed-by-server") return <>closed by server</>;
 
   return (
     <WebSocketContext.Provider value={{ socket, socketStatus }}>
