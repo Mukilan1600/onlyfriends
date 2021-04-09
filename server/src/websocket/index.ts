@@ -14,8 +14,8 @@ interface Socket extends socketio.Socket {
 
 const AuthError = {
   code: 401,
-  msg: "Authentication error"
-}
+  msg: "Authentication error",
+};
 
 class WebSocket {
   private io: socketio.Server;
@@ -27,7 +27,11 @@ class WebSocket {
         credentials: true,
       },
     }).use((socket: Socket, next: any) => {
-      if (socket.handshake.query && socket.handshake.query.jwtTok && socket.handshake.query.jwtTok!=="null") {
+      if (
+        socket.handshake.query &&
+        socket.handshake.query.jwtTok &&
+        socket.handshake.query.jwtTok !== "null"
+      ) {
         const token = socket.handshake.query.jwtTok as string;
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded: any) => {
           if (err) {
@@ -97,7 +101,9 @@ class WebSocket {
         }
       });
 
-      logger.info(`Incoming socket connection Id: ${socket.id}`);
+      logger.info(
+        `Incoming socket connection Id: ${socket.id} UserId: ${socket.oauthId}`
+      );
     });
   }
 
