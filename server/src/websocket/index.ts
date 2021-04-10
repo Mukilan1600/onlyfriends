@@ -48,7 +48,7 @@ class WebSocket {
   }
 
   private initializeSocketListeners() {
-    this.io.on("connection", (socket: Socket) => {
+    this.io.on("connection", async (socket: Socket) => {
       if (
         !this.AuthenticateUserAndDropPreviousConnections(
           socket.id,
@@ -100,6 +100,9 @@ class WebSocket {
           logger.error(err, { service: "socket.disconnect" });
         }
       });
+
+      const profile = await User.findOne({oauthId: socket.oauthId});
+      socket.emit("profile", JSON.stringify(profile));
 
       logger.info(
         `Incoming socket connection Id: ${socket.id} UserId: ${socket.oauthId}`

@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import React, { createContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import useProfile from "../stores/useProfile";
 import useToken from "../stores/useToken";
 
 type ConnectionStatus =
@@ -52,10 +53,18 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
         setSocket(null);
       }
     });
+    newSocket.on("profile", (msg) => {
+      try{
+        const profile = JSON.parse(msg);
+        useProfile.getState().setUser(profile);
+        console.log(profile)
+      }catch{}
+    })
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok]);
 
+  // @todo Redirect to socket closed page
   if (socketStatus === "closed-by-server") return <>closed by server</>;
 
   return (

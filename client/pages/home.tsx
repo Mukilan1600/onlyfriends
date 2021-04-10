@@ -1,11 +1,13 @@
-import React from 'react'
+import React from "react";
+import Navbar from "../components/modules/Navbar";
 
 const Home: React.FC = () => {
-    return (
-        <div>
-            Hello
-        </div>
-    )
-}
+  return (
+    <>
+      <Navbar />
+      Hello
+    </>
+  );
+};
 
-export default Home
+export default Home;
