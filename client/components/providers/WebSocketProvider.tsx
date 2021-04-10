@@ -32,8 +32,12 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (socket || !jwtTok) return;
+    if (socket || !jwtTok) {
+      setSocketStatus("disconnected");
+      return;
+    }
 
+    setSocketStatus("connecting");
     const newSocket = io(process.env.NEXT_PUBLIC_SERVER, { query: { jwtTok } });
     newSocket.on("disconnect", (msg) => {
       if (msg === "io server disconnect") {
@@ -52,14 +56,15 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       } else {
         setSocket(null);
       }
+      setSocketStatus("disconnected");
     });
     newSocket.on("profile", (msg) => {
-      try{
+      try {
         const profile = JSON.parse(msg);
         useProfile.getState().setUser(profile);
-        console.log(profile)
-      }catch{}
-    })
+        console.log(profile);
+      } catch {}
+    });
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok]);
