@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useContext } from "react";
-import { WebSocketContext } from "../providers/WebSocketProvider";
-import useProfile from "../stores/useProfile";
+import { WebSocketContext } from "../../providers/WebSocketProvider";
+import useProfile from "../../stores/useProfile";
 
 const AuthenticatedPage: React.FC = (props) => {
   const { socketStatus } = useContext(WebSocketContext);

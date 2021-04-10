@@ -1,12 +1,16 @@
 import React from "react";
-import AuthenticatedPage from "../components/modules/AuthenticatedPage";
+import AuthenticatedPage from "../components/modules/Wrappers/AuthenticatedPage";
 import Navbar from "../components/modules/Navbar";
+import Layout from "../components/modules/Wrappers/Layout";
 
 const Home: React.FC = () => {
   return (
     <AuthenticatedPage>
       <Navbar />
-      Hello
+      <Layout>
+        <div>Friends</div>
+        <div>Main</div>
+      </Layout>
     </AuthenticatedPage>
   );
 };
