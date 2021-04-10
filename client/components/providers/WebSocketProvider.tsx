@@ -59,10 +59,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       setSocketStatus("disconnected");
     });
     newSocket.on("profile", (msg) => {
-      try {
-        const profile = JSON.parse(msg);
-        useProfile.getState().setUser(profile);
-      } catch {}
+        useProfile.getState().setUser(msg);
     });
     setSocketStatus("connected");
     setSocket(newSocket);

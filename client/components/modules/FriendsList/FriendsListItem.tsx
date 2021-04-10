@@ -12,7 +12,6 @@ export interface IFriendsListItem {
 }
 
 const FriendsListItem: React.FC<IFriendsListItem> = ({user, chat}) => {
-    console.log(user)
     return (
         <div style={{display: 'flex', flexDirection: 'row'}}>
             <img src={user.avatarUrl} alt="user" height="50px"/>

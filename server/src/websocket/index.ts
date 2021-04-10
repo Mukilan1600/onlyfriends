@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import User, {
   acceptFriendRequest,
   getFriendsList,
+  IUser,
   sendFriendRequest,
 } from "../database/Models/User";
 
@@ -60,13 +61,13 @@ class WebSocket {
       }
       // Friends
       socket.on("get_friends_list", async () => {
-        try{
+        try {
           const friends = await getFriendsList(socket.oauthId);
-          socket.emit("friends_list", friends)
-        }catch(err){
+          socket.emit("friends_list", friends);
+        } catch (err) {
           socket.emit("error");
         }
-      })
+      });
 
       socket.on("add_friend", async ({ userId }) => {
         try {
@@ -99,19 +100,25 @@ class WebSocket {
 
       socket.on("disconnect", async () => {
         try {
-          await User.findOneAndUpdate(
+          const user = await User.findOneAndUpdate(
             { oauthId: socket.oauthId },
             { online: false, lastSeen: Date.now() },
             { useFindAndModify: false }
-          );
+          ).populate("friends.user");
+          this.updateOnlineStatus(user);
         } catch (err) {
           socket.emit("error");
           logger.error(err, { service: "socket.disconnect" });
         }
       });
 
-      const profile = await User.findOne({oauthId: socket.oauthId});
-      socket.emit("profile", JSON.stringify(profile));
+      const profile = await User.findOneAndUpdate(
+        { oauthId: socket.oauthId },
+        { online: true },
+        { useFindAndModify: false }
+      ).populate("friends.user");
+      this.updateOnlineStatus(profile);
+      socket.emit("profile", profile);
 
       logger.info(
         `Incoming socket connection Id: ${socket.id} UserId: ${socket.oauthId}`
@@ -143,6 +150,16 @@ class WebSocket {
       logger.error(err);
       return false;
     }
+  }
+
+  private updateOnlineStatus(user: IUser) {
+    user.friends.forEach((friend) => {
+      this.io.to(friend.user.socketId).emit("update_friend_status", {
+        oauthId: user.oauthId,
+        online: user.online,
+        lastSeen: user.lastSeen,
+      });
+    });
   }
 }
 
