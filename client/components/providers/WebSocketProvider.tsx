@@ -62,7 +62,6 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       try {
         const profile = JSON.parse(msg);
         useProfile.getState().setUser(profile);
-        console.log(profile);
       } catch {}
     });
     setSocketStatus("connected");

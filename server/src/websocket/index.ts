@@ -59,6 +59,15 @@ class WebSocket {
         return;
       }
       // Friends
+      socket.on("get_friends_list", async () => {
+        try{
+          const friends = await getFriendsList(socket.oauthId);
+          socket.emit("friends_list", friends)
+        }catch(err){
+          socket.emit("error");
+        }
+      })
+
       socket.on("add_friend", async ({ userId }) => {
         try {
           const user = await sendFriendRequest(socket.oauthId, userId);
