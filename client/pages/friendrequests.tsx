@@ -4,7 +4,4 @@ import NavbarAndFriendsList from "../components/modules/Wrappers/NavbarAndFriend
 const friendrequests = () => {
   return <NavbarAndFriendsList>Friend requests</NavbarAndFriendsList>;
 };
-
-friendrequests.ws = true;
-
 export default friendrequests;

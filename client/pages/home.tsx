@@ -9,5 +9,4 @@ const Home = () => {
     </NavbarAndFriendsList>
   );
 };
-Home.ws = true;
 export default Home;
