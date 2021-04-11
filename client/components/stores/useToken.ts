@@ -11,7 +11,7 @@ const getTokenFromStorage = () => {
   }
 };
 
-export default create(
+const useToken =  create(
   combine({ jwtTok: getTokenFromStorage() }, (setState) => ({
     setToken: (jwtTok: string) => {
       try {
@@ -29,3 +29,5 @@ export default create(
     },
   }))
 );
+
+export default useToken

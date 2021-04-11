@@ -9,7 +9,7 @@ const AuthenticatedPage: React.FC = (props) => {
   const router = useRouter();
 
   // @todo better loader
-  if (socketStatus === "connecting") return <>Loading...</>;
+  if (socketStatus === "connecting") return <div>Loading...</div>;
 
   if (!user) {
     router.push("/");

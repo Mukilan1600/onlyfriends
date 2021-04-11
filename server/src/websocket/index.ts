@@ -103,7 +103,7 @@ class WebSocket {
           const user = await User.findOneAndUpdate(
             { oauthId: socket.oauthId },
             { online: false, lastSeen: Date.now() },
-            { useFindAndModify: false }
+            { useFindAndModify: false, returnOriginal: false }
           ).populate("friends.user");
           this.updateOnlineStatus(user);
         } catch (err) {
@@ -115,7 +115,7 @@ class WebSocket {
       const profile = await User.findOneAndUpdate(
         { oauthId: socket.oauthId },
         { online: true },
-        { useFindAndModify: false }
+        { useFindAndModify: false, returnOriginal: false }
       ).populate("friends.user");
       this.updateOnlineStatus(profile);
       socket.emit("profile", profile);

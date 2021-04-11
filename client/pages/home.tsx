@@ -1,19 +1,13 @@
 import React from "react";
-import AuthenticatedPage from "../components/modules/Wrappers/AuthenticatedPage";
-import Navbar from "../components/modules/Navbar";
-import Layout from "../components/modules/Wrappers/Layout";
-import FriendsList from "../components/modules/FriendsList/FriendsList";
+import NavbarAndFriendsList from "../components/modules/Wrappers/NavbarAndFriendsList";
 
-const Home: React.FC = () => {
+
+const Home = () => {
   return (
-    <AuthenticatedPage>
-      <Navbar />
-      <Layout>
-        <FriendsList />
+    <NavbarAndFriendsList>
         <div>Main</div>
-      </Layout>
-    </AuthenticatedPage>
+    </NavbarAndFriendsList>
   );
 };
-
+Home.ws = true;
 export default Home;
