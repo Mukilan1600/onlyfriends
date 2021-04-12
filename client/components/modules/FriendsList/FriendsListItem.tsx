@@ -1,13 +1,8 @@
 import React from 'react'
+import { IUser } from '../../stores/useProfile'
 
 export interface IFriendsListItem {
-    user: {
-        avatarUrl: string,
-        lastSeen: string,
-        online: boolean,
-        name: string,
-        oauthId: string
-    },
+    user: IUser,
     chat: string;
 }
 

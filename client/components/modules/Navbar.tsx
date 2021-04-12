@@ -1,4 +1,6 @@
 import React from 'react'
+import styles from './Navbar.module.css'
+
 import useProfile from '../stores/useProfile'
 import Link from 'next/link'
 import { useRouter } from 'next/router';
@@ -14,11 +16,15 @@ export default function Navbar() {
     }
 
     return (
-        <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            <Link href="/home">Logo</Link>
-            <div>
-            <div>{user?.name}</div>
-            <button onClick={onLogout}>Logout</button>
+        <div className={styles.navbarLayout}>
+            <Link href="/home"><p className={styles.navbarLogoText}>Only Friends</p></Link>
+            <div className={styles.navbarOptions}>
+                <div className={styles.profileDetails}>
+                    <img src={user.avatarUrl} className={styles.profileImage} alt="profile" height="22" width="22"></img>
+                    <p className={styles.profileName}>{user?.name}</p>
+                </div>
+                {/** @Mukilan1600 replace with notifications icon */}
+                <button onClick={onLogout} style={{marginLeft: '66px'}}>Logout</button>
             </div>
         </div>
     )
