@@ -1,9 +1,14 @@
-import { Router } from "express";
+import { RequestHandler, Router } from "express";
 import passport from "passport";
-import { ensureLoggedIn } from "connect-ensure-login";
 import logger from "../../Logger/Logger";
 import jwt from "jsonwebtoken";
 import User, { IUser } from "../../database/Models/User";
+
+const ensureLoggedIn: RequestHandler = (req, res, next) => {
+  const user = req.user as IUser;
+  if (user === undefined || !user) return res.redirect(process.env.CLIENT);
+  return next();
+};
 
 const router = Router();
 
@@ -29,20 +34,13 @@ router.get(
     res.redirect(`${process.env.CLIENT}/?jwtTok=${jwtTok}`);
   }
 );
-router.get(
-  "/profile",
-  ensureLoggedIn({ redirectTo: "/api/auth/oauth" }),
-  (req, res) => {
-    res.json(req.user);
-  }
-);
 
-router.get("/logout", ensureLoggedIn({ redirectTo: "/" }), (req, res) => {
+router.get("/logout", ensureLoggedIn, (req, res) => {
   const user = req.user as IUser;
   User.findOneAndUpdate(
     { oauthId: user.oauthId },
     { online: false, lastSeen: Date.now() },
-    {useFindAndModify: false},
+    { useFindAndModify: false },
     (err) => {
       if (err) {
         logger.error(err);
@@ -55,7 +53,7 @@ router.get("/logout", ensureLoggedIn({ redirectTo: "/" }), (req, res) => {
           logger.error(err);
           return res.status(500).send({ msg: "Internal server error" });
         }
-        return res.redirect("/");
+        return res.redirect(`${process.env.CLIENT}/`);
       });
     }
   );
