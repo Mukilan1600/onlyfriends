@@ -39,6 +39,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
 
     setSocketStatus("connecting");
     const newSocket = io(process.env.NEXT_PUBLIC_SERVER, { query: { jwtTok } });
+
     newSocket.on("disconnect", (msg) => {
       if (msg === "io server disconnect") {
         setSocketStatus("closed-by-server");
@@ -47,6 +48,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       }
       setSocket(null);
     });
+
     newSocket.on("connect_error", (msg) => {
       const error: ConnectionError = JSON.parse(msg.message);
       if (error.code === 401) {
@@ -58,9 +60,14 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       }
       setSocketStatus("disconnected");
     });
+
     newSocket.on("profile", (msg) => {
-        useProfile.getState().setUser(msg);
+      useProfile.getState().setUser(msg);
     });
+
+    /** @Mukilan1600 Use toaster to handle confirmation messages */
+    newSocket.on("success", (msg) => console.log(msg));
+    newSocket.on("error", (msg) => console.log(msg));
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok]);

@@ -73,9 +73,12 @@ class WebSocket {
         try {
           const user = await sendFriendRequest(socket.oauthId, userId);
           if (user) {
-            socket
+            socket.emit("success", "Friend request sent")
+            this.io
               .to(user.socketId)
               .emit("friend_requests", user.friendRequests);
+          }else{
+            socket.emit("error", "UserId not found");
           }
         } catch (err) {
           socket.emit("error");
