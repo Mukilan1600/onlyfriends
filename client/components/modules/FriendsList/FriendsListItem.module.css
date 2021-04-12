@@ -1,0 +1,45 @@
+.friendItem {
+  height: 68px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px 35px;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #EEEEEE;
+}
+
+.friendImg {
+  border-radius: 50%;
+  margin-right: 14px;
+}
+
+.friendImgContainer {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+}
+.friendStatus {
+  display: flex;
+  align-items: center;
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.statusRingOnline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #18ff21;
+  margin-right: 4px;
+}
+
+.statusRingOffline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b6b6b;
+  margin-right: 4px;
+}

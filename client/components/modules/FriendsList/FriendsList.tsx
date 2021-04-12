@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import Link from "next/link";
+import styles from './FriendsList.module.css'
 
 import { WebSocketContext } from "../../providers/WebSocketProvider";
 import FriendsListItem from "./FriendsListItem";
@@ -13,9 +14,9 @@ const FriendsList: React.FC = () => {
     if (!socket) return;
     socket.on("friends_list", (msg) => setFriends(msg));
     socket.on("update_friend_status", (msg) => {
-      const newFriends = [...friends];
+      const {friends} = useFriendsList.getState();
       setFriends(
-        newFriends.map((friend) => {
+        friends.map((friend) => {
           if (friend.user.oauthId === msg.oauthId) {
             friend.user.lastSeen = msg.lastSeen;
             friend.user.online = msg.online;
@@ -33,7 +34,7 @@ const FriendsList: React.FC = () => {
   }, [socket]);
 
   return (
-    <div>
+    <div className={styles.body}>
       {friends &&
         friends.map((friend) => (
           <FriendsListItem
@@ -42,7 +43,7 @@ const FriendsList: React.FC = () => {
             chat={friend.chat}
           />
         ))}
-      <Link href="/friendrequests">Add friend</Link>
+      <Link href="/friendrequests"><div className={styles.btnAddFriends}>Friend Requests</div></Link>
     </div>
   );
 };
