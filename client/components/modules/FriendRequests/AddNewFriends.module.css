@@ -1,0 +1,55 @@
+.body {
+  height: 168px;
+  width: 100%;
+  padding: 26px 38px;
+  box-shadow: 0px 0px 86px -36px rgba(0, 0, 0, 0.25);
+}
+.header {
+  font-family: Raleway;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0px;
+}
+
+.inputDiv {
+  height: 66px;
+  border: 0.4px solid #9a9a9a;
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 0px 15px;
+  margin-top: 21px;
+}
+
+.inputDiv input {
+  width: 78%;
+  height: 100%;
+  border: none;
+  font-family: Raleway;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 21px;
+  outline: none;
+}
+
+.inputDiv input:active {
+    border: none;
+}
+
+.inputDiv button{
+    border: none;
+    width: 22%;
+    height: 36px;
+    background: linear-gradient(94.34deg, #3D98E7 -25.12%, rgba(255, 0, 199, 0.71) 158.36%);
+    border-radius: 9px;
+    cursor: pointer;
+
+    font-family: Raleway;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    text-align: center;
+
+    color: #FFFFFF;
+}

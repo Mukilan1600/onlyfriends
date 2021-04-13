@@ -1,4 +1,4 @@
-import create from "zustand";
+import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
 
 export interface IUser {
@@ -9,7 +9,12 @@ export interface IUser {
         oauthId: string
 }
 
-const useProfile = create<{user: IUser}>(combine({ user: null }, (setState) => ({
+interface IProfile extends State {
+    user: IUser
+    setUser: (user: any) => void
+}
+
+const useProfile = create<IProfile>(combine({ user: null }, (setState) => ({
     setUser: (user: any) => setState({user})
 })));
 

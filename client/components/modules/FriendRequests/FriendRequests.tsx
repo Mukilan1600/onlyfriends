@@ -2,9 +2,11 @@ import React from "react";
 import AddNewFriends from "./AddNewFriends";
 import RequestsTabs from "./RequestsTabs";
 
+import styles from './FriendRequests.module.css'
+
 const FriendRequests: React.FC = () => {
   return (
-    <div>
+    <div className={styles.body}>
       <AddNewFriends />
       <RequestsTabs />
     </div>
