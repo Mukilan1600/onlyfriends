@@ -125,7 +125,7 @@ export const sendFriendRequest = async (from: string, to: string) => {
 
 export const acceptFriendRequest = async (from: string, to: string) => {
   try {
-    const user = await User.findOneAndUpdate({ oauthId: from });
+    const user = await User.findOne({ oauthId: from });
     if (user) {
       const toUser = await User.findOneAndUpdate(
         {

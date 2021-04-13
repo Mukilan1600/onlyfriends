@@ -109,6 +109,7 @@ class WebSocket {
             const toUserFriends = await getFriendsList(socket.oauthId);
             socket.to(user.socketId).emit("friends_list", userFriends);
             socket.emit("friends_list", toUserFriends);
+            socket.emit("friend_request_accepted", userId);
           }
         } catch (err) {
           socket.emit("error");
@@ -123,7 +124,8 @@ class WebSocket {
             { online: false, lastSeen: Date.now() },
             { useFindAndModify: false, returnOriginal: false }
           ).populate("friends.user");
-          this.updateOnlineStatus(user);
+          if(user)
+            this.updateOnlineStatus(user);
         } catch (err) {
           socket.emit("error");
           logger.error(err, { service: "socket.disconnect" });
