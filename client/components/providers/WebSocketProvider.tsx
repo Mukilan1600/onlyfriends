@@ -54,7 +54,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       if (error.code === 401) {
         clearTokens();
         setSocket(null);
-        router.push("/login");
+        router.push("/");
       } else {
         setSocket(null);
       }
@@ -62,6 +62,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     });
 
     newSocket.on("profile", (msg) => {
+      console.log(msg)
       useProfile.getState().setUser(msg);
     });
 

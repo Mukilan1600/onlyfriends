@@ -132,7 +132,7 @@ export const acceptFriendRequest = async (from: string, to: string) => {
           oauthId: to,
           "friendRequests.user": user,
         },
-        { $pull: { friendRequests: user._id } },
+        { $pull: { friendRequests: { user: user._id } } },
         { useFindAndModify: false, returnOriginal: false }
       );
       if (toUser) {

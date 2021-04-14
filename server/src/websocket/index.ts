@@ -131,7 +131,6 @@ class WebSocket {
           logger.error(err, { service: "socket.disconnect" });
         }
       });
-
       const profile = await User.findOneAndUpdate(
         { oauthId: socket.oauthId },
         { online: true },
