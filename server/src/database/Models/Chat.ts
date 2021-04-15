@@ -7,13 +7,14 @@ interface IText extends Document {
   replyTo: string;
   fileUrl?: string;
   message?: string;
-  time: Date;
+  createdAt?: Date;
 }
 
 export interface IChat extends Document {
   type: "personal" | "group";
   participants: IUser[];
   messages: IText[];
+  createdAt?: Date;
 }
 
 const textSchema = new Schema({
@@ -22,13 +23,14 @@ const textSchema = new Schema({
   replyTo: { type: Schema.Types.ObjectId, ref: "Chat.messages" },
   fileUrl: String,
   message: String,
-  time: { type: Date, default: Date.now() },
+  createdAt: { type: Date, default: Date.now() },
 });
 
 const chatSchema = new Schema({
   type: String,
   participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
   messages: { type: [textSchema], default: [] },
+  createdAt: { type: Date, default: Date.now() },
 });
 
 const Chat: Model<IChat> = model<IChat>("Chat", chatSchema);

@@ -1,0 +1,41 @@
+.body {
+  padding: 0px 38px;
+}
+
+.tabsHeader {
+  height: 72px;
+  width: 100%;
+  border-bottom: 1px solid #dcdbdb;
+  display: flex;
+  align-items: center;
+}
+
+.tabsHeader h4 {
+  width: 160px;
+  margin: 0px;
+  font-size: 18px;
+}
+
+.tab {
+  width: 100px;
+  text-align: center;
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 21px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tab:hover{
+    background-color: rgba(61,152,231,0.25);
+}
+
+.active{
+    border-bottom: 3px solid #3D98E7;
+    margin-bottom: -3px;
+}

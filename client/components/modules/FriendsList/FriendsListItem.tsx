@@ -1,21 +1,45 @@
-import React from 'react'
-import { IUser } from '../../stores/useProfile'
+import React from "react";
+import styles from "./FriendsListItem.module.css";
+import { IUser } from "../../stores/useProfile";
 
 export interface IFriendsListItem {
-    user: IUser,
-    chat: string;
+  user: IUser;
+  chat: string;
 }
 
-const FriendsListItem: React.FC<IFriendsListItem> = ({user, chat}) => {
-    return (
-        <div style={{display: 'flex', flexDirection: 'row'}}>
-            <img src={user.avatarUrl} alt="user" height="50px"/>
-            <div>
-                <p>{user.name}</p>
-                <p>Online: {user.online?'true': 'false'}</p>
-            </div>
-        </div>
-    )
-}
+const FriendsListItem: React.FC<IFriendsListItem> = ({ user, chat }) => {
+  const getStatusDiv = (status: boolean) => {
+    if (status)
+      return (
+        <>
+          <div className={styles.statusRingOnline} />
+          <p>Online</p>
+        </>
+      );
+    else
+      return (
+        <>
+          <div className={styles.statusRingOffline} />
+          <p>Offline</p>
+        </>
+      );
+  };
 
-export default FriendsListItem
+  return (
+    <div className={styles.friendItem}>
+      <div className={styles.friendImgContainer}>
+        <img
+          src={user.avatarUrl}
+          alt="user"
+          height="38px"
+          width="38px"
+          className={styles.friendImg}
+        />
+        <p>{user.name}</p>
+      </div>
+      <div className={styles.friendStatus}>{getStatusDiv(user.online)}</div>
+    </div>
+  );
+};
+
+export default FriendsListItem;

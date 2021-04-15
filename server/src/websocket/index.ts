@@ -60,6 +60,21 @@ class WebSocket {
         return;
       }
       // Friends
+      socket.on("get_friend_requests", async () => {
+        try {
+          const user = await User.findOne({ oauthId: socket.oauthId }).populate(
+            "friendRequests.user",
+            "name online lastSeen avatarUrl socketId oauthId"
+          );
+          if (user) {
+            socket.emit("friend_requests", user.friendRequests);
+          }
+        } catch (err) {
+          socket.emit("error");
+          logger.error(err, { service: "socket.add_friend" });
+        }
+      });
+
       socket.on("get_friends_list", async () => {
         try {
           const friends = await getFriendsList(socket.oauthId);
@@ -73,11 +88,11 @@ class WebSocket {
         try {
           const user = await sendFriendRequest(socket.oauthId, userId);
           if (user) {
-            socket.emit("success", "Friend request sent")
+            socket.emit("success", "Friend request sent");
             this.io
               .to(user.socketId)
               .emit("friend_requests", user.friendRequests);
-          }else{
+          } else {
             socket.emit("error", "UserId not found");
           }
         } catch (err) {
@@ -94,6 +109,7 @@ class WebSocket {
             const toUserFriends = await getFriendsList(socket.oauthId);
             socket.to(user.socketId).emit("friends_list", userFriends);
             socket.emit("friends_list", toUserFriends);
+            socket.emit("friend_request_accepted", userId);
           }
         } catch (err) {
           socket.emit("error");
@@ -108,13 +124,13 @@ class WebSocket {
             { online: false, lastSeen: Date.now() },
             { useFindAndModify: false, returnOriginal: false }
           ).populate("friends.user");
-          this.updateOnlineStatus(user);
+          if(user)
+            this.updateOnlineStatus(user);
         } catch (err) {
           socket.emit("error");
           logger.error(err, { service: "socket.disconnect" });
         }
       });
-
       const profile = await User.findOneAndUpdate(
         { oauthId: socket.oauthId },
         { online: true },
