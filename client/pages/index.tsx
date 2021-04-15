@@ -1,8 +1,12 @@
 import { useRouter } from "next/router";
 import React, { useContext, useEffect } from "react";
 import { WebSocketContext } from "../components/providers/WebSocketProvider";
+import GithubLogo from "../components/statics/icons/GithubLogo";
 import GoogleLogoIcon from "../components/statics/icons/GoogleLogoIcon";
+import HeroSectionIllustration from "../components/statics/icons/HeroSectionIllustration";
+import OnlyFriendsLogo from "../components/statics/icons/OnlyFriendsLogo";
 import useSaveQueryParamsToken from "../components/stores/useSaveQueryParamsToken";
+import styles from "../styles/index.module.css"
 
 const Login: React.FC = () => {
   useSaveQueryParamsToken();
@@ -12,11 +16,36 @@ const Login: React.FC = () => {
     if (socketStatus === "connected") router.push("/home");
   }, [socketStatus]);
   return (
-    <div style={{backgroundColor: 'gray'}}>
-      <GoogleLogoIcon />
-      <a href={`${process.env.NEXT_PUBLIC_SERVER}/api/auth/oauth`}>
-        Sign in with google
-      </a>
+    <div className={styles.loginpage}>
+      <div className={styles.hero}>
+        <div className={styles.heroimg}>
+          <HeroSectionIllustration />
+        </div>
+      </div>
+      <div className={styles.rightpage}>
+        <div className={styles.logoandtag}>
+          <div>
+          <div className={styles.logo}><OnlyFriendsLogo /></div>
+          <p className={styles.tag}> Connect better</p>
+          </div>
+        </div>
+        <div className={styles.buttoncontainer}>
+        <div className={styles.button}>
+          <div className={styles.googlelogo}>
+          <GoogleLogoIcon />
+          </div>
+          <a  href={`${process.env.NEXT_PUBLIC_SERVER}/api/auth/oauth`}>
+          Login with google
+        </a>
+        </div>
+        </div>
+        <div className={styles.githublink} >
+          <div className={styles.githublogo}>
+          <GithubLogo />
+          </div>
+          <p className={styles.githubtext}>Yes, we are Open Source</p>
+        </div>
+      </div>
     </div>
   );
 };
