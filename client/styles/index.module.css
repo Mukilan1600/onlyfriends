@@ -1,0 +1,106 @@
+.loginpage{
+    display: flex;
+}
+.hero{
+    display: flex;
+width: 62%;
+height: 100vh;
+align-items: center;
+justify-content: center;
+
+background: linear-gradient(133.71deg, #DDF1FF 0%, #A4D9FF 100%);
+}
+
+.heroimg{
+width: 620px;
+height: 620px;
+}
+
+.rightpage{
+    width: 38%;
+    align-items: center;
+    justify-content: center;
+    box-shadow: -3px 0px 37px -9px rgba(22, 22, 22, 0.27);
+}
+
+.logoandtag{
+    display: flex;
+height: 49vh;
+justify-content: center;
+align-items: center;
+}
+
+.logoandtag p{
+    font-family: Raleway;
+font-style: normal;
+font-weight: 300;
+font-size: 24px;
+line-height: 28px;
+text-align: center;
+
+color: #121212;
+}
+
+.logo{
+    padding: 0%;
+}
+
+.tag{
+    margin: 0%;
+}
+
+.buttoncontainer{
+    display: flex;
+    justify-content: center;
+}
+
+.button{
+    width: 381px;
+    height: 10vh;
+    border: 0px;
+    color: #FFFFFF;
+    
+    font-family: 'Raleway', sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    /*-height: 28px;*/
+    text-align: center;
+
+    
+    background: linear-gradient(99.8deg, #3D98E7 9.74%, rgba(255, 0, 199, 0.71) 176.61%);
+    border-radius: 18px;
+
+    display: flex;
+    align-items: center;
+
+}
+
+.button div{
+    display: flex;
+}
+.googlelogo{
+    padding-right: 25px;
+    padding-left: 45px;
+}
+
+.githublink{
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    text-align: center;
+    padding-top: 30vh;
+}
+
+.githublogo{
+    padding-right: 14px;
+}
+.githubtext{
+    font-family: Raleway;
+font-style: normal;
+font-weight: 300;
+font-size: 14px;
+line-height: 16px;
+
+color: #000000;
+}
