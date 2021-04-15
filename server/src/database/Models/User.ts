@@ -10,6 +10,7 @@ export interface IUser extends Document {
   online: Boolean;
   lastSeen: number;
   friendRequests: { user: IUser; ignored?: boolean; createdAt?: Date }[];
+  friendRequestsSent: { user: IUser; createdAt?: Date }[];
   friends: {
     user: IUser;
     chat: IChat;
@@ -57,6 +58,15 @@ const userSchema = new Schema({
     ],
     default: [],
   },
+  friendRequestsSent: {
+    type: [
+      {
+        user: { type: Schema.Types.ObjectId, ref: "User" },
+        createdAt: { type: Date, default: Date.now() },
+      },
+    ],
+    default: [],
+  },
   chat: {
     type: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
     default: [],
@@ -86,6 +96,18 @@ export const findOrCreate = async (id: string, newUserDetails: any) => {
 };
 
 // Friends
+export const getFriendRequestsSent = async (userId: string) => {
+  try {
+    const user = await User.findOne({ oauthId: userId }).populate(
+      "friendRequestsSent.user",
+      "oauthId name avatarUrl"
+    );
+    if (user) return user.friendRequestsSent;
+  } catch (err) {
+    logger.error(err, { service: "User.getFriendsList" });
+  }
+}
+
 export const getFriendsList = async (userId: string) => {
   try {
     const user = await User.findOne({ oauthId: userId }).populate(
@@ -100,7 +122,7 @@ export const getFriendsList = async (userId: string) => {
 
 export const sendFriendRequest = async (from: string, to: string) => {
   try {
-    const user = await User.findOne({ oauthId: from });
+    const user = await User.findOneAndUpdate({ oauthId: from });
     if (user) {
       const toUser = await User.findOneAndUpdate(
         {
@@ -115,6 +137,10 @@ export const sendFriendRequest = async (from: string, to: string) => {
           select: "name online lastSeen avatarUrl socketId oauthId",
         })
         .exec();
+      const index = user.friendRequestsSent.findIndex(request => request.user===toUser._id)
+      if(index===-1)
+        user.friendRequestsSent.push({user: toUser});
+      await user.save();
       return toUser;
     }
     return null;

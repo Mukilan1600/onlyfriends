@@ -4,6 +4,7 @@ import logger from "../Logger/Logger";
 import jwt from "jsonwebtoken";
 import User, {
   acceptFriendRequest,
+  getFriendRequestsSent,
   getFriendsList,
   IUser,
   sendFriendRequest,
@@ -60,6 +61,18 @@ class WebSocket {
         return;
       }
       // Friends
+      socket.on("get_friend_requests_sent", async () => {
+        try {
+          const requests = await getFriendRequestsSent(socket.oauthId)
+          if (requests) {
+            socket.emit("friend_requests_sent", requests);
+          }
+        } catch (err) {
+          socket.emit("error");
+          logger.error(err, { service: "socket.get_friend_requests_sent" });
+        }
+      });
+
       socket.on("get_friend_requests", async () => {
         try {
           const user = await User.findOne({ oauthId: socket.oauthId }).populate(
@@ -71,7 +84,7 @@ class WebSocket {
           }
         } catch (err) {
           socket.emit("error");
-          logger.error(err, { service: "socket.add_friend" });
+          logger.error(err, { service: "socket.get_friend_requests" });
         }
       });
 
@@ -92,6 +105,8 @@ class WebSocket {
             this.io
               .to(user.socketId)
               .emit("friend_requests", user.friendRequests);
+            const sentRequests = await getFriendRequestsSent(socket.oauthId);
+            socket.emit("friend_requests_sent",sentRequests)
           } else {
             socket.emit("error", "UserId not found");
           }

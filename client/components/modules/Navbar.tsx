@@ -17,7 +17,7 @@ export default function Navbar() {
 
     return (
         <div className={styles.navbarLayout}>
-            <Link href="/home"><p className={styles.navbarLogoText}>Only Friends</p></Link>
+            <Link href="/home"><p className={styles.navbarLogoText} title="Only friends">Only Friends</p></Link>
             <div className={styles.navbarOptions}>
                 <div className={styles.profileDetails}>
                     <img src={user.avatarUrl} className={styles.profileImage} alt="profile" height="22" width="22"></img>

@@ -1,0 +1,11 @@
+.listItem{
+    padding: 49px 51px;
+    width: 40%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.listItem p{
+    margin: 0px;
+}

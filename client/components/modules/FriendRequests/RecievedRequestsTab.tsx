@@ -48,7 +48,7 @@ export default function RecievedRequestsTab() {
               width="38"
             />
             <p>{friend.user.name}</p>
-            <TimeAgo date={friend.user.lastSeen} />
+            <TimeAgo date={friend.createdAt} />
           </div>
           <div>
             <button className={styles.acceptBtn} onClick={acceptFriendRequest.bind(this, friend.user.oauthId)}>
