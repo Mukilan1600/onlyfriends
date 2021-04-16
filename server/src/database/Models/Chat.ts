@@ -24,6 +24,7 @@ const textSchema = new Schema({
   fileUrl: String,
   message: String,
   createdAt: { type: Date, default: Date.now() },
+  readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 const chatSchema = new Schema({

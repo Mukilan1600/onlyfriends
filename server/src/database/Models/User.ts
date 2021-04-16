@@ -17,7 +17,7 @@ export interface IUser extends Document {
     chat: IChat;
     createdAt?: Date;
   }[];
-  chat: IChat[];
+  chats: { chat: IChat; unread?: Number }[];
   createdAt?: Date;
 }
 
@@ -72,8 +72,13 @@ const userSchema = new Schema({
     ],
     default: [],
   },
-  chat: {
-    type: [{ type: Schema.Types.ObjectId, ref: "Chat" }],
+  chats: {
+    type: [
+      {
+        chat: { type: Schema.Types.ObjectId, ref: "Chat" },
+        unread: { type: Number, default: 0 },
+      },
+    ],
     default: [],
   },
   createdAt: { type: Date, default: Date.now() },
@@ -183,7 +188,10 @@ export const acceptFriendRequest = async (from: string, to: string) => {
         });
 
         await user.updateOne({
-          $addToSet: { friends: { user: toUser, chat: newChat } },
+          $addToSet: {
+            friends: { user: toUser, chat: newChat },
+            chats: { chat: newChat },
+          },
           $pull: {
             friendRequests: { user: toUser._id },
             friendRequestsSent: { user: toUser._id },
@@ -191,6 +199,7 @@ export const acceptFriendRequest = async (from: string, to: string) => {
         });
 
         toUser.friends.push({ user: user, chat: newChat });
+        toUser.chats.push({ chat: newChat });
         await toUser.save();
 
         await newChat.save();

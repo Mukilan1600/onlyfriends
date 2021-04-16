@@ -3,6 +3,7 @@ import RecievedRequestsTab from './RecievedRequestsTab';
 import SentRequestsTab from './SentRequestsTab';
 
 import styles from './RequestsTabs.module.css';
+import IgnoredRequestsTab from './IgnoredRequestsTab';
 
 const RequestsTabs: React.FC = () => {
     const [currentTab,setCurrentTab] = useState(0);
@@ -22,7 +23,7 @@ const RequestsTabs: React.FC = () => {
             <div>
                 {currentTab===0 && <RecievedRequestsTab />}
                 {currentTab===1 && <SentRequestsTab />}
-                {currentTab===2 && <>Blocked</>}
+                {currentTab===2 && <IgnoredRequestsTab />}
         
             </div>
         </div>
