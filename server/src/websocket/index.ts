@@ -63,7 +63,7 @@ class WebSocket {
       // Friends
       socket.on("get_friend_requests_sent", async () => {
         try {
-          const requests = await getFriendRequestsSent(socket.oauthId)
+          const requests = await getFriendRequestsSent(socket.oauthId);
           if (requests) {
             socket.emit("friend_requests_sent", requests);
           }
@@ -106,7 +106,7 @@ class WebSocket {
               .to(user.socketId)
               .emit("friend_requests", user.friendRequests);
             const sentRequests = await getFriendRequestsSent(socket.oauthId);
-            socket.emit("friend_requests_sent",sentRequests)
+            socket.emit("friend_requests_sent", sentRequests);
           } else {
             socket.emit("error", "Username not found");
           }
@@ -132,6 +132,25 @@ class WebSocket {
         }
       });
 
+      socket.on("ignore_friend_request", async ({ userId }) => {
+        try {
+          const user = await User.findOne({ oauthId: socket.oauthId }).populate(
+            "friendRequests.user"
+          );
+          const index = user.friendRequests.findIndex(
+            (request) => request.user.oauthId == userId
+          );
+          if (index!==-1) {
+            user.friendRequests[index].ignored = true;
+          }
+          await user.save();
+          socket.emit("friend_requests", user.friendRequests);
+        } catch (err) {
+          socket.emit("error");
+          logger.error(err, { service: "socket.ignore_friend_request" });
+        }
+      });
+
       socket.on("disconnect", async () => {
         try {
           const user = await User.findOneAndUpdate(
@@ -139,8 +158,7 @@ class WebSocket {
             { online: false, lastSeen: Date.now() },
             { useFindAndModify: false, returnOriginal: false }
           ).populate("friends.user");
-          if(user)
-            this.updateOnlineStatus(user);
+          if (user) this.updateOnlineStatus(user);
         } catch (err) {
           socket.emit("error");
           logger.error(err, { service: "socket.disconnect" });

@@ -141,6 +141,7 @@ export const sendFriendRequest = async (from: string, to: string) => {
         {
           username: to,
           "friends.user": { $ne: user },
+          "friendRequests.user": { $ne: user },
         },
         { $addToSet: { friendRequests: { user } } },
         { useFindAndModify: false, returnOriginal: false }
