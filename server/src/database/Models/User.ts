@@ -8,7 +8,7 @@ export interface IUser extends Document {
   username: string;
   avartarUrl: string;
   socketId: string;
-  online: Boolean;
+  online: boolean;
   lastSeen: number;
   friendRequests: { user: IUser; ignored?: boolean; createdAt?: Date }[];
   friendRequestsSent: { user: IUser; createdAt?: Date }[];
@@ -17,7 +17,7 @@ export interface IUser extends Document {
     chat: IChat;
     createdAt?: Date;
   }[];
-  chats: { chat: IChat; unread?: Number }[];
+  chats: { chat: IChat; unread?: number }[];
   createdAt?: Date;
 }
 
@@ -92,8 +92,8 @@ export const findOrCreate = async (id: string, newUserDetails: any) => {
     if (doc) {
       return doc;
     } else {
-      var username = newUserDetails.username;
-      var usernameTaken = await User.exists({ username: username });
+      let username = newUserDetails.username;
+      let usernameTaken = await User.exists({ username: username });
       while (usernameTaken) {
         username = `${newUserDetails.username}#${
           Math.floor(Math.random() * 8999) + 1000

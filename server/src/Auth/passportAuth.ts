@@ -1,9 +1,9 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import logger from "../Logger/Logger";
-import User, { findOrCreate } from "../database/Models/User";
+import User, { findOrCreate, IUser } from "../database/Models/User";
 
-passport.serializeUser((user: any, cb) => {
+passport.serializeUser((user: IUser, cb) => {
   cb(null, user._id);
 });
 
