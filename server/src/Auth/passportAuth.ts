@@ -28,6 +28,7 @@ passport.use(
         const user = await findOrCreate(profile.id, {
           name: profile.displayName,
           avatarUrl: profile.photos[0].value,
+          username: profile.name.givenName.toLowerCase()
         });
         return cb(null, user);
       } catch (err) {

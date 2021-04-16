@@ -8,15 +8,15 @@ import styles from './AddNewFriends.module.css'
  */
 const AddNewFriends: React.FC = () => {
     const {socket} = useContext(WebSocketContext)
-  const [userId, setUserId] = useState("");
+  const [username, setUsername] = useState("");
 
-  const onUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUserId(event.target.value);
+  const onUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(event.target.value);
   };
 
   const onAddFriend = () => {
-      if(userId.length===0) return;
-        socket.emit("add_friend", {userId})
+      if(username.length===0) return;
+        socket.emit("add_friend", {username})
   };
   return (
     <div className={styles.body}>
@@ -25,8 +25,8 @@ const AddNewFriends: React.FC = () => {
         <input
           type="text"
           name="userId"
-          placeholder="Enter userID to add new friends"
-          onChange={onUserIdChange}
+          placeholder="Enter username to add new friends"
+          onChange={onUsernameChange}
         />
         <button onClick={onAddFriend}>Send Request</button>
       </div>

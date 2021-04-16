@@ -97,9 +97,9 @@ class WebSocket {
         }
       });
 
-      socket.on("add_friend", async ({ userId }) => {
+      socket.on("add_friend", async ({ username }) => {
         try {
-          const user = await sendFriendRequest(socket.oauthId, userId);
+          const user = await sendFriendRequest(socket.oauthId, username);
           if (user) {
             socket.emit("success", "Friend request sent");
             this.io
@@ -108,7 +108,7 @@ class WebSocket {
             const sentRequests = await getFriendRequestsSent(socket.oauthId);
             socket.emit("friend_requests_sent",sentRequests)
           } else {
-            socket.emit("error", "UserId not found");
+            socket.emit("error", "Username not found");
           }
         } catch (err) {
           socket.emit("error");

@@ -5,6 +5,7 @@ import Chat, { IChat } from "./Chat";
 export interface IUser extends Document {
   oauthId: string;
   name: string;
+  username: string;
   avartarUrl: string;
   socketId: string;
   online: Boolean;
@@ -27,6 +28,10 @@ const userSchema = new Schema({
   },
   name: {
     type: String,
+  },
+  username: {
+    type: String,
+    unique: true,
   },
   avatarUrl: { type: String },
   socketId: String,
@@ -76,16 +81,24 @@ const userSchema = new Schema({
 
 const User: Model<IUser> = model<IUser>("User", userSchema);
 export default User;
-
 export const findOrCreate = async (id: string, newUserDetails: any) => {
   try {
     const doc = await User.findOne({ oauthId: id });
     if (doc) {
       return doc;
     } else {
+      var username = newUserDetails.username;
+      var usernameTaken = await User.exists({ username: username });
+      while (usernameTaken) {
+        username = `${newUserDetails.username}#${
+          Math.floor(Math.random() * 8999) + 1000
+        }`;
+        usernameTaken = await User.exists({ username: username });
+      }
       const newUser = new User({
         oauthId: id,
         ...newUserDetails,
+        username,
       });
       newUser.save();
       return newUser;
@@ -106,7 +119,7 @@ export const getFriendRequestsSent = async (userId: string) => {
   } catch (err) {
     logger.error(err, { service: "User.getFriendsList" });
   }
-}
+};
 
 export const getFriendsList = async (userId: string) => {
   try {
@@ -122,11 +135,11 @@ export const getFriendsList = async (userId: string) => {
 
 export const sendFriendRequest = async (from: string, to: string) => {
   try {
-    const user = await User.findOneAndUpdate({ oauthId: from });
-    if (user) {
+    const user = await User.findOne({ oauthId: from });
+    if (user && user.username !== to) {
       const toUser = await User.findOneAndUpdate(
         {
-          oauthId: to,
+          username: to,
           "friends.user": { $ne: user },
         },
         { $addToSet: { friendRequests: { user } } },
@@ -137,9 +150,10 @@ export const sendFriendRequest = async (from: string, to: string) => {
           select: "name online lastSeen avatarUrl socketId oauthId",
         })
         .exec();
-      const index = user.friendRequestsSent.findIndex(request => request.user===toUser._id)
-      if(index===-1)
-        user.friendRequestsSent.push({user: toUser});
+      const index = user.friendRequestsSent.findIndex(
+        (request) => request.user === toUser._id
+      );
+      if (index === -1) user.friendRequestsSent.push({ user: toUser });
       await user.save();
       return toUser;
     }
@@ -166,13 +180,18 @@ export const acceptFriendRequest = async (from: string, to: string) => {
           type: "personal",
           participants: [user, toUser],
         });
-        user.friends.push({ user: toUser, chat: newChat });
-        user.friendRequests = [...user.friendRequests].filter(
-          (request) => request.user !== toUser._id
-        );
+
+        await user.updateOne({
+          $addToSet: { friends: { user: toUser, chat: newChat } },
+          $pull: {
+            friendRequests: { user: toUser._id },
+            friendRequestsSent: { user: toUser._id },
+          },
+        });
+
         toUser.friends.push({ user: user, chat: newChat });
-        await user.save();
         await toUser.save();
+
         await newChat.save();
         return { user };
       }
