@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import styles from "./RecievedRequestsTab.module.css";
-import TimeAgo from "react-timeago";
+import TimeAgo from "react-time-ago";
 
 import { WebSocketContext } from "../../providers/WebSocketProvider";
 import GreenTickIcon from "../../statics/icons/GreenTickIcon";

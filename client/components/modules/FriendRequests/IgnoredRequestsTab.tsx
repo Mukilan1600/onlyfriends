@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./RecievedRequestsTab.module.css";
-import TimeAgo from "react-timeago";
+import TimeAgo from "react-time-ago";
 
 import useFriendRequests from "../../stores/useFriendRequests";
 
@@ -21,7 +21,7 @@ export default function IgnoredRequestsTab() {
                   width="38"
                 />
                 <p>{friend.user.name}</p>
-                <TimeAgo date={friend.createdAt} />
+                <TimeAgo date={friend.createdAt}  />
               </div>
             </div>
           )
