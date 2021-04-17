@@ -62,7 +62,6 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     });
 
     newSocket.on("profile", (msg) => {
-      console.log(msg)
       useProfile.getState().setUser(msg);
     });
 

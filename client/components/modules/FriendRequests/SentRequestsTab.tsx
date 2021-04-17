@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import ReactTimeago from 'react-timeago';
+import ReactTimeago from 'react-time-ago';
 import styles from './SentRequestsTab.module.css'
 import { WebSocketContext } from '../../providers/WebSocketProvider'
 

@@ -140,7 +140,7 @@ class WebSocket {
           const index = user.friendRequests.findIndex(
             (request) => request.user.oauthId == userId
           );
-          if (index!==-1) {
+          if (index !== -1) {
             user.friendRequests[index].ignored = true;
           }
           await user.save();
@@ -149,6 +149,24 @@ class WebSocket {
           socket.emit("error");
           logger.error(err, { service: "socket.ignore_friend_request" });
         }
+      });
+
+      // Chats
+      socket.on("get_chat_list", async () => {
+        try {
+          const user = await User.findOne({
+            oauthId: socket.oauthId,
+          }).populate({
+            path: "chats.chat",
+            populate: {
+              path: "participants",
+              select: "name oauthId avatarUrl socketId online lastSeen",
+            },
+          });
+          if (user) {
+            socket.emit("chat_list", user.chats);
+          }
+        } catch (error) {}
       });
 
       socket.on("disconnect", async () => {

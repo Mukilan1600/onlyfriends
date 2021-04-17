@@ -1,5 +1,5 @@
 import React from "react";
-import FriendsList from "../FriendsList/FriendsList";
+import ChatsList from "../ChatList/ChatList";
 import Navbar from "../Navbar";
 import AuthenticatedPage from "./AuthenticatedPage";
 import Layout from "./Layout";
@@ -9,7 +9,7 @@ const NavbarAndFriendsList: React.FC = ({ children }) => {
     <AuthenticatedPage>
       <Navbar />
       <Layout>
-        <FriendsList />
+        <ChatsList />
         {children}
       </Layout>
     </AuthenticatedPage>
