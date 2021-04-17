@@ -212,3 +212,18 @@ export const acceptFriendRequest = async (from: string, to: string) => {
     logger.error(err, { service: "User.acceptfriendrequest" });
   }
 };
+
+export const getChatList = async (userId: string) => {
+  try {
+    const user = await User.findOne({
+      oauthId: userId,
+    }).populate({
+      path: "chats.chat",
+      populate: {
+        path: "participants",
+        select: "name oauthId avatarUrl socketId online lastSeen",
+      },
+    });
+    if (user) return user.chats;
+  } catch (error) {}
+};
