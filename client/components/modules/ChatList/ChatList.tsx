@@ -24,7 +24,6 @@ const ChatsList: React.FC = () => {
         chat.chat.participants = newParticipants;
         return chat;
       });
-      console.log(newChatList);
       setChats(newChatList);
     });
 

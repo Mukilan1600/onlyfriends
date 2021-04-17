@@ -160,7 +160,7 @@ class WebSocket {
             path: "chats.chat",
             populate: {
               path: "participants",
-              select: "name oauthId avatarUrl socketId online lastseen",
+              select: "name oauthId avatarUrl socketId online lastSeen",
             },
           });
           if (user) {
