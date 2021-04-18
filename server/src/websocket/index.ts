@@ -102,14 +102,14 @@ class WebSocket {
         try {
           const user = await sendFriendRequest(socket.oauthId, username);
           if (user) {
-            socket.emit("success", "Friend request sent");
             this.io
               .to(user.socketId)
               .emit("friend_requests", user.friendRequests);
             const sentRequests = await getFriendRequestsSent(socket.oauthId);
             socket.emit("friend_requests_sent", sentRequests);
+            socket.emit("success",{msg: "Request sent successfully"})
           } else {
-            socket.emit("error", "Username not found");
+            socket.emit("error", {msg: "Invalid username or request already sent"});
           }
         } catch (err) {
           socket.emit("error");
