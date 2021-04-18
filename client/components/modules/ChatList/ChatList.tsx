@@ -6,6 +6,7 @@ import { WebSocketContext } from "../../providers/WebSocketProvider";
 import ChatListItem, { IChatListItem } from "./ChatListItem";
 import useChatList from "../../stores/useChatList";
 import useProfile from "../../stores/useProfile";
+import Button from "../Button";
 
 const ChatsList: React.FC = () => {
   const { chats, setChats } = useChatList();
@@ -56,7 +57,19 @@ const ChatsList: React.FC = () => {
           <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
         ))}
       <Link href="/friendrequests">
-        <div className={styles.btnAddFriends}>Friend Requests</div>
+        <Button
+          style={{
+            position: "absolute",
+            left: "50%",
+            bottom: "41px",
+            transform: "translate(-50%, 0)",
+            width: "unset",
+            height: "58px",
+            padding: "18px 70px",
+            fontWeight: 600,
+          }}
+          label="Friend Requests"
+        />
       </Link>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactHTMLElement, ReactNode, StyleHTMLAttributes } from "react";
 import styled from "styled-components";
 
 const ButtonWrapper = styled.button`
@@ -34,8 +34,7 @@ const ButtonWrapper = styled.button`
 
 interface ButtonProps {
   label: string;
-  onClick?: () => void;
-  onHover?: () => void;
+  style?: React.CSSProperties
 }
 
 const Button: React.FC<ButtonProps> = ({ label, ...props }) => {
