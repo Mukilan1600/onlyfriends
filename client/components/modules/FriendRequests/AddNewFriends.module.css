@@ -35,21 +35,3 @@
 .inputDiv input:active {
     border: none;
 }
-
-.inputDiv button{
-    border: none;
-    width: 22%;
-    height: 36px;
-    background: linear-gradient(94.34deg, #3D98E7 -25.12%, rgba(255, 0, 199, 0.71) 158.36%);
-    border-radius: 9px;
-    cursor: pointer;
-
-    font-family: Raleway;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 16px;
-    text-align: center;
-
-    color: #FFFFFF;
-}
