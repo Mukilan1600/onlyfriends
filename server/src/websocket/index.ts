@@ -4,6 +4,7 @@ import logger from "../Logger/Logger";
 import jwt from "jsonwebtoken";
 import User, {
   acceptFriendRequest,
+  getChatList,
   getFriendRequestsSent,
   getFriendsList,
   IUser,
@@ -101,14 +102,14 @@ class WebSocket {
         try {
           const user = await sendFriendRequest(socket.oauthId, username);
           if (user) {
-            socket.emit("success", "Friend request sent");
             this.io
               .to(user.socketId)
               .emit("friend_requests", user.friendRequests);
             const sentRequests = await getFriendRequestsSent(socket.oauthId);
             socket.emit("friend_requests_sent", sentRequests);
+            socket.emit("success",{msg: "Request sent successfully"})
           } else {
-            socket.emit("error", "Username not found");
+            socket.emit("error", {msg: "Invalid username or request already sent"});
           }
         } catch (err) {
           socket.emit("error");
@@ -120,10 +121,10 @@ class WebSocket {
         try {
           const { user } = await acceptFriendRequest(userId, socket.oauthId);
           if (user) {
-            const userFriends = await getFriendsList(user.oauthId);
-            const toUserFriends = await getFriendsList(socket.oauthId);
-            socket.to(user.socketId).emit("friends_list", userFriends);
-            socket.emit("friends_list", toUserFriends);
+            const userChats = await getChatList(user.oauthId);
+            const toUserChats = await getChatList(socket.oauthId);
+            socket.to(user.socketId).emit("chat_list", userChats);
+            socket.emit("chat_list", toUserChats);
             socket.emit("friend_request_accepted", userId);
           }
         } catch (err) {
@@ -154,19 +155,14 @@ class WebSocket {
       // Chats
       socket.on("get_chat_list", async () => {
         try {
-          const user = await User.findOne({
-            oauthId: socket.oauthId,
-          }).populate({
-            path: "chats.chat",
-            populate: {
-              path: "participants",
-              select: "name oauthId avatarUrl socketId online lastSeen",
-            },
-          });
-          if (user) {
-            socket.emit("chat_list", user.chats);
+          const chats = await getChatList(socket.oauthId)
+          if (chats) {
+            socket.emit("chat_list", chats);
           }
-        } catch (error) {}
+        } catch (error) {
+          socket.emit("error");
+          logger.error(error, { service: "socket.get_chat_list" });
+        }
       });
 
       socket.on("disconnect", async () => {

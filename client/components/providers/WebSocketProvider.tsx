@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import React, { createContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { io, Socket } from "socket.io-client";
 import useProfile from "../stores/useProfile";
 import useToken from "../stores/useToken";
@@ -66,8 +67,13 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     });
 
     /** @Mukilan1600 Use toaster to handle confirmation messages */
-    newSocket.on("success", (msg) => console.log(msg));
-    newSocket.on("error", (msg) => console.log(msg));
+    newSocket.on("success", (msg) => {
+      toast(msg.msg, { type: "success" });
+    });
+
+    newSocket.on("error", (msg) => {
+      toast(msg.msg, { type: "error" });
+    });
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok]);

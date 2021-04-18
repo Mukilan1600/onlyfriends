@@ -156,6 +156,9 @@ export const sendFriendRequest = async (from: string, to: string) => {
           select: "name online lastSeen avatarUrl socketId oauthId",
         })
         .exec();
+
+      if (!toUser) return null;
+      
       const index = user.friendRequestsSent.findIndex(
         (request) => request.user === toUser._id
       );
@@ -211,4 +214,19 @@ export const acceptFriendRequest = async (from: string, to: string) => {
   } catch (err) {
     logger.error(err, { service: "User.acceptfriendrequest" });
   }
+};
+
+export const getChatList = async (userId: string) => {
+  try {
+    const user = await User.findOne({
+      oauthId: userId,
+    }).populate({
+      path: "chats.chat",
+      populate: {
+        path: "participants",
+        select: "name oauthId avatarUrl socketId online lastSeen",
+      },
+    });
+    if (user) return user.chats;
+  } catch (error) {}
 };
