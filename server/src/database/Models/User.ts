@@ -156,6 +156,9 @@ export const sendFriendRequest = async (from: string, to: string) => {
           select: "name online lastSeen avatarUrl socketId oauthId",
         })
         .exec();
+
+      if (!toUser) return null;
+      
       const index = user.friendRequestsSent.findIndex(
         (request) => request.user === toUser._id
       );
