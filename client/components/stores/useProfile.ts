@@ -6,7 +6,8 @@ export interface IUser {
         lastSeen: string,
         online: boolean,
         name: string,
-        oauthId: string
+        oauthId: string,
+        username: string
 }
 
 interface IProfile extends State {

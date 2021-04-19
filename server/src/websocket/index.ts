@@ -69,7 +69,7 @@ class WebSocket {
             socket.emit("friend_requests_sent", requests);
           }
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(err, { service: "socket.get_friend_requests_sent" });
         }
       });
@@ -84,7 +84,7 @@ class WebSocket {
             socket.emit("friend_requests", user.friendRequests);
           }
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(err, { service: "socket.get_friend_requests" });
         }
       });
@@ -94,7 +94,7 @@ class WebSocket {
           const friends = await getFriendsList(socket.oauthId);
           socket.emit("friends_list", friends);
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
         }
       });
 
@@ -107,12 +107,14 @@ class WebSocket {
               .emit("friend_requests", user.friendRequests);
             const sentRequests = await getFriendRequestsSent(socket.oauthId);
             socket.emit("friend_requests_sent", sentRequests);
-            socket.emit("success",{msg: "Request sent successfully"})
+            socket.emit("success", { msg: "Request sent successfully" });
           } else {
-            socket.emit("error", {msg: "Invalid username or request already sent"});
+            socket.emit("error", {
+              msg: "Invalid username or request already sent",
+            });
           }
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(err, { service: "socket.add_friend" });
         }
       });
@@ -128,7 +130,7 @@ class WebSocket {
             socket.emit("friend_request_accepted", userId);
           }
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(err, { service: "socket.accept_friend_request" });
         }
       });
@@ -147,7 +149,7 @@ class WebSocket {
           await user.save();
           socket.emit("friend_requests", user.friendRequests);
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(err, { service: "socket.ignore_friend_request" });
         }
       });
@@ -155,13 +157,34 @@ class WebSocket {
       // Chats
       socket.on("get_chat_list", async () => {
         try {
-          const chats = await getChatList(socket.oauthId)
+          const chats = await getChatList(socket.oauthId);
           if (chats) {
             socket.emit("chat_list", chats);
           }
         } catch (error) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(error, { service: "socket.get_chat_list" });
+        }
+      });
+
+      //Profile
+      socket.on("change_username", async ({ username }) => {
+        try {
+          const exists = await User.findOne({ username });
+
+          if (exists) socket.emit("error", { msg: "Username is taken" });
+          else {
+            const user = await User.findOneAndUpdate(
+              { oauthId: socket.oauthId },
+              { username },
+              { useFindAndModify: false, returnOriginal: false }
+            ).populate("friends.user");
+            socket.emit("profile", user);
+            socket.emit("success", { msg: "Username changed successfully" });
+          }
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.change_username" });
         }
       });
 
@@ -174,7 +197,7 @@ class WebSocket {
           ).populate("friends.user");
           if (user) this.updateOnlineStatus(user);
         } catch (err) {
-          socket.emit("error");
+          socket.emit("error", { msg: "Internal server error" });
           logger.error(err, { service: "socket.disconnect" });
         }
       });

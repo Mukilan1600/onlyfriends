@@ -66,7 +66,6 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       useProfile.getState().setUser(msg);
     });
 
-    /** @Mukilan1600 Use toaster to handle confirmation messages */
     newSocket.on("success", (msg) => {
       toast(msg.msg, { type: "success" });
     });
