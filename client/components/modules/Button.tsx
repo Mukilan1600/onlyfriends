@@ -34,7 +34,8 @@ const ButtonWrapper = styled.button`
 
 interface ButtonProps {
   label: string;
-  style?: React.CSSProperties
+  style?: React.CSSProperties;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
 const Button: React.FC<ButtonProps> = ({ label, ...props }) => {
