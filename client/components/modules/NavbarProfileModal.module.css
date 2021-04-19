@@ -10,10 +10,27 @@
 }
 
 #profileModalUsername {
-    margin-top: 28px;
+  margin: 0px;
+  margin-right: 4px;
 }
 
-.divider{
-    width: 185px;
-    border-bottom: 1px solid #DCDBDB;
+#profileModalUsername[contentEditable=true] {
+  outline: none;
+  border-bottom: 1px dashed #BBBB;
+}
+
+.divider {
+  width: 185px;
+  border-bottom: 1px solid #dcdbdb;
+  margin-top: 21px;
+}
+
+#profileModalUsernameDiv {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.usernameEditIcon{
+  cursor: pointer;
 }
