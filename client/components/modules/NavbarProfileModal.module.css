@@ -1,0 +1,19 @@
+.profileModalDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#profileModalImg {
+  border-radius: 50%;
+  margin-top: 40px;
+}
+
+#profileModalUsername {
+    margin-top: 28px;
+}
+
+.divider{
+    width: 185px;
+    border-bottom: 1px solid #DCDBDB;
+}
