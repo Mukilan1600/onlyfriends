@@ -7,6 +7,7 @@ import ChatListItem, { IChatListItem } from "./ChatListItem";
 import useChatList from "../../stores/useChatList";
 import useProfile from "../../stores/useProfile";
 import Button from "../Button";
+import EmptyChats from "../../statics/illustrations/EmptyChats";
 
 const ChatsList: React.FC = () => {
   const { chats, setChats } = useChatList();
@@ -53,8 +54,15 @@ const ChatsList: React.FC = () => {
   return (
     <div className={styles.body}>
       {chats &&
-        chats.map((chat, i) => (
-          <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
+        (chats.length > 0 ? (
+          chats.map((chat, i) => (
+            <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
+          ))
+        ) : (
+          <div className={styles.illustrationHolder}>
+            <p>Friend Request to get started</p>
+            <EmptyChats />
+          </div>
         ))}
       <Link href="/friendrequests">
         <Button
@@ -63,9 +71,8 @@ const ChatsList: React.FC = () => {
             left: "50%",
             bottom: "41px",
             transform: "translate(-50%, 0)",
-            width: "unset",
+            width: "250px",
             height: "58px",
-            padding: "18px 70px",
             fontWeight: 600,
           }}
           label="Friend Requests"

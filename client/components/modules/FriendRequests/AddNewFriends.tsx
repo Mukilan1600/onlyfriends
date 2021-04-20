@@ -1,15 +1,13 @@
 import React, { useContext, useState } from "react";
 import { WebSocketContext } from "../../providers/WebSocketProvider";
+import useLoader from "../../stores/useLoader";
 import Button from "../Button";
 import styles from "./AddNewFriends.module.css";
 
-/**
- * @Mukilan1600 Change to use username
- *              add new friends
- */
 const AddNewFriends: React.FC = () => {
   const { socket } = useContext(WebSocketContext);
   const [username, setUsername] = useState("");
+  const { friendRequest, setLoader } = useLoader();
 
   const onUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value);
@@ -17,6 +15,7 @@ const AddNewFriends: React.FC = () => {
 
   const onAddFriend = () => {
     if (username.length === 0) return;
+    setLoader({ friendRequest: true });
     socket.emit("add_friend", { username });
   };
   return (
@@ -29,7 +28,11 @@ const AddNewFriends: React.FC = () => {
           placeholder="Enter username to add new friends"
           onChange={onUsernameChange}
         />
-        <Button onClick={onAddFriend} label="Add friend" />
+        <Button
+          onClick={onAddFriend}
+          label="Add friend"
+          loading={friendRequest}
+        />
       </div>
     </div>
   );

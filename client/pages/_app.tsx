@@ -7,6 +7,7 @@ import { PageComponenet } from "../types";
 import { ToastContainer } from "react-toastify";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
+import Headers from "../components/modules/Headers/Headers";
 
 TimeAgo.locale(en);
 
@@ -15,18 +16,21 @@ const isServer = typeof window === "undefined";
 export default function App({ Component, pageProps }: AppProps) {
   if (isServer && (Component as PageComponenet).noRedirect) return null;
   return (
-    <WebSocketProvider>
-      <Component {...pageProps} />
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable={false}
-        pauseOnHover
-      />
-    </WebSocketProvider>
+    <>
+      <Headers />
+      <WebSocketProvider>
+        <Component {...pageProps} />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable={false}
+          pauseOnHover
+        />
+      </WebSocketProvider>
+    </>
   );
 }

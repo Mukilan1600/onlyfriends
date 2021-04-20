@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import React, { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { io, Socket } from "socket.io-client";
+import useLoader from "../stores/useLoader";
 import useProfile from "../stores/useProfile";
 import useToken from "../stores/useToken";
 
@@ -68,10 +69,12 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
 
     newSocket.on("success", (msg) => {
       toast(msg.msg, { type: "success" });
+      useLoader.getState().clearLoaders();
     });
 
     newSocket.on("error", (msg) => {
       toast(msg.msg, { type: "error" });
+      useLoader.getState().clearLoaders();
     });
     setSocketStatus("connected");
     setSocket(newSocket);

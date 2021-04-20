@@ -1,15 +1,22 @@
-import React, { ReactHTMLElement, ReactNode, StyleHTMLAttributes } from "react";
-import styled from "styled-components";
+import React from "react";
+import styled, { keyframes } from "styled-components";
+
+const LoaderAnimation = keyframes`
+  0%{ opacity: 100%; }
+  50%{ opacity: 20%; }
+  100%{ opacity: 100%; }
+
+`;
 
 const ButtonWrapper = styled.button`
-  border: none;
   width: 22%;
   height: 36px;
-  background: linear-gradient(
-    94.34deg,
-    #3d98e7 -25.12%,
-    rgba(255, 0, 199, 0.71) 158.36%
-  );
+  background: ${(props: { loading: boolean }) =>
+    !props.loading
+      ? "linear-gradient(94.34deg,#3d98e7 -25.12%,rgba(255, 0, 199, 0.71) 158.36%)"
+      : "linear-gradient(94.06deg, #DAEEFF 10.41%, #DAEEFF 10.41%, #DAEEFF 10.42%, rgba(255, 218, 247, 0.71) 157.89%) !important"};
+  border-width: 1px;
+  border-color: #3d98e7;
   border-radius: 19px;
   cursor: pointer;
 
@@ -32,14 +39,56 @@ const ButtonWrapper = styled.button`
   }
 `;
 
+const LoaderDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  & div {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #a028e9;
+    margin: 3px;
+    animation-name: ${LoaderAnimation};
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    animation-delay: 0s;
+  }
+
+  div:nth-child(2) {
+    animation-delay: 0.5s;
+  }
+
+  div:nth-child(3) {
+    animation-delay: 1s;
+  }
+`;
+
 interface ButtonProps {
   label: string;
+  loading?: boolean;
   style?: React.CSSProperties;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-const Button: React.FC<ButtonProps> = ({ label, ...props }) => {
-  return <ButtonWrapper {...props}>{label}</ButtonWrapper>;
-};
+const Button: React.FC<ButtonProps> = React.forwardRef<HTMLButtonElement,ButtonProps>(
+  ({ label, ...props }, ref) => {
+    return (
+      <ButtonWrapper {...props} loading={props.loading} ref={ref}>
+        {props.loading ? (
+          <LoaderDiv>
+            <div />
+            <div />
+            <div />
+          </LoaderDiv>
+        ) : (
+          label
+        )}
+      </ButtonWrapper>
+    );
+  }
+);
 
 export default Button;

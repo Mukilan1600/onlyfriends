@@ -2,9 +2,9 @@ import { Schema, model, Document, Model } from "mongoose";
 import { IUser } from "./User";
 
 interface IText extends Document {
-  type: "message" | "file";
+  type: "message" | "file" | "reply";
   reply: boolean;
-  replyTo: string;
+  replyTo?: string;
   fileUrl?: string;
   message?: string;
   createdAt?: Date;
@@ -20,7 +20,7 @@ export interface IChat extends Document {
 const textSchema = new Schema({
   type: String,
   reply: { type: Boolean, default: false },
-  replyTo: { type: Schema.Types.ObjectId, ref: "Chat.messages" },
+  replyTo: { type: Schema.Types.ObjectId, ref: "Chat.messages", required: false },
   fileUrl: String,
   message: String,
   createdAt: { type: Date, default: Date.now() },
@@ -35,5 +35,4 @@ const chatSchema = new Schema({
 });
 
 const Chat: Model<IChat> = model<IChat>("Chat", chatSchema);
-
 export default Chat;
