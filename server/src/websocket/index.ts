@@ -10,6 +10,7 @@ import User, {
   IUser,
   sendFriendRequest,
 } from "../database/Models/User";
+import Chat from "../database/Models/Chat";
 
 interface Socket extends socketio.Socket {
   oauthId?: string;
@@ -167,6 +168,23 @@ class WebSocket {
         }
       });
 
+      socket.on("send_message", async ({ chatId, msg }) => {
+        const chat = await Chat.findById(chatId).populate("participants");
+        chat.messages.push(msg);
+        chat.participants.forEach((participant) => {
+          this.io
+            .to(participant.socketId)
+            .emit("receive_message", { chatId, msg });
+        });
+      });
+
+      socket.on("get_messages", async (chatId, skip = 0) => {
+        const chat = await Chat.findById(chatId, {
+          messages: { $slice: [skip, skip + 50] },
+        });
+        socket.emit("messages", chat.messages);
+      });
+
       //Profile
       socket.on("change_username", async ({ username }) => {
         try {
@@ -201,13 +219,18 @@ class WebSocket {
           logger.error(err, { service: "socket.disconnect" });
         }
       });
-      const profile = await User.findOneAndUpdate(
-        { oauthId: socket.oauthId },
-        { online: true },
-        { useFindAndModify: false, returnOriginal: false }
-      ).populate("friends.user");
-      this.updateOnlineStatus(profile);
-      socket.emit("profile", profile);
+      try {
+        const profile = await User.findOneAndUpdate(
+          { oauthId: socket.oauthId },
+          { online: true },
+          { useFindAndModify: false, returnOriginal: false }
+        ).populate("friends.user");
+        this.updateOnlineStatus(profile);
+        socket.emit("profile", profile);
+      } catch (err) {
+        socket.emit("error", { msg: "Authentication error" }, 401);
+        logger.error(err, { service: "socket.connect" });
+      }
 
       logger.info(
         `Incoming socket connection Id: ${socket.id} UserId: ${socket.oauthId}`

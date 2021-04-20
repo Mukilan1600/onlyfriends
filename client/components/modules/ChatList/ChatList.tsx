@@ -63,9 +63,8 @@ const ChatsList: React.FC = () => {
             left: "50%",
             bottom: "41px",
             transform: "translate(-50%, 0)",
-            width: "unset",
+            width: "250px",
             height: "58px",
-            padding: "18px 70px",
             fontWeight: 600,
           }}
           label="Friend Requests"
