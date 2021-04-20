@@ -42,11 +42,17 @@ const Login: React.FC = () => {
             Login with google
           </a>
         </div>
-        <div  className={styles.githublink}>
+        <div className={styles.githublink}>
           <div className={styles.githublogo}>
             <GithubLogo />
           </div>
-          <a href="https://github.com/Mukilan1600/onlyfriends" target="blank" className={styles.githubtext}>Yes, we are Open Source</a>
+          <a
+            href="https://github.com/Mukilan1600/onlyfriends"
+            target="blank"
+            className={styles.githubtext}
+          >
+            Yes, we are Open Source
+          </a>
         </div>
       </div>
     </div>
