@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 
 const LoaderAnimation = keyframes`
   0%{ opacity: 100%; }
-  50%{ opacity: 50%; }
+  50%{ opacity: 20%; }
   100%{ opacity: 100%; }
 
 `;
@@ -52,7 +52,7 @@ const LoaderDiv = styled.div`
     background-color: #a028e9;
     margin: 3px;
     animation-name: ${LoaderAnimation};
-    animation-duration: 2s;
+    animation-duration: 1.5s;
     animation-iteration-count: infinite;
     animation-delay: 0s;
   }
