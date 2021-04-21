@@ -5,7 +5,7 @@ import ReactTimeago from "react-time-ago";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-type IChat = {
+export type IChat = {
   _id: string,
   type: "personal" | "group";
   participants: IUser[];
