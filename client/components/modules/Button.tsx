@@ -18,7 +18,7 @@ const ButtonWrapper = styled.button`
   border-width: 1px;
   border-color: #3d98e7;
   border-radius: 19px;
-  cursor: not-allowed;
+  cursor: ${(props: { loading: boolean }) => props.loading?'not-allowed':'pointer'};
   font-family: Raleway;
   font-style: normal;
   font-weight: 500;

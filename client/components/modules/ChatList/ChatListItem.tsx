@@ -2,8 +2,11 @@ import React from "react";
 import styles from "./ChatListItem.module.css";
 import { IUser } from "../../stores/useProfile";
 import ReactTimeago from "react-time-ago";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 type IChat = {
+  _id: string,
   type: "personal" | "group";
   participants: IUser[];
   createdAt: string;
@@ -15,6 +18,7 @@ export interface IChatListItem {
 }
 
 const ChatListItem: React.FC<IChatListItem> = ({ chat }) => {
+  const router = useRouter();
   const getStatusDiv = () => {
     if (chat.type === "personal") {
       if (chat.participants[0].online)
@@ -49,19 +53,21 @@ const ChatListItem: React.FC<IChatListItem> = ({ chat }) => {
   };
 
   return (
-    <div className={styles.friendItem}>
-      <div className={styles.friendImgContainer}>
-        <img
-          src={getAvatarUrl()}
-          alt="user"
-          height="38px"
-          width="38px"
-          className={styles.friendImg}
-        />
-        <p>{getChatName()}</p>
+    <Link href={`/chat/${chat._id}`}>
+      <div className={`${styles.friendItem} ${chat._id===router.query.id&&styles.itemActive}`}>
+        <div className={styles.friendImgContainer}>
+          <img
+            src={getAvatarUrl()}
+            alt="user"
+            height="38px"
+            width="38px"
+            className={styles.friendImg}
+          />
+          <p>{getChatName()}</p>
+        </div>
+        <div className={styles.friendStatus}>{getStatusDiv()}</div>
       </div>
-      <div className={styles.friendStatus}>{getStatusDiv()}</div>
-    </div>
+    </Link>
   );
 };
 
