@@ -3,20 +3,12 @@ import styles from "./Navbar.module.css";
 
 import useProfile from "../stores/useProfile";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import useToken from "../stores/useToken";
 import ProfileModal from "./Modal/ProfileModal";
 import NavbarProfileModal from "./NavbarProfileModal";
 
 export default function Navbar() {
   const { user } = useProfile();
-  const router = useRouter();
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-
-  const onLogout = () => {
-    useToken.getState().clearTokens();
-    router.push(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/logout`);
-  };
 
   const onProfileToggle = () => {
     setProfileModalOpen((profileModalOpen) => !profileModalOpen);
