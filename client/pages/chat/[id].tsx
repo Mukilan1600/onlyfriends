@@ -1,16 +1,19 @@
-import React, { useEffect } from "react";
-import { useRouter } from "next/router";
+import React from "react";
 import NavbarAndFriendsList from "../../components/modules/Wrappers/NavbarAndFriendsList";
 import CheckValidChat from "../../components/modules/Wrappers/CheckValidChat";
+import ChatLayout from "../../components/modules/Chat/ChatLayout";
+import ChatHeader from "../../components/modules/Chat/Header/ChatHeader";
 
 const Chat: React.FC = () => {
-  const router = useRouter();
-  useEffect(() => {
-    console.log(router.query);
-  }, [router.query]);
   return (
     <NavbarAndFriendsList>
-      <CheckValidChat>{router.query.id}</CheckValidChat>
+      <CheckValidChat>
+        <ChatLayout>
+          <ChatHeader />
+          <div>body</div>
+          <div>input</div>
+        </ChatLayout>
+      </CheckValidChat>
     </NavbarAndFriendsList>
   );
 };

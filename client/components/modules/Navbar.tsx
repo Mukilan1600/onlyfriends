@@ -40,10 +40,6 @@ export default function Navbar() {
           ></img>
           <p className={styles.profileName}>{user?.name}</p>
         </div>
-        {/** @Mukilan1600 replace with notifications icon */}
-        <button onClick={onLogout} style={{ marginLeft: "66px" }}>
-          Logout
-        </button>
       </div>
       <ProfileModal open={profileModalOpen}>
         <NavbarProfileModal />
