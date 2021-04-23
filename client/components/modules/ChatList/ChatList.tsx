@@ -67,8 +67,8 @@ const ChatsList: React.FC = () => {
       <Link href="/friendrequests">
         <Button
           style={{
-            position: "absolute",
-            left: "50%",
+            position: "fixed",
+            left: "165px",
             bottom: "41px",
             transform: "translate(-50%, 0)",
             width: "250px",

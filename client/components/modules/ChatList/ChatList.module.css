@@ -1,4 +1,5 @@
 .body {
+  overflow-y: auto;
   height: calc(100vh - 70px);
   width: 380px;
   min-width: 380px;
@@ -6,26 +7,6 @@
   /* box-shadow: 10px 0 5px -2px #888; */
   background-color: white;
   position: relative;
-}
-
-.btnAddFriends {
-  cursor: pointer;
-  position: absolute;
-  left: 50%;
-  bottom: 41px;
-  transform: translate(-50%, 0);
-  height: 58px;
-  padding: 18px 70px;
-  background: linear-gradient(
-    94.06deg,
-    #3d98e7 10.41%,
-    rgba(255, 0, 199, 0.71) 157.89%
-  );
-  border-radius: 19px;
-  white-space: nowrap;
-  font-family: Raleway;
-  font-weight: 600;
-  color: white;
 }
 
 .illustrationHolder {

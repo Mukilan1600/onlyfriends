@@ -14,4 +14,20 @@ a {
 
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar{
+  width: 8px;
+  height: 8px;
+  overflow: overlay;
+}
+
+*::-webkit-scrollbar-thumb{
+  background-color: #c6e2f8;
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-track{
+  background-color: #e5f0f86c;
 }
