@@ -182,22 +182,31 @@ class WebSocket {
       });
 
       socket.on("get_messages", async (chatId, skip = 0) => {
-        
-        const chat = await Chat.findById(chatId, {
-          messages: { $slice: [skip, skip + 50] },
-        });
-        socket.emit("messages", chat.messages);
+        try {
+          const chat = await Chat.findById(chatId, {
+            messages: { $slice: [skip, skip + 50] },
+          });
+          socket.emit("messages", chat.messages);
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.get_chat_details" });
+        }
       });
 
       socket.on("get_chat_details", async (chatId) => {
-        var chat = null
-        if(Types.ObjectId.isValid(chatId)){
-          chat = await Chat.findById(chatId, "-messages").populate(
-            "participants",
-            "name avatarUrl online lastSeen oauthId"
-          );
+        try {
+          var chat = null;
+          if (Types.ObjectId.isValid(chatId)) {
+            chat = await Chat.findById(chatId, "-messages").populate(
+              "participants",
+              "name avatarUrl online lastSeen oauthId"
+            );
+          }
+          socket.emit("chat_details", chat);
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.get_chat_details" });
         }
-        socket.emit("chat_details", chat);
       });
 
       //Profile
