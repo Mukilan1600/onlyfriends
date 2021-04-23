@@ -18,8 +18,7 @@ const ButtonWrapper = styled.button`
   border-width: 1px;
   border-color: #3d98e7;
   border-radius: 19px;
-  cursor: pointer;
-
+  cursor: ${(props: { loading: boolean }) => props.loading?'not-allowed':'pointer'};
   font-family: Raleway;
   font-style: normal;
   font-weight: 500;
@@ -44,10 +43,12 @@ const LoaderDiv = styled.div`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  height: 100%;
+  width: 100%;
 
   & div {
-    width: 9px;
-    height: 9px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background-color: #a028e9;
     margin: 3px;
@@ -76,7 +77,7 @@ interface ButtonProps {
 const Button: React.FC<ButtonProps> = React.forwardRef<HTMLButtonElement,ButtonProps>(
   ({ label, ...props }, ref) => {
     return (
-      <ButtonWrapper {...props} loading={props.loading} ref={ref}>
+      <ButtonWrapper {...props} loading={props.loading} ref={ref} disabled={props.loading}>
         {props.loading ? (
           <LoaderDiv>
             <div />
