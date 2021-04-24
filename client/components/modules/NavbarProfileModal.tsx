@@ -16,6 +16,15 @@ export default function NavbarProfileModal() {
 
   useEffect(() => {
     usernameRef.current.innerText = user.username;
+    if (usernameRef.current) {
+      usernameRef.current.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") event.preventDefault();
+      });
+    }
+    return () => {
+      if (usernameRef.current)
+        usernameRef.current.removeEventListener("keydown", () => {});
+    };
   }, [usernameRef.current, user.username]);
 
   const toggleEditing = () => {
@@ -53,16 +62,16 @@ export default function NavbarProfileModal() {
         </div>
       </div>
       <div className={styles.divider} />
-        <Button
-          style={{
-            height: "38px",
-            padding: "10px 30px",
-            width: "120px",
-            marginTop: "38px",
-          }}
-          label="Sign out"
-          onClick={onLogout}
-        />
+      <Button
+        style={{
+          height: "38px",
+          padding: "10px 30px",
+          width: "120px",
+          marginTop: "38px",
+        }}
+        label="Sign out"
+        onClick={onLogout}
+      />
     </div>
   );
 }
