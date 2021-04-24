@@ -68,7 +68,7 @@ const ChatsList: React.FC = () => {
         <Button
           style={{
             position: "fixed",
-            left: "165px",
+            left: "190px",
             bottom: "41px",
             transform: "translate(-50%, 0)",
             width: "250px",

@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
+import { WebSocketContext } from "../../../providers/WebSocketProvider";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
@@ -47,6 +48,7 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
 const ChatInput: React.FC = () => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
+  const { socket } = useContext(WebSocketContext)
 
   const onMessage = () => {
     setMessage(inputRef.current.innerHTML);
