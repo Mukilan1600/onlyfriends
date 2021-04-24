@@ -4,7 +4,8 @@ import { IChat } from "../modules/ChatList/ChatListItem";
 
 export interface IMessage {
   type: "message" | "file" | "reply";
-  reply: boolean;
+  sentBy?: string;
+  reply?: boolean;
   replyTo?: string;
   fileUrl?: string;
   message?: string;

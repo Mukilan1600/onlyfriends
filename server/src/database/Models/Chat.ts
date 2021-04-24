@@ -3,6 +3,7 @@ import { IUser } from "./User";
 
 interface IText extends Document {
   type: "message" | "file" | "reply";
+  sentBy: string,
   reply: boolean;
   replyTo?: string;
   fileUrl?: string;
@@ -19,6 +20,7 @@ export interface IChat extends Document {
 
 const textSchema = new Schema({
   type: String,
+  sentBy: {type: Schema.Types.ObjectId, ref: "User"},
   reply: { type: Boolean, default: false },
   replyTo: { type: Schema.Types.ObjectId, ref: "Chat.messages", required: false },
   fileUrl: String,

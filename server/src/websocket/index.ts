@@ -169,16 +169,24 @@ class WebSocket {
         }
       });
 
-      socket.on("send_message", async ({ chatId, msg }) => {
-        const chat = await Chat.findById(chatId, "-messages").populate(
-          "participants"
-        );
-        chat.messages.push(msg);
-        chat.participants.forEach((participant) => {
-          this.io
-            .to(participant.socketId)
-            .emit("receive_message", { chatId, msg });
-        });
+      socket.on("send_message", async (chatId, msg) => {
+        try {
+          const chat = await Chat.findById(chatId).populate(
+            "participants"
+          );
+          const user = await User.findOne({oauthId: socket.oauthId});
+          msg.sentBy = user._id;
+          chat.messages.push(msg);
+          chat.participants.forEach((participant) => {
+            this.io
+              .to(participant.socketId)
+              .emit("receive_message", chatId, msg);
+          });
+          await chat.save();
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.send_message" });
+        }
       });
 
       socket.on("get_messages", async (chatId, skip = 0) => {

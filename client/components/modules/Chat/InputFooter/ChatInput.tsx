@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { WebSocketContext } from "../../../providers/WebSocketProvider";
+import useChat, { IMessage } from "../../../stores/useChat";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
@@ -18,8 +19,9 @@ const MessageContainer = styled.div`
 
 const MessageInput = styled.div`
   width: 100%;
+  word-break: break-word;
+  white-space: pre-wrap;
   min-height: 18px;
-  max-height: 200px;
   overflow-y: auto;
   box-sizing: border-box;
   outline: none;
@@ -48,32 +50,54 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
 const ChatInput: React.FC = () => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
-  const { socket } = useContext(WebSocketContext)
+  const { socket } = useContext(WebSocketContext);
+  const { chat } = useChat();
 
   const onMessage = () => {
     setMessage(inputRef.current.innerHTML);
+  };
+
+  const sendMessage = (message: string) => {
+    const newMessage: IMessage = { type: "message", message };
+    socket.emit("send_message", chat._id, newMessage);
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       setMessage((message) => {
-        if (message.length > 0) console.log(message);
+        if (message.length > 0) {
+          sendMessage(message);
+        }
         return "";
       });
       inputRef.current.innerHTML = "";
     }
   };
 
+  const removeListeners = () => {
+    if (inputRef.current) {
+      inputRef.current.removeEventListener("input", () => {});
+      inputRef.current.removeEventListener("keydown", () => {});
+      inputRef.current.removeEventListener("paste", () => {});
+    }
+  };
+
   useEffect(() => {
     if (!inputRef.current) return;
+
+    removeListeners();
+
     inputRef.current.addEventListener("keydown", onKeyDown);
     inputRef.current.addEventListener("input", onMessage);
+    inputRef.current.addEventListener("paste", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      var text = e.clipboardData.getData("text/plain").trim();
+      document.execCommand("insertHTML", false, text);
+    });
     return () => {
-      if (inputRef.current) {
-        inputRef.current.removeEventListener("input", () => {});
-        inputRef.current.removeEventListener("keydown", () => {});
-      }
+      removeListeners();
     };
   }, [inputRef.current]);
 
