@@ -7,24 +7,26 @@ import { IChat } from "../ChatList/ChatListItem";
 
 const CheckValidChat: React.FC = ({ children }) => {
   const router = useRouter();
-  const { user } = useProfile()
+  const { user } = useProfile();
   const { socket } = useContext(WebSocketContext);
-  const { chat, setChat, setMessages } = useChat();
+  const { chat, setChat, resetChat } = useChat();
   useEffect(() => {
     socket.emit("get_chat_details", router.query.id);
     socket.on("chat_details", (chat: IChat) => {
-      if (!chat) router.push("/home");
+      if (!chat) {
+        router.push("/home");
+        return;
+      }
       // Remove logged in user from list of participants
       const newParticipants = chat.participants.filter((participant: IUser) => {
-          return participant.oauthId !== user.oauthId
+        return participant.oauthId !== user.oauthId;
       });
-      setChat({...chat, participants: newParticipants});
+      setChat({ ...chat, participants: newParticipants });
     });
 
     return () => {
       socket.off("chat_details");
-      setChat(null);
-      setMessages([]);
+      resetChat();
     };
   }, [router.query.id]);
 

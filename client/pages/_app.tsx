@@ -7,7 +7,7 @@ import { AppProps } from "next/app";
 import { Router } from 'next/router'
 import WebSocketProvider from "../components/providers/WebSocketProvider";
 import { PageComponenet } from "../types";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, Flip } from "react-toastify";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import Headers from "../components/modules/Headers/Headers";
@@ -34,8 +34,11 @@ export default function App({ Component, pageProps }: AppProps) {
           newestOnTop={false}
           closeOnClick
           rtl={false}
-          pauseOnFocusLoss
+          pauseOnFocusLoss={false}
           draggable={false}
+          limit={3}
+          transition={Flip}
+          closeButton={false}
           pauseOnHover
         />
       </WebSocketProvider>

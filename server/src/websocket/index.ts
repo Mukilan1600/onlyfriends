@@ -169,35 +169,52 @@ class WebSocket {
         }
       });
 
-      socket.on("send_message", async ({ chatId, msg }) => {
-        const chat = await Chat.findById(chatId, "-messages").populate(
-          "participants"
-        );
-        chat.messages.push(msg);
-        chat.participants.forEach((participant) => {
-          this.io
-            .to(participant.socketId)
-            .emit("receive_message", { chatId, msg });
-        });
+      socket.on("send_message", async (chatId, msg) => {
+        try {
+          const chat = await Chat.findById(chatId).populate(
+            "participants"
+          );
+          const user = await User.findOne({oauthId: socket.oauthId});
+          msg.sentBy = user._id;
+          chat.messages.push(msg);
+          chat.participants.forEach((participant) => {
+            this.io
+              .to(participant.socketId)
+              .emit("receive_message", chatId, msg);
+          });
+          await chat.save();
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.send_message" });
+        }
       });
 
       socket.on("get_messages", async (chatId, skip = 0) => {
-        
-        const chat = await Chat.findById(chatId, {
-          messages: { $slice: [skip, skip + 50] },
-        });
-        socket.emit("messages", chat.messages);
+        try {
+          const chat = await Chat.findById(chatId, {
+            messages: { $slice: [skip, skip + 50] },
+          });
+          socket.emit("messages", chat.messages);
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.get_chat_details" });
+        }
       });
 
       socket.on("get_chat_details", async (chatId) => {
-        var chat = null
-        if(Types.ObjectId.isValid(chatId)){
-          chat = await Chat.findById(chatId, "-messages").populate(
-            "participants",
-            "name avatarUrl online lastSeen oauthId"
-          );
+        try {
+          var chat = null;
+          if (Types.ObjectId.isValid(chatId)) {
+            chat = await Chat.findById(chatId, "-messages").populate(
+              "participants",
+              "name avatarUrl online lastSeen oauthId"
+            );
+          }
+          socket.emit("chat_details", chat);
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.get_chat_details" });
         }
-        socket.emit("chat_details", chat);
       });
 
       //Profile
