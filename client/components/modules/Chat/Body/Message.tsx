@@ -10,7 +10,7 @@ interface MessageProps {
 const MessageWrapper = styled.div<MessageProps>`
   width: 100%;
   display: flex;
-  justify-content: ${({sentByMe}) => sentByMe?"flex-end":"flex-start"};
+  justify-content: ${({ sentByMe }) => (sentByMe ? "flex-end" : "flex-start")};
 `;
 
 const MessageDiv = styled.div<MessageProps>`
@@ -21,7 +21,7 @@ const MessageDiv = styled.div<MessageProps>`
   box-shadow: 0px 0px 14px -6px rgba(0, 0, 0, 0.5);
   border-radius: 11px;
   padding: 5px 10px;
-  margin: 10px 0px;
+  margin: 2px 0px;
   background: ${({ sentByMe }) => (sentByMe ? "#55A3FF" : "#ffffff")};
   color: ${({ sentByMe }) => (sentByMe ? "#FFF" : "#000")};
 
@@ -34,13 +34,14 @@ const MessageDiv = styled.div<MessageProps>`
 
 interface IMessageProps {
   message: IMessage;
+  idx: number;
 }
 
-const Message: React.FC<IMessageProps> = ({ message }) => {
+const Message: React.FC<IMessageProps> = ({ message, idx }) => {
   const { user } = useProfile();
   const sentByMe = message.sentBy === user._id;
   return (
-    <MessageWrapper sentByMe={sentByMe}>
+    <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <MessageDiv sentByMe={sentByMe}>{message.message}</MessageDiv>
     </MessageWrapper>
   );

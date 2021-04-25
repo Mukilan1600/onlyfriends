@@ -13,6 +13,8 @@ const ChatBodyDiv = styled.div`
   padding: 35px;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column-reverse;
 `;
 
 const ChatBody: React.FC = () => {
@@ -29,7 +31,8 @@ const ChatBody: React.FC = () => {
     getMessages();
     socket.on("messages", (newMessages: IMessage[]) => {
       const { setMessages, messages } = useChat.getState();
-      messages.push(...newMessages);
+      newMessages.reverse();
+      messages.unshift(...newMessages);
       setMessages(messages);
     });
 
@@ -37,7 +40,7 @@ const ChatBody: React.FC = () => {
     socket.on("receive_message", (chatId: string, msg: IMessage) => {
       if (chatId === chat._id) {
         const { setMessages, messages } = useChat.getState();
-        messages.push(msg);
+        messages.unshift(msg);
         setMessages(messages);
       }
     });
@@ -51,7 +54,7 @@ const ChatBody: React.FC = () => {
   return (
     <ChatBodyDiv ref={chatBodyRef}>
       {messages.map((msg, i) => (
-        <Message message={msg} key={i} />
+        <Message message={msg} key={i} idx={i} />
       ))}
     </ChatBodyDiv>
   );
