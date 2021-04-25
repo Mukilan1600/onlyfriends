@@ -242,7 +242,7 @@ class WebSocket {
       socket.on("disconnect", async () => {
         try {
           const user = await User.findOneAndUpdate(
-            { oauthId: socket.oauthId },
+            { oauthId: socket.oauthId, socketId: socket.id },
             { online: false, lastSeen: Date.now() },
             { useFindAndModify: false, returnOriginal: false }
           ).populate("friends.user");
