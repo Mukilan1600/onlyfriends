@@ -21,68 +21,70 @@ export interface IUser extends Document {
   createdAt?: Date;
 }
 
-const userSchema = new Schema({
-  oauthId: {
-    type: String,
-    required: true,
+const userSchema = new Schema(
+  {
+    oauthId: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+    },
+    username: {
+      type: String,
+      unique: true,
+    },
+    avatarUrl: { type: String },
+    socketId: String,
+    online: {
+      type: Boolean,
+      default: true,
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now,
+    },
+    friends: {
+      type: [
+        {
+          user: { type: Schema.Types.ObjectId, ref: "User" },
+          chat: { type: Schema.Types.ObjectId, ref: "Chat" },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+    friendRequests: {
+      type: [
+        {
+          user: { type: Schema.Types.ObjectId, ref: "User" },
+          ignored: { type: Boolean, default: false },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+    friendRequestsSent: {
+      type: [
+        {
+          user: { type: Schema.Types.ObjectId, ref: "User" },
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+    chats: {
+      type: [
+        {
+          chat: { type: Schema.Types.ObjectId, ref: "Chat" },
+          unread: { type: Number, default: 0 },
+        },
+      ],
+      default: [],
+    },
   },
-  name: {
-    type: String,
-  },
-  username: {
-    type: String,
-    unique: true,
-  },
-  avatarUrl: { type: String },
-  socketId: String,
-  online: {
-    type: Boolean,
-    default: true,
-  },
-  lastSeen: {
-    type: Date,
-    default: Date.now(),
-  },
-  friends: {
-    type: [
-      {
-        user: { type: Schema.Types.ObjectId, ref: "User" },
-        chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-        createdAt: { type: Date, default: Date.now() },
-      },
-    ],
-    default: [],
-  },
-  friendRequests: {
-    type: [
-      {
-        user: { type: Schema.Types.ObjectId, ref: "User" },
-        ignored: { type: Boolean, default: false },
-        createdAt: { type: Date, default: Date.now() },
-      },
-    ],
-    default: [],
-  },
-  friendRequestsSent: {
-    type: [
-      {
-        user: { type: Schema.Types.ObjectId, ref: "User" },
-        createdAt: { type: Date, default: Date.now() },
-      },
-    ],
-    default: [],
-  },
-  chats: {
-    type: [
-      {
-        chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-        unread: { type: Number, default: 0 },
-      },
-    ],
-    default: [],
-  },
-  createdAt: { type: Date, default: Date.now() },
-});
+  { timestamps: { createdAt: "createdAt" } }
+);
 
 const User: Model<IUser> = model<IUser>("User", userSchema);
 export default User;
@@ -158,7 +160,7 @@ export const sendFriendRequest = async (from: string, to: string) => {
         .exec();
 
       if (!toUser) return null;
-      
+
       const index = user.friendRequestsSent.findIndex(
         (request) => request.user === toUser._id
       );

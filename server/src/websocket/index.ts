@@ -171,16 +171,17 @@ class WebSocket {
 
       socket.on("send_message", async (chatId, msg) => {
         try {
-          const chat = await Chat.findById(chatId).populate(
-            "participants"
-          );
-          const user = await User.findOne({oauthId: socket.oauthId});
+          const chat = await Chat.findById(chatId).populate("participants");
+          const user = await User.findOne({ oauthId: socket.oauthId });
           msg.sentBy = user._id;
           chat.messages.push(msg);
           chat.participants.forEach((participant) => {
             this.io
               .to(participant.socketId)
-              .emit("receive_message", chatId, msg);
+              .emit("receive_message", chatId, {
+                ...msg,
+                createdAt: Date.now(),
+              });
           });
           await chat.save();
         } catch (error) {

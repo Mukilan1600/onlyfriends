@@ -3,8 +3,7 @@ import styled, { keyframes } from "styled-components";
 
 const LoaderAnimation = keyframes`
   0%{ opacity: 100%; }
-  50%{ opacity: 20%; }
-  100%{ opacity: 100%; }
+  100%{ opacity: 20%; }
 
 `;
 
@@ -50,20 +49,21 @@ const LoaderDiv = styled.div`
     width: 7px;
     height: 7px;
     border-radius: 50%;
+    opacity: 20%;
     background-color: #a028e9;
     margin: 3px;
     animation-name: ${LoaderAnimation};
-    animation-duration: 1.5s;
+    animation-duration: 0.8s;
     animation-iteration-count: infinite;
     animation-delay: 0s;
   }
 
   div:nth-child(2) {
-    animation-delay: 0.5s;
+    animation-delay: 0.1s;
   }
 
   div:nth-child(3) {
-    animation-delay: 1s;
+    animation-delay: 0.2s;
   }
 `;
 
