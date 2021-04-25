@@ -3,7 +3,7 @@ import { IUser } from "./User";
 
 interface IText extends Document {
   type: "message" | "file" | "reply";
-  sentBy: string,
+  sentBy: string;
   reply: boolean;
   replyTo?: string;
   fileUrl?: string;
@@ -18,23 +18,31 @@ export interface IChat extends Document {
   createdAt?: Date;
 }
 
-const textSchema = new Schema({
-  type: String,
-  sentBy: {type: Schema.Types.ObjectId, ref: "User"},
-  reply: { type: Boolean, default: false },
-  replyTo: { type: Schema.Types.ObjectId, ref: "Chat.messages", required: false },
-  fileUrl: String,
-  message: String,
-  createdAt: { type: Date, default: Date.now() },
-  readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
-});
+const textSchema = new Schema(
+  {
+    type: String,
+    sentBy: { type: Schema.Types.ObjectId, ref: "User" },
+    reply: { type: Boolean, default: false },
+    replyTo: {
+      type: Schema.Types.ObjectId,
+      ref: "Chat.messages",
+      required: false,
+    },
+    fileUrl: String,
+    message: String,
+    readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  },
+  { timestamps: { createdAt: "createdAt" } }
+);
 
-const chatSchema = new Schema({
-  type: String,
-  participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  messages: { type: [textSchema], default: [] },
-  createdAt: { type: Date, default: Date.now() },
-});
+const chatSchema = new Schema(
+  {
+    type: String,
+    participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    messages: { type: [textSchema], default: [] },
+  },
+  { timestamps: { createdAt: "createdAt" } }
+);
 
 const Chat: Model<IChat> = model<IChat>("Chat", chatSchema);
 export default Chat;
