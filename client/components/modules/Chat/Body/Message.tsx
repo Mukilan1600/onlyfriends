@@ -14,6 +14,8 @@ const MessageWrapper = styled.div<MessageProps>`
 `;
 
 const MessageDiv = styled.div<MessageProps>`
+  display: flex;
+  flex-direction: column;
   width: fit-content;
   white-space: pre-wrap;
   max-width: 50%;
@@ -32,6 +34,21 @@ const MessageDiv = styled.div<MessageProps>`
   line-height: 21px;
 `;
 
+const TimeDiv = styled.div<MessageProps>`
+  width: 100%;
+  span {
+    float: right;
+    margin-top: -5px;
+    margin-left: 15px;
+    font-family: Raleway;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    color: ${({ sentByMe }) =>
+      sentByMe ? "rgba(255, 255, 255, 0.59)" : "rgba(82, 82, 82, 0.80)"};
+  }
+`;
+
 interface IMessageProps {
   message: IMessage;
   idx: number;
@@ -40,9 +57,35 @@ interface IMessageProps {
 const Message: React.FC<IMessageProps> = ({ message, idx }) => {
   const { user } = useProfile();
   const sentByMe = message.sentBy === user._id;
+  const date = new Date(message.createdAt);
+
+  const isToday = () => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const getFormattedTime = () => {
+    if (isToday())
+      return date.toLocaleTimeString(undefined, {
+        hour12: false,
+        minute: "2-digit",
+        hour: "2-digit",
+      });
+    else return date.toLocaleDateString();
+  };
+
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
-      <MessageDiv sentByMe={sentByMe}>{message.message}</MessageDiv>
+      <MessageDiv sentByMe={sentByMe}>
+        <div>{message.message}</div>
+        <TimeDiv sentByMe={sentByMe}>
+          <span title={date.toLocaleString()}>{getFormattedTime()}</span>
+        </TimeDiv>
+      </MessageDiv>
     </MessageWrapper>
   );
 };
