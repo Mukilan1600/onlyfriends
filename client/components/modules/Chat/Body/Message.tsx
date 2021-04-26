@@ -96,7 +96,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       {sentByMe && (
-        <ReplyButton onClick={setReplyTo.bind(this, message._id)}>
+        <ReplyButton onClick={setReplyTo.bind(this, message)}>
           <ReplyIcon />
         </ReplyButton>
       )}
@@ -107,7 +107,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
         </TimeDiv>
       </MessageDiv>
       {!sentByMe && (
-        <ReplyButton onClick={setReplyTo.bind(this, message._id)}>
+        <ReplyButton onClick={setReplyTo.bind(this, message)}>
           <ReplyIcon />
         </ReplyButton>
       )}
