@@ -21,6 +21,7 @@ const Emoji: React.FC<IEmoji> = ({onEmojiSelect}) => {
           bottom: "100%",
           left: "0px",
           display: paletteOpen ? "block" : "none",
+          userSelect: 'none'
         }}
         emoji=""
         title=""
