@@ -21,6 +21,7 @@ const MessageInput = styled.div`
   width: 100%;
   word-break: break-word;
   white-space: pre-wrap;
+  max-height: 200px;
   min-height: 18px;
   overflow-y: auto;
   box-sizing: border-box;
