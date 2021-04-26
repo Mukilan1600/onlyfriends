@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
-import { WebSocketContext } from "../../../providers/WebSocketProvider";
-import useChat, { IMessage } from "../../../stores/useChat";
+
+import useChat from "../../../stores/useChat";
 import useLoader from "../../../stores/useLoader";
 import useLoadMessages from "../../../stores/useLoadMessages";
 import Message from "./Message";

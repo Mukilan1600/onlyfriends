@@ -2,11 +2,16 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { WebSocketContext } from "../../../providers/WebSocketProvider";
 import useChat, { IMessage } from "../../../stores/useChat";
+import { EmojiData, Picker } from "emoji-mart";
+import Emoji from "./EmojiPalette/Emoji";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
   width: 100%;
   padding: 17px 50px;
+  display: flex;
+  position: relative;
+  align-items: center;
 `;
 
 const MessageContainer = styled.div`
@@ -15,6 +20,8 @@ const MessageContainer = styled.div`
   padding: 9px 12px 11px;
   border-radius: 12px;
   position: relative;
+  width: 100%;
+  margin-left: 26px;
 `;
 
 const MessageInput = styled.div`
@@ -56,6 +63,12 @@ const ChatInput: React.FC = () => {
 
   const onMessage = () => {
     setMessage(inputRef.current.innerHTML);
+  };
+
+  const onEmojiSelect = (emoji: EmojiData) => {
+    const newMessage = message + emoji.native;
+    setMessage(newMessage);
+    inputRef.current.innerHTML = newMessage;
   };
 
   const sendMessage = (message: string) => {
@@ -104,6 +117,7 @@ const ChatInput: React.FC = () => {
 
   return (
     <ChatInputDiv>
+      <Emoji onEmojiSelect={onEmojiSelect} />
       <MessageContainer>
         <MessagePlaceholder visible={message.length > 0}>
           Type your message here
