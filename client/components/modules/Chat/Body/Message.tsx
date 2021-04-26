@@ -1,16 +1,29 @@
 import React from "react";
 import styled from "styled-components";
+import EditIcon from "../../../statics/icons/EditIcon";
+import ReplyIcon from "../../../statics/icons/ReplyIcon";
 import { IMessage } from "../../../stores/useChat";
+import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
 
 interface MessageProps {
   readonly sentByMe: boolean;
 }
 
+const ReplyButton = styled.div`
+  display: none;
+  cursor: pointer;
+  margin: 5px;
+`;
+
 const MessageWrapper = styled.div<MessageProps>`
   width: 100%;
   display: flex;
   justify-content: ${({ sentByMe }) => (sentByMe ? "flex-end" : "flex-start")};
+  align-items: center;
+  &:hover ${ReplyButton} {
+    display: block;
+  }
 `;
 
 const MessageDiv = styled.div<MessageProps>`
@@ -57,6 +70,7 @@ interface IMessageProps {
 
 const Message: React.FC<IMessageProps> = ({ message, idx }) => {
   const { user } = useProfile();
+  const { setReplyTo } = useMessage();
   const sentByMe = message.sentBy === user._id;
   const date = new Date(message.createdAt);
 
@@ -81,12 +95,22 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
 
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
+      {sentByMe && (
+        <ReplyButton onClick={setReplyTo.bind(this, message._id)}>
+          <ReplyIcon />
+        </ReplyButton>
+      )}
       <MessageDiv sentByMe={sentByMe}>
         <div>{message.message}</div>
         <TimeDiv sentByMe={sentByMe}>
           <span title={date.toLocaleString()}>{getFormattedTime()}</span>
         </TimeDiv>
       </MessageDiv>
+      {!sentByMe && (
+        <ReplyButton onClick={setReplyTo.bind(this, message._id)}>
+          <ReplyIcon />
+        </ReplyButton>
+      )}
     </MessageWrapper>
   );
 };
