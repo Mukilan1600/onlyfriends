@@ -174,7 +174,7 @@ class WebSocket {
           const chat = await Chat.findById(chatId).populate("participants");
           const user = await User.findOne({ oauthId: socket.oauthId });
           msg.sentBy = user._id;
-          chat.messages.push(msg);
+          chat.messages.unshift(msg);
           chat.participants.forEach((participant) => {
             this.io
               .to(participant.socketId)
@@ -193,7 +193,7 @@ class WebSocket {
       socket.on("get_messages", async (chatId, skip = 0) => {
         try {
           const chat = await Chat.findById(chatId, {
-            messages: { $slice: [skip, skip + 50] },
+            messages: { $slice: [skip, 12] },
           });
           socket.emit("messages", chat.messages);
         } catch (error) {

@@ -1,23 +1,29 @@
 import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
 
-type keys = "friendRequest";
+type keys = "friendRequest" | "messagesLoading";
 
 interface ILoaderState extends State {
   friendRequest: boolean;
+  messagesLoading: boolean;
   clearLoaders: () => void;
-  setLoader: (obj: { [key in keys]: boolean }) => void;
+  setLoader: (obj: LoaderSetProps) => void;
 }
 
-const INITIAL_STATE = { friendRequest: false };
+interface LoaderSetProps {
+  friendRequest?: boolean;
+  messagesLoading?: boolean;
+}
+
+const INITIAL_STATE = { friendRequest: false, messagesLoading: false };
 
 const useLoader = create<ILoaderState>(
-  combine({ friendRequest: false }, (setState, getState) => ({
+  combine(INITIAL_STATE, (setState, get) => ({
     clearLoaders: () => {
       setState(INITIAL_STATE);
     },
-    setLoader: (obj: { [key in keys]: boolean }) => {
-      setState({ ...getState(), ...obj });
+    setLoader: (obj: LoaderSetProps) => {
+      setState({ ...get(), ...obj });
     },
   }))
 );

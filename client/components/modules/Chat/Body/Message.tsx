@@ -18,6 +18,7 @@ const MessageDiv = styled.div<MessageProps>`
   flex-direction: column;
   width: fit-content;
   white-space: pre-wrap;
+  word-wrap: break-word;
   max-width: 50%;
   min-height: 25px;
   box-shadow: 0px 0px 14px -6px rgba(0, 0, 0, 0.5);
