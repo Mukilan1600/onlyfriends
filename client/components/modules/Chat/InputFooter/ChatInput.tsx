@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { WebSocketContext } from "../../../providers/WebSocketProvider";
 import useChat, { IMessage } from "../../../stores/useChat";
-import { EmojiData, Picker } from "emoji-mart";
+import { BaseEmoji, EmojiData, Picker } from "emoji-mart";
 import Emoji from "./EmojiPalette/Emoji";
 
 const ChatInputDiv = styled.div`
@@ -55,6 +55,7 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
   color: #888;
 `;
 
+
 const ChatInput: React.FC = () => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
@@ -65,7 +66,7 @@ const ChatInput: React.FC = () => {
     setMessage(inputRef.current.innerHTML);
   };
 
-  const onEmojiSelect = (emoji: EmojiData) => {
+  const onEmojiSelect = (emoji: BaseEmoji) => {
     const newMessage = message + emoji.native;
     setMessage(newMessage);
     inputRef.current.innerHTML = newMessage;
