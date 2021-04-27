@@ -17,7 +17,7 @@ export interface IUser extends Document {
     chat: IChat;
     createdAt?: Date;
   }[];
-  chats: { chat: IChat; unread?: number }[];
+  chats: { chat: IChat }[];
   createdAt?: Date;
 }
 
@@ -77,7 +77,6 @@ const userSchema = new Schema(
       type: [
         {
           chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-          unread: { type: Number, default: 0 },
         },
       ],
       default: [],

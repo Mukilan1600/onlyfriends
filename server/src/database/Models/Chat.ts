@@ -13,7 +13,7 @@ interface IText extends Document {
 
 export interface IChat extends Document {
   type: "personal" | "group";
-  participants: IUser[];
+  participants: { unread: number; user: IUser }[];
   messages: IText[];
   createdAt?: Date;
 }
@@ -38,7 +38,12 @@ const textSchema = new Schema(
 const chatSchema = new Schema(
   {
     type: String,
-    participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    participants: [
+      {
+        unread: { type: Number, default: 0 },
+        user: { type: Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
     messages: {
       type: [{ type: Schema.Types.ObjectId, ref: "Message" }],
       default: [],
