@@ -30,7 +30,7 @@ const MessagePreview = styled.div`
   background: rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   white-space: pre-wrap;
-  word-break: break-all
+  word-break: break-all;
 `;
 
 const ReplyPreview: React.FC = () => {
@@ -42,7 +42,7 @@ const ReplyPreview: React.FC = () => {
     replyTo && (
       <ReplyPreviewWrapper>
         <PreviewHeader>
-          <div>{sentByMe ? "You" : chat.participants[0].name}</div>
+          <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           <div style={{ cursor: "pointer" }} onClick={() => setReplyTo(null)}>
             x
           </div>

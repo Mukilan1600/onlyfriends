@@ -21,7 +21,7 @@ const ChatsList: React.FC = () => {
       const newChatList = msg.map((chat: IChatListItem) => {
         if (chat.chat.type === "group") return chat;
         const newParticipants = chat.chat.participants.filter(
-          (participant) => participant.oauthId !== user.oauthId
+          (participant) => participant.user.oauthId !== user.oauthId
         );
         chat.chat.participants = newParticipants;
         return chat;
@@ -34,8 +34,8 @@ const ChatsList: React.FC = () => {
       setChats(
         chats.map((chat) => {
           const newParticipants = chat.chat.participants.map((participant) => {
-            if (participant.oauthId === msg.oauthId) {
-              return { ...participant, ...msg };
+            if (participant.user.oauthId === msg.oauthId) {
+              return { ...participant, user: { ...participant.user, ...msg } };
             } else return participant;
           });
           chat.chat.participants = newParticipants;
