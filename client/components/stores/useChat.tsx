@@ -3,11 +3,11 @@ import { combine } from "zustand/middleware";
 import { IChat } from "../modules/ChatList/ChatListItem";
 
 export interface IMessage {
-  _id: string;
+  _id?: string;
   type: "message" | "file" | "reply";
   sentBy?: string;
   reply?: boolean;
-  replyTo?: string;
+  replyTo?: string | IMessage;
   fileUrl?: string;
   message?: string;
   createdAt?: Date;

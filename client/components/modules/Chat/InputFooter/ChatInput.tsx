@@ -4,6 +4,7 @@ import { WebSocketContext } from "../../../providers/WebSocketProvider";
 import useChat, { IMessage } from "../../../stores/useChat";
 import { BaseEmoji, EmojiData, Picker } from "emoji-mart";
 import Emoji from "./EmojiPalette/Emoji";
+import useMessage from "../../../stores/useMessage";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
@@ -55,7 +56,6 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
   color: #888;
 `;
 
-
 const ChatInput: React.FC = () => {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
@@ -74,6 +74,12 @@ const ChatInput: React.FC = () => {
 
   const sendMessage = (message: string) => {
     const newMessage: IMessage = { type: "message", message };
+    const { replyTo, setReplyTo } = useMessage.getState();
+    if (replyTo) {
+      newMessage.reply = true;
+      newMessage.replyTo = replyTo;
+      setReplyTo(null);
+    }
     socket.emit("send_message", chat._id, newMessage);
   };
 
