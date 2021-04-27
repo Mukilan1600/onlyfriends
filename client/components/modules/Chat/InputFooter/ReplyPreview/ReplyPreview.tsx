@@ -29,6 +29,8 @@ const MessagePreview = styled.div`
   font-family: Raleway;
   background: rgba(0, 0, 0, 0.1);
   border-radius: 5px;
+  white-space: pre-wrap;
+  word-break: break-all;
 `;
 
 const ReplyPreview: React.FC = () => {
