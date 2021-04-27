@@ -10,7 +10,7 @@ import User, {
   IUser,
   sendFriendRequest,
 } from "../database/Models/User";
-import Chat from "../database/Models/Chat";
+import Chat, { Message } from "../database/Models/Chat";
 import { Types } from "mongoose";
 
 interface Socket extends socketio.Socket {
@@ -174,16 +174,17 @@ class WebSocket {
           const chat = await Chat.findById(chatId).populate("participants");
           const user = await User.findOne({ oauthId: socket.oauthId });
           msg.sentBy = user._id;
-          chat.messages.push(msg);
+          const message = new Message(msg);
+          chat.messages.unshift(message);
           chat.participants.forEach((participant) => {
-            this.io
-              .to(participant.socketId)
-              .emit("receive_message", chatId, {
-                ...msg,
-                createdAt: Date.now(),
-              });
+            this.io.to(participant.socketId).emit("receive_message", chatId, {
+              ...message.toObject(),
+              createdAt: Date.now(),
+              replyTo: msg.replyTo,
+            });
           });
           await chat.save();
+          await message.save();
         } catch (error) {
           socket.emit("error", { msg: "Internal server error" });
           logger.error(error, { service: "socket.send_message" });
@@ -193,8 +194,8 @@ class WebSocket {
       socket.on("get_messages", async (chatId, skip = 0) => {
         try {
           const chat = await Chat.findById(chatId, {
-            messages: { $slice: [skip, skip + 50] },
-          });
+            messages: { $slice: [skip, 12] },
+          }).populate({ path: "messages", populate: { path: "replyTo" } });
           socket.emit("messages", chat.messages);
         } catch (error) {
           socket.emit("error", { msg: "Internal server error" });
@@ -242,7 +243,7 @@ class WebSocket {
       socket.on("disconnect", async () => {
         try {
           const user = await User.findOneAndUpdate(
-            { oauthId: socket.oauthId },
+            { oauthId: socket.oauthId, socketId: socket.id },
             { online: false, lastSeen: Date.now() },
             { useFindAndModify: false, returnOriginal: false }
           ).populate("friends.user");

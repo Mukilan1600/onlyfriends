@@ -72,7 +72,10 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       useLoader.getState().clearLoaders();
     });
 
-    newSocket.on("error", (msg) => {
+    newSocket.on("error", (msg, code) => {
+      if (code === 401) {
+        clearTokens();
+      }
       toast(msg.msg, { type: "error" });
       useLoader.getState().clearLoaders();
     });

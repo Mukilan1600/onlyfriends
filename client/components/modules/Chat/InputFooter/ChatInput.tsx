@@ -2,11 +2,17 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { WebSocketContext } from "../../../providers/WebSocketProvider";
 import useChat, { IMessage } from "../../../stores/useChat";
+import { BaseEmoji, EmojiData, Picker } from "emoji-mart";
+import Emoji from "./EmojiPalette/Emoji";
+import useMessage from "../../../stores/useMessage";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
   width: 100%;
   padding: 17px 50px;
+  display: flex;
+  position: relative;
+  align-items: center;
 `;
 
 const MessageContainer = styled.div`
@@ -15,12 +21,15 @@ const MessageContainer = styled.div`
   padding: 9px 12px 11px;
   border-radius: 12px;
   position: relative;
+  width: 100%;
+  margin-left: 26px;
 `;
 
 const MessageInput = styled.div`
   width: 100%;
   word-break: break-word;
   white-space: pre-wrap;
+  max-height: 200px;
   min-height: 18px;
   overflow-y: auto;
   box-sizing: border-box;
@@ -57,8 +66,20 @@ const ChatInput: React.FC = () => {
     setMessage(inputRef.current.innerHTML);
   };
 
+  const onEmojiSelect = (emoji: BaseEmoji) => {
+    const newMessage = message + emoji.native;
+    setMessage(newMessage);
+    inputRef.current.innerHTML = newMessage;
+  };
+
   const sendMessage = (message: string) => {
     const newMessage: IMessage = { type: "message", message };
+    const { replyTo, setReplyTo } = useMessage.getState();
+    if (replyTo) {
+      newMessage.reply = true;
+      newMessage.replyTo = replyTo;
+      setReplyTo(null);
+    }
     socket.emit("send_message", chat._id, newMessage);
   };
 
@@ -103,6 +124,7 @@ const ChatInput: React.FC = () => {
 
   return (
     <ChatInputDiv>
+      <Emoji onEmojiSelect={onEmojiSelect} />
       <MessageContainer>
         <MessagePlaceholder visible={message.length > 0}>
           Type your message here

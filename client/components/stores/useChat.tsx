@@ -3,10 +3,11 @@ import { combine } from "zustand/middleware";
 import { IChat } from "../modules/ChatList/ChatListItem";
 
 export interface IMessage {
+  _id?: string;
   type: "message" | "file" | "reply";
   sentBy?: string;
   reply?: boolean;
-  replyTo?: string;
+  replyTo?: string | IMessage;
   fileUrl?: string;
   message?: string;
   createdAt?: Date;
@@ -15,23 +16,26 @@ export interface IMessage {
 interface IUseChat extends State {
   chat: IChat;
   messages: IMessage[];
-  offset: number;
+  reachedEnd: boolean;
   setChat: (chat: IChat) => void;
   setMessages: (messages: IMessage[]) => void;
   resetChat: () => void;
+  setReachedEnd: (reached: boolean) => void;
 }
 
 const useChat = create<IUseChat>(
-  combine({ chat: null, messages: [], offset: 0 }, (set, get) => ({
+  combine({ chat: null, messages: [], reachedEnd: false }, (set, get) => ({
     setChat: (chat: IChat) => {
       set({ chat, messages: [] });
     },
     setMessages: (messages: IMessage[]) => {
-      const state = get();
-      set({ ...state, messages, offset: state.offset + 1 });
+      set({ messages });
+    },
+    setReachedEnd: (reached: boolean) => {
+      set({ reachedEnd: reached });
     },
     resetChat: () => {
-      set({ chat: null, messages: [], offset: 0 });
+      set({ chat: null, messages: [], reachedEnd: false });
     },
   }))
 );

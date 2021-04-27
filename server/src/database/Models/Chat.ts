@@ -25,7 +25,7 @@ const textSchema = new Schema(
     reply: { type: Boolean, default: false },
     replyTo: {
       type: Schema.Types.ObjectId,
-      ref: "Chat.messages",
+      ref: "Message",
       required: false,
     },
     fileUrl: String,
@@ -39,10 +39,14 @@ const chatSchema = new Schema(
   {
     type: String,
     participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    messages: { type: [textSchema], default: [] },
+    messages: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Message" }],
+      default: [],
+    },
   },
   { timestamps: { createdAt: "createdAt" } }
 );
 
 const Chat: Model<IChat> = model<IChat>("Chat", chatSchema);
+export const Message: Model<IText> = model<IText>("Message", textSchema);
 export default Chat;

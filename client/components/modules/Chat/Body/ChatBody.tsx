@@ -1,7 +1,9 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
-import { WebSocketContext } from "../../../providers/WebSocketProvider";
-import useChat, { IMessage } from "../../../stores/useChat";
+
+import useChat from "../../../stores/useChat";
+import useLoader from "../../../stores/useLoader";
+import useLoadMessages from "../../../stores/useLoadMessages";
 import Message from "./Message";
 
 const ChatBodyDiv = styled.div`
@@ -18,41 +20,23 @@ const ChatBodyDiv = styled.div`
 `;
 
 const ChatBody: React.FC = () => {
-  const { socket } = useContext(WebSocketContext);
-  const { offset, messages, chat, resetChat } = useChat();
+  const { messages } = useChat();
   const chatBodyRef = useRef<HTMLDivElement>();
+  const { loadMoreMessages } = useLoadMessages();
+  const { messagesLoading } = useLoader();
 
-  const getMessages = () => {
-    socket.emit("get_messages", chat._id, offset);
+  const onChatScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    if (
+      event.currentTarget.scrollHeight + event.currentTarget.scrollTop ===
+        event.currentTarget.clientHeight &&
+      !messagesLoading
+    ) {
+      loadMoreMessages();
+    }
   };
 
-  useEffect(() => {
-    if (!chatBodyRef.current) return;
-    getMessages();
-    socket.on("messages", (newMessages: IMessage[]) => {
-      const { setMessages, messages } = useChat.getState();
-      newMessages.reverse();
-      messages.unshift(...newMessages);
-      setMessages(messages);
-    });
-
-    /** @Mukilan1600 update unread messages  */
-    socket.on("receive_message", (chatId: string, msg: IMessage) => {
-      if (chatId === chat._id) {
-        const { setMessages, messages } = useChat.getState();
-        messages.unshift(msg);
-        setMessages(messages);
-      }
-    });
-    return () => {
-      socket.off("messages");
-      socket.off("receive_message");
-      resetChat();
-    };
-  }, []);
-
   return (
-    <ChatBodyDiv ref={chatBodyRef}>
+    <ChatBodyDiv ref={chatBodyRef} onScroll={onChatScroll}>
       {messages.map((msg, i) => (
         <Message message={msg} key={i} idx={i} />
       ))}
