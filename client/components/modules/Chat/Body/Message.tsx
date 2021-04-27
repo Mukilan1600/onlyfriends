@@ -44,7 +44,7 @@ const MessageDiv = styled.div<MessageProps>`
   font-family: Raleway;
   font-style: normal;
   font-weight: normal;
-  font-size: 14px;
+  font-size: 14.2px;
   line-height: 21px;
 `;
 
@@ -52,8 +52,7 @@ const TimeDiv = styled.div<MessageProps>`
   width: 100%;
   span {
     float: right;
-    margin-top: -5px;
-    margin-left: 15px;
+    margin: -12px 0px -5px 4px;
     font-family: Raleway;
     font-style: normal;
     font-weight: normal;
@@ -101,7 +100,10 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
         </ReplyButton>
       )}
       <MessageDiv sentByMe={sentByMe}>
-        <div>{message.message}</div>
+        <div>
+          <span>{message.message}</span>
+          <span style={{ width: "36px", display: "inline-block" }}></span>
+        </div>
         <TimeDiv sentByMe={sentByMe}>
           <span title={date.toLocaleString()}>{getFormattedTime()}</span>
         </TimeDiv>

@@ -30,7 +30,7 @@ const MessagePreview = styled.div`
   background: rgba(0, 0, 0, 0.1);
   border-radius: 5px;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-all
 `;
 
 const ReplyPreview: React.FC = () => {
