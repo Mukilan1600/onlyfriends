@@ -188,7 +188,7 @@ export const acceptFriendRequest = async (from: string, to: string) => {
       if (toUser) {
         const newChat = new Chat({
           type: "personal",
-          participants: [user, toUser],
+          participants: [{ user: user }, { user: toUser }],
         });
 
         await user.updateOne({
@@ -224,7 +224,7 @@ export const getChatList = async (userId: string) => {
     }).populate({
       path: "chats.chat",
       populate: {
-        path: "participants",
+        path: "participants.user",
         select: "name oauthId avatarUrl socketId online lastSeen",
       },
     });
