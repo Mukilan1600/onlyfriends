@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { WebSocketContext } from "../providers/WebSocketProvider";
 import useChat, { IMessage } from "./useChat";
+import useChatList from "./useChatList";
 import useLoader from "./useLoader";
 import useProfile from "./useProfile";
 
@@ -44,17 +45,17 @@ const useLoadMessages = (): IUseLoadMessages => {
       sendMessageAcknowledgements(newMessages);
     });
 
-    /** @Mukilan1600 update unread messages  */
-    socket.on("receive_message", (chatId: string, msg: IMessage) => {
-      if (chatId === chat._id) {
-        const { setMessages, messages } = useChat.getState();
-        messages.unshift(msg);
-        setMessages(messages);
-        sendMessageAcknowledgements([msg]);
-      }
-    });
-
     socket.on("message_acks", (chatId: string, messageIds: string[]) => {
+      const { chats, setChats } = useChatList.getState();
+      const newChats = [...chats].map((chat) => {
+        if (chat.chat._id !== chatId) return chat;
+        else
+          return {
+            ...chat,
+            unread: chat.unread - messageIds.length,
+          };
+      });
+      setChats(newChats);
       if (chatId !== chat._id) return;
       const { messages } = useChat.getState();
       setMessages(
@@ -71,7 +72,6 @@ const useLoadMessages = (): IUseLoadMessages => {
 
     return () => {
       socket.off("messages");
-      socket.off("receive_message");
       socket.off("message_acks");
       resetChat();
     };

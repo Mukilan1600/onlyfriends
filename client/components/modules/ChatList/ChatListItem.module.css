@@ -5,16 +5,16 @@
   padding: 10px 35px;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #EEEEEE;
+  border-bottom: 1px solid #eeeeee;
   cursor: pointer;
 }
 
 .friendItem:hover {
-  background: #EEEEEE;
+  background: #eeeeee;
 }
 
-.itemActive{
-  background: #DDDDDD !important;
+.itemActive {
+  background: #dddddd !important;
 }
 
 .friendImg {
@@ -51,4 +51,24 @@
   border-radius: 50%;
   background: #6b6b6b;
   margin-right: 4px;
+}
+
+.unreadDiv {
+  width: 18px;
+  height: 18px;
+  background: #ff1818;
+  border-radius: 50%;
+  margin-left: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  font-family: Raleway;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 13px;
+  line-height: 15px;
+
+  color: #ffffff;
 }

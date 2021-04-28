@@ -17,7 +17,7 @@ export interface IChatListItem {
   unread: number;
 }
 
-const ChatListItem: React.FC<IChatListItem> = ({ chat }) => {
+const ChatListItem: React.FC<IChatListItem> = ({ unread, chat }) => {
   const router = useRouter();
   const getStatusDiv = () => {
     if (chat.type === "personal") {
@@ -71,6 +71,7 @@ const ChatListItem: React.FC<IChatListItem> = ({ chat }) => {
             className={styles.friendImg}
           />
           <p>{getChatName()}</p>
+          {unread > 0 && <div className={styles.unreadDiv}>{unread}</div>}
         </div>
         <div className={styles.friendStatus}>{getStatusDiv()}</div>
       </div>

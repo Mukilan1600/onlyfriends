@@ -8,11 +8,25 @@ import useChatList from "../../stores/useChatList";
 import useProfile from "../../stores/useProfile";
 import Button from "../Button";
 import EmptyChats from "../../statics/illustrations/EmptyChats";
+import useChat, { IMessage } from "../../stores/useChat";
 
 const ChatsList: React.FC = () => {
   const { chats, setChats } = useChatList();
   const { socket } = useContext(WebSocketContext);
   const { user } = useProfile();
+
+  const sendMessageAcknowledgements = (newMessages: IMessage[]) => {
+    const { chat } = useChat.getState();
+    const unAcknowledgedMessages = newMessages.filter(
+      (message) => !message.readBy.includes(user._id)
+    );
+    if (unAcknowledgedMessages.length > 0)
+      socket.emit(
+        "acknowledge_messages",
+        chat._id,
+        unAcknowledgedMessages.map((msg) => msg._id)
+      );
+  };
 
   useEffect(() => {
     if (!socket) return;
@@ -20,9 +34,15 @@ const ChatsList: React.FC = () => {
       // Remove logged in user from list of participants
       const newChatList = msg.map((chat: IChatListItem) => {
         if (chat.chat.type === "group") return chat;
-        const newParticipants = chat.chat.participants.filter(
-          (participant) => participant.user.oauthId !== user.oauthId
-        );
+        var unread = 0;
+        const newParticipants = chat.chat.participants.filter((participant) => {
+          if (participant.user.oauthId === user.oauthId) {
+            unread = participant.unread;
+            return false;
+          }
+          return true;
+        });
+        chat.unread = unread;
         chat.chat.participants = newParticipants;
         return chat;
       });
@@ -44,9 +64,31 @@ const ChatsList: React.FC = () => {
       );
     });
 
+    socket.on("receive_message", (chatId: string, msg: IMessage) => {
+      const { chat } = useChat.getState();
+      if (chat && chatId === chat._id) {
+        const { setMessages, messages } = useChat.getState();
+        messages.unshift(msg);
+        setMessages(messages);
+        sendMessageAcknowledgements([msg]);
+      } else if (msg.sentBy !== user._id) {
+        const { chats, setChats } = useChatList.getState();
+        const newChats = [...chats].map((chat) => {
+          if (chat.chat._id !== chatId) return chat;
+          else
+            return {
+              ...chat,
+              unread: chat.unread + 1,
+            };
+        });
+        setChats(newChats);
+      }
+    });
+
     socket.emit("get_chat_list");
     return () => {
       socket.off("chat_list");
+      socket.off("receive_message");
       socket.off("update_friend_status");
     };
   }, [socket]);
