@@ -102,7 +102,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
       <MessageDiv sentByMe={sentByMe}>
         <div>
           <span>{message.message}</span>
-          <span style={{ width: "36px", display: "inline-block" }}></span>
+          <span style={{ width: isToday()?"36px":"62px", display: "inline-block" }}></span>
         </div>
         <TimeDiv sentByMe={sentByMe}>
           <span title={date.toLocaleString()}>{getFormattedTime()}</span>

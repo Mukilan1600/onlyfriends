@@ -37,13 +37,13 @@ export default function ChatHeader() {
     <HeaderDiv>
       <DetailsDiv>
         <img
-          src={chat.participants[0].avatarUrl}
+          src={chat.participants[0].user.avatarUrl}
           alt="friend"
           height="38"
           width="38"
           style={{ borderRadius: "50%" }}
         />
-        <p>{chat.participants[0].name}</p>
+        <p>{chat.participants[0].user.name}</p>
       </DetailsDiv>
     </HeaderDiv>
   );

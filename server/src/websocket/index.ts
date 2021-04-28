@@ -171,13 +171,18 @@ class WebSocket {
 
       socket.on("send_message", async (chatId, msg) => {
         try {
-          const chat = await Chat.findById(chatId).populate("participants");
+          const chat = await Chat.findById(chatId).populate(
+            "participants.user"
+          );
           const user = await User.findOne({ oauthId: socket.oauthId });
           msg.sentBy = user._id;
+          msg.readBy = [user._id];
           const message = new Message(msg);
           chat.messages.unshift(message);
           chat.participants.forEach((participant, i) => {
-            chat.participants[i].unread++;
+            if (!participant.user._id.equals(user._id)){
+              chat.participants[i].unread++;
+            }
             this.io
               .to(participant.user.socketId)
               .emit("receive_message", chatId, {
@@ -223,8 +228,9 @@ class WebSocket {
                 chat.participants[i].unread -= messagesAck.nModified;
               this.io
                 .to(participant.user.socketId)
-                .emit("message_acks", messageIds);
+                .emit("message_acks", chatId, messageIds);
             });
+            await chat.save();
           } catch (error) {
             socket.emit("error", { msg: "Internal server error" });
             logger.error(error, { service: "socket.acknowledge_messages" });

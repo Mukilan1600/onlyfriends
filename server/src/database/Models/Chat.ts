@@ -9,6 +9,7 @@ interface IText extends Document {
   fileUrl?: string;
   message?: string;
   createdAt?: Date;
+  readBy?: IUser[];
 }
 
 export interface IChat extends Document {

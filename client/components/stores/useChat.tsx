@@ -1,6 +1,7 @@
 import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
 import { IChat } from "../modules/ChatList/ChatListItem";
+import { IUser } from "./useProfile";
 
 export interface IMessage {
   _id?: string;
@@ -11,6 +12,7 @@ export interface IMessage {
   fileUrl?: string;
   message?: string;
   createdAt?: Date;
+  readBy?: string[];
 }
 
 interface IUseChat extends State {
