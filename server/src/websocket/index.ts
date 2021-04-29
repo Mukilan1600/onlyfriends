@@ -183,6 +183,10 @@ class WebSocket {
             if (!participant.user._id.equals(user._id)){
               chat.participants[i].unread++;
             }
+          });
+          await chat.save();
+          await message.save();
+          chat.participants.forEach((participant, i) => {
             this.io
               .to(participant.user.socketId)
               .emit("receive_message", chatId, {
@@ -191,8 +195,6 @@ class WebSocket {
                 replyTo: msg.replyTo,
               });
           });
-          await chat.save();
-          await message.save();
         } catch (error) {
           socket.emit("error", { msg: "Internal server error" });
           logger.error(error, { service: "socket.send_message" });
@@ -226,11 +228,13 @@ class WebSocket {
             chat.participants.forEach((participant, i) => {
               if (participant.user.oauthId === socket.oauthId)
                 chat.participants[i].unread -= messagesAck.nModified;
+            });
+            await chat.save();
+            chat.participants.forEach((participant, i) => {
               this.io
                 .to(participant.user.socketId)
                 .emit("message_acks", chatId, messageIds,user._id);
             });
-            await chat.save();
           } catch (error) {
             socket.emit("error", { msg: "Internal server error" });
             logger.error(error, { service: "socket.acknowledge_messages" });
