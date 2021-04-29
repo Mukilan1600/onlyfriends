@@ -18,8 +18,8 @@ const CheckValidChat: React.FC = ({ children }) => {
         return;
       }
       // Remove logged in user from list of participants
-      const newParticipants = chat.participants.filter((participant: IUser) => {
-        return participant.oauthId !== user.oauthId;
+      const newParticipants = chat.participants.filter((participant) => {
+        return participant.user.oauthId !== user.oauthId;
       });
       setChat({ ...chat, participants: newParticipants });
     });
