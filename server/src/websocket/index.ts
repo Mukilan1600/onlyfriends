@@ -171,17 +171,25 @@ class WebSocket {
 
       socket.on("send_message", async (chatId, msg) => {
         try {
-          const chat = await Chat.findById(chatId).populate("participants");
+          const chat = await Chat.findById(chatId).populate(
+            "participants.user"
+          );
           const user = await User.findOne({ oauthId: socket.oauthId });
           msg.sentBy = user._id;
+          msg.readBy = [user._id];
           const message = new Message(msg);
           chat.messages.unshift(message);
-          chat.participants.forEach((participant) => {
-            this.io.to(participant.socketId).emit("receive_message", chatId, {
-              ...message.toObject(),
-              createdAt: Date.now(),
-              replyTo: msg.replyTo,
-            });
+          chat.participants.forEach((participant, i) => {
+            if (!participant.user._id.equals(user._id)){
+              chat.participants[i].unread++;
+            }
+            this.io
+              .to(participant.user.socketId)
+              .emit("receive_message", chatId, {
+                ...message.toObject(),
+                createdAt: Date.now(),
+                replyTo: msg.replyTo,
+              });
           });
           await chat.save();
           await message.save();
@@ -194,7 +202,7 @@ class WebSocket {
       socket.on("get_messages", async (chatId, skip = 0) => {
         try {
           const chat = await Chat.findById(chatId, {
-            messages: { $slice: [skip, 12] },
+            messages: { $slice: [skip, 100] },
           }).populate({ path: "messages", populate: { path: "replyTo" } });
           socket.emit("messages", chat.messages);
         } catch (error) {
@@ -203,12 +211,39 @@ class WebSocket {
         }
       });
 
+      socket.on(
+        "acknowledge_messages",
+        async (chatId: string, messageIds: string[]) => {
+          try {
+            const user = await User.findOne({ oauthId: socket.oauthId });
+            const messagesAck = await Message.updateMany(
+              { _id: { $in: messageIds } },
+              { $addToSet: { readBy: user } }
+            );
+            const chat = await Chat.findById(chatId).populate(
+              "participants.user"
+            );
+            chat.participants.forEach((participant, i) => {
+              if (participant.user.oauthId === socket.oauthId)
+                chat.participants[i].unread -= messagesAck.nModified;
+              this.io
+                .to(participant.user.socketId)
+                .emit("message_acks", chatId, messageIds);
+            });
+            await chat.save();
+          } catch (error) {
+            socket.emit("error", { msg: "Internal server error" });
+            logger.error(error, { service: "socket.acknowledge_messages" });
+          }
+        }
+      );
+
       socket.on("get_chat_details", async (chatId) => {
         try {
           var chat = null;
           if (Types.ObjectId.isValid(chatId)) {
             chat = await Chat.findById(chatId, "-messages").populate(
-              "participants",
+              "participants.user",
               "name avatarUrl online lastSeen oauthId"
             );
           }

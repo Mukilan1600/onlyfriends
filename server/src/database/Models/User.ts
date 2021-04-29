@@ -17,7 +17,7 @@ export interface IUser extends Document {
     chat: IChat;
     createdAt?: Date;
   }[];
-  chats: { chat: IChat; unread?: number }[];
+  chats: { chat: IChat }[];
   createdAt?: Date;
 }
 
@@ -77,7 +77,6 @@ const userSchema = new Schema(
       type: [
         {
           chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-          unread: { type: Number, default: 0 },
         },
       ],
       default: [],
@@ -189,7 +188,7 @@ export const acceptFriendRequest = async (from: string, to: string) => {
       if (toUser) {
         const newChat = new Chat({
           type: "personal",
-          participants: [user, toUser],
+          participants: [{ user: user }, { user: toUser }],
         });
 
         await user.updateOne({
@@ -225,7 +224,7 @@ export const getChatList = async (userId: string) => {
     }).populate({
       path: "chats.chat",
       populate: {
-        path: "participants",
+        path: "participants.user",
         select: "name oauthId avatarUrl socketId online lastSeen",
       },
     });

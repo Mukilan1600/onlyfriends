@@ -6,9 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 
 export type IChat = {
-  _id: string,
+  _id: string;
   type: "personal" | "group";
-  participants: IUser[];
+  participants: { unread: number; user: IUser }[];
   createdAt: string;
 };
 
@@ -17,44 +17,51 @@ export interface IChatListItem {
   unread: number;
 }
 
-const ChatListItem: React.FC<IChatListItem> = ({ chat }) => {
+const ChatListItem: React.FC<IChatListItem> = ({ unread, chat }) => {
   const router = useRouter();
   const getStatusDiv = () => {
     if (chat.type === "personal") {
-      if (chat.participants[0].online)
+      if (chat.participants[0].user.online)
         return (
           <>
             <div className={styles.statusRingOnline} />
             <p>Online</p>
           </>
         );
-      else{
+      else {
         return (
           <>
-            <span style={{marginRight: '4px'}}>Last seen</span><ReactTimeago date={new Date(chat.participants[0].lastSeen)} locale="en-US" timeStyle="round-minute"/>
+            <span style={{ marginRight: "4px" }}>Last seen</span>
+            <ReactTimeago
+              date={new Date(chat.participants[0].user.lastSeen)}
+              locale="en-US"
+              timeStyle="round-minute"
+            />
           </>
         );
-
       }
-
     }
   };
 
   const getAvatarUrl = () => {
     if (chat.type === "personal") {
-      return chat.participants[0].avatarUrl;
+      return chat.participants[0].user.avatarUrl;
     }
   };
 
   const getChatName = () => {
     if (chat.type === "personal") {
-      return chat.participants[0].name;
+      return chat.participants[0].user.name;
     }
   };
 
   return (
     <Link href={`/chat/${chat._id}`}>
-      <div className={`${styles.friendItem} ${chat._id===router.query.id&&styles.itemActive}`}>
+      <div
+        className={`${styles.friendItem} ${
+          chat._id === router.query.id && styles.itemActive
+        }`}
+      >
         <div className={styles.friendImgContainer}>
           <img
             src={getAvatarUrl()}
@@ -64,6 +71,7 @@ const ChatListItem: React.FC<IChatListItem> = ({ chat }) => {
             className={styles.friendImg}
           />
           <p>{getChatName()}</p>
+          {unread > 0 && <div className={styles.unreadDiv}>{unread}</div>}
         </div>
         <div className={styles.friendStatus}>{getStatusDiv()}</div>
       </div>

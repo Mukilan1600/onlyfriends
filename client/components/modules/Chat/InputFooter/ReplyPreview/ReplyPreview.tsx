@@ -42,7 +42,7 @@ const ReplyPreview: React.FC = () => {
     replyTo && (
       <ReplyPreviewWrapper>
         <PreviewHeader>
-          <div>{sentByMe ? "You" : chat.participants[0].name}</div>
+          <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           <div style={{ cursor: "pointer" }} onClick={() => setReplyTo(null)}>
             x
           </div>
