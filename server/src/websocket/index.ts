@@ -178,13 +178,18 @@ class WebSocket {
           msg.sentBy = user._id;
           msg.readBy = [user._id];
           const message = new Message(msg);
-          chat.messages.unshift(message);
           chat.participants.forEach((participant, i) => {
-            if (!participant.user._id.equals(user._id)){
+            if (!participant.user._id.equals(user._id)) {
               chat.participants[i].unread++;
             }
           });
-          await chat.save();
+          await Chat.updateOne(
+            { _id: chat._id },
+            {
+              $push: { messages: { $each: [message], $position: 0 } },
+              $set: { participants: chat.participants },
+            }
+          );
           await message.save();
           chat.participants.forEach((participant, i) => {
             this.io
@@ -229,11 +234,14 @@ class WebSocket {
               if (participant.user.oauthId === socket.oauthId)
                 chat.participants[i].unread -= messagesAck.nModified;
             });
-            await chat.save();
+            await Chat.updateOne(
+              { _id: chat._id },
+              { $set: { participants: chat.participants } }
+            );
             chat.participants.forEach((participant, i) => {
               this.io
                 .to(participant.user.socketId)
-                .emit("message_acks", chatId, messageIds,user._id);
+                .emit("message_acks", chatId, messageIds, user._id);
             });
           } catch (error) {
             socket.emit("error", { msg: "Internal server error" });
