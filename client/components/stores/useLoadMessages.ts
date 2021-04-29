@@ -45,7 +45,7 @@ const useLoadMessages = (): IUseLoadMessages => {
       sendMessageAcknowledgements(newMessages);
     });
 
-    socket.on("message_acks", (chatId: string, messageIds: string[]) => {
+    socket.on("message_acks", (chatId: string, messageIds: string[],userId: string) => {
       const { chats, setChats } = useChatList.getState();
       const newChats = [...chats].map((chat) => {
         if (chat.chat._id !== chatId) return chat;
@@ -62,9 +62,9 @@ const useLoadMessages = (): IUseLoadMessages => {
         messages.map((message) => {
           if (
             messageIds.includes(message._id) &&
-            !message.readBy.includes(user._id)
+            !message.readBy.includes(userId)
           )
-            message.readBy.push(user._id);
+            message.readBy.push(userId);
           return message;
         })
       );
