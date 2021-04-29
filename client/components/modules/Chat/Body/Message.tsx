@@ -2,13 +2,25 @@ import React from "react";
 import styled from "styled-components";
 import EditIcon from "../../../statics/icons/EditIcon";
 import ReplyIcon from "../../../statics/icons/ReplyIcon";
-import { IMessage } from "../../../stores/useChat";
+import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
 
 interface MessageProps {
   readonly sentByMe: boolean;
 }
+
+interface ReadReceiptProps {
+  readonly allRead: boolean;
+}
+
+const ReadReceipt = styled.div<ReadReceiptProps>`
+  margin: -12px 0px -5px 4px;
+  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  background: ${({ allRead }) => (allRead ? "#0072FA" : "#F3F3F3")};
+`;
 
 const ReplyButton = styled.div`
   display: none;
@@ -50,6 +62,9 @@ const MessageDiv = styled.div<MessageProps>`
 
 const TimeDiv = styled.div<MessageProps>`
   width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   span {
     float: right;
     margin: -12px 0px -5px 4px;
@@ -68,6 +83,7 @@ interface IMessageProps {
 }
 
 const Message: React.FC<IMessageProps> = ({ message, idx }) => {
+  const { chat } = useChat();
   const { user } = useProfile();
   const { setReplyTo } = useMessage();
   const sentByMe = message.sentBy === user._id;
@@ -102,10 +118,20 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
       <MessageDiv sentByMe={sentByMe}>
         <div>
           <span>{message.message}</span>
-          <span style={{ width: isToday()?"36px":"62px", display: "inline-block" }}></span>
+          <span
+            style={{
+              width: isToday() ? "46px" : "72px",
+              display: "inline-block",
+            }}
+          ></span>
         </div>
         <TimeDiv sentByMe={sentByMe}>
           <span title={date.toLocaleString()}>{getFormattedTime()}</span>
+          {sentByMe && (
+            <ReadReceipt
+              allRead={message.readBy.length > chat.participants.length}
+            />
+          )}
         </TimeDiv>
       </MessageDiv>
       {!sentByMe && (

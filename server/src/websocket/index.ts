@@ -228,7 +228,7 @@ class WebSocket {
                 chat.participants[i].unread -= messagesAck.nModified;
               this.io
                 .to(participant.user.socketId)
-                .emit("message_acks", chatId, messageIds);
+                .emit("message_acks", chatId, messageIds,user._id);
             });
             await chat.save();
           } catch (error) {
