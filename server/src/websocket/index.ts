@@ -178,20 +178,18 @@ class WebSocket {
           msg.sentBy = user._id;
           msg.readBy = [user._id];
           const message = new Message(msg);
+          var incrementParticipantsUnreadQuery: any = {};
           chat.participants.forEach((participant, i) => {
             if (!participant.user._id.equals(user._id)) {
-              chat.participants[i].unread++;
+              incrementParticipantsUnreadQuery[`participants.${i}.unread`] = 1;
             }
           });
-          await Chat.updateOne(
-            { _id: chat._id },
-            {
-              $push: { messages: { $each: [message], $position: 0 } },
-              $set: { participants: chat.participants },
-            }
-          );
+          await chat.update({
+            $push: { messages: { $each: [message._id], $position: 0 } },
+            $inc: incrementParticipantsUnreadQuery,
+          });
           await message.save();
-          chat.participants.forEach((participant, i) => {
+          chat.participants.forEach((participant) => {
             this.io
               .to(participant.user.socketId)
               .emit("receive_message", chatId, {
@@ -230,13 +228,13 @@ class WebSocket {
             const chat = await Chat.findById(chatId).populate(
               "participants.user"
             );
-            chat.participants.forEach((participant, i) => {
-              if (participant.user.oauthId === socket.oauthId)
-                chat.participants[i].unread -= messagesAck.nModified;
-            });
+            const participantIndex = chat.participants.findIndex(
+              (participant) => participant.user.oauthId === socket.oauthId
+            );
+            const setIndexQuery = `participants.${participantIndex}.unread`;
             await Chat.updateOne(
               { _id: chat._id },
-              { $set: { participants: chat.participants } }
+              { $inc: { [setIndexQuery]: -messagesAck.nModified } }
             );
             chat.participants.forEach((participant, i) => {
               this.io
