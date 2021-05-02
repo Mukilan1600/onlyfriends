@@ -5,6 +5,7 @@ import ReplyIcon from "../../../statics/icons/ReplyIcon";
 import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
+import ReplyMessage from "./ReplyMessage";
 
 interface MessageProps {
   readonly sentByMe: boolean;
@@ -22,10 +23,14 @@ const ReadReceipt = styled.div<ReadReceiptProps>`
   background: ${({ allRead }) => (allRead ? "#0072FA" : "#F3F3F3")};
 `;
 
-const ReplyButton = styled.div`
+const ReplyButton = styled.div<MessageProps>`
   display: none;
   cursor: pointer;
-  margin: 5px;
+  position: absolute;
+  top: 50%;
+  left: ${({ sentByMe }) => (sentByMe ? "-30px" : "unset")};
+  right: ${({ sentByMe }) => (!sentByMe ? "-30px" : "unset")};
+  transform: translate(0%, -50%);
 `;
 
 const MessageWrapper = styled.div<MessageProps>`
@@ -41,11 +46,8 @@ const MessageWrapper = styled.div<MessageProps>`
 const MessageDiv = styled.div<MessageProps>`
   display: flex;
   flex-direction: column;
-  width: fit-content;
   white-space: pre-wrap;
   word-wrap: break-word;
-  max-width: 50%;
-  min-height: 25px;
   box-shadow: 0px 0px 14px -6px rgba(0, 0, 0, 0.5);
   border-radius: 11px;
   padding: 5px 10px;
@@ -110,35 +112,39 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
 
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
-      {sentByMe && (
-        <ReplyButton onClick={setReplyTo.bind(this, message)}>
-          <ReplyIcon />
-        </ReplyButton>
-      )}
-      <MessageDiv sentByMe={sentByMe}>
-        <div>
-          <span>{message.message}</span>
-          <span
-            style={{
-              width: isToday() ? "46px" : "72px",
-              display: "inline-block",
-            }}
-          ></span>
-        </div>
-        <TimeDiv sentByMe={sentByMe}>
-          <span title={date.toLocaleString()}>{getFormattedTime()}</span>
+      <ReplyMessage message={message} chat={chat} user={user}>
+        <div style={{ position: 'relative' }}>
           {sentByMe && (
-            <ReadReceipt
-              allRead={message.readBy.length > chat.participants.length}
-            />
+            <ReplyButton onClick={setReplyTo.bind(this, message)} sentByMe={sentByMe}>
+              <ReplyIcon />
+            </ReplyButton>
           )}
-        </TimeDiv>
-      </MessageDiv>
-      {!sentByMe && (
-        <ReplyButton onClick={setReplyTo.bind(this, message)}>
-          <ReplyIcon />
-        </ReplyButton>
-      )}
+          <MessageDiv sentByMe={sentByMe}>
+            <div>
+              <span>{message.message}</span>
+              <span
+                style={{
+                  width: isToday() ? "46px" : "72px",
+                  display: "inline-block",
+                }}
+              ></span>
+            </div>
+            <TimeDiv sentByMe={sentByMe}>
+              <span title={date.toLocaleString()}>{getFormattedTime()}</span>
+              {sentByMe && (
+                <ReadReceipt
+                  allRead={message.readBy.length > chat.participants.length}
+                />
+              )}
+            </TimeDiv>
+          </MessageDiv>
+          {!sentByMe && (
+            <ReplyButton onClick={setReplyTo.bind(this, message)} sentByMe={sentByMe}>
+              <ReplyIcon />
+            </ReplyButton>
+          )}
+        </div>
+      </ReplyMessage>
     </MessageWrapper>
   );
 };

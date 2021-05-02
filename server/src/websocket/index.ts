@@ -184,10 +184,13 @@ class WebSocket {
               incrementParticipantsUnreadQuery[`participants.${i}.unread`] = 1;
             }
           });
-          await chat.update({
-            $push: { messages: { $each: [message._id], $position: 0 } },
-            $inc: incrementParticipantsUnreadQuery,
-          });
+          await Chat.updateOne(
+            { _id: chat._id },
+            {
+              $push: { messages: { $each: [message._id], $position: 0 } },
+              $inc: incrementParticipantsUnreadQuery,
+            }
+          );
           await message.save();
           chat.participants.forEach((participant) => {
             this.io
