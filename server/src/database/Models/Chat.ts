@@ -7,7 +7,11 @@ interface IText extends Document {
   reply: boolean;
   replyTo?: string;
   fileUrl?: string;
-  message?: string;
+  message?: {
+    type: "emote" | "text";
+    id?: string;
+    msg?: string;
+  };
   createdAt?: Date;
   readBy?: IUser[];
 }
@@ -30,7 +34,13 @@ const textSchema = new Schema(
       required: false,
     },
     fileUrl: String,
-    message: String,
+    message: [
+      {
+        type: { type: String },
+        id: { type: String, required: false },
+        msg: { type: String, required: false },
+      },
+    ],
     readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: { createdAt: "createdAt" } }

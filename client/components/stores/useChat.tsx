@@ -3,6 +3,12 @@ import { combine } from "zustand/middleware";
 import { IChat } from "../modules/ChatList/ChatListItem";
 import { IUser } from "./useProfile";
 
+export interface IMessageFragment {
+    type: "emote" | "text";
+    id?: string;
+    msg?: string;
+}
+
 export interface IMessage {
   _id?: string;
   type: "message" | "file" | "reply";
@@ -10,7 +16,7 @@ export interface IMessage {
   reply?: boolean;
   replyTo?: string | IMessage;
   fileUrl?: string;
-  message?: string;
+  message?: IMessageFragment[];
   createdAt?: Date;
   readBy?: string[];
 }
