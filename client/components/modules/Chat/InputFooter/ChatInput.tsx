@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { WebSocketContext } from "../../../providers/WebSocketProvider";
-import useChat, { IMessage } from "../../../stores/useChat";
-import { BaseEmoji, EmojiData, Picker } from "emoji-mart";
+import useChat, { IMessage, IMessageFragment } from "../../../stores/useChat";
+import { BaseEmoji, emojiIndex } from "emoji-mart";
 import Emoji from "./EmojiPalette/Emoji";
 import useMessage from "../../../stores/useMessage";
 
@@ -67,13 +67,21 @@ const ChatInput: React.FC = () => {
   };
 
   const onEmojiSelect = (emoji: BaseEmoji) => {
-    const newMessage = message + emoji.native;
+    const newMessage = message + emoji.colons;
     setMessage(newMessage);
     inputRef.current.innerHTML = newMessage;
   };
 
   const sendMessage = (message: string) => {
-    const newMessage: IMessage = { type: "message", message };
+    const messageArray: IMessageFragment[] = [];
+    message.split(":").forEach((messageFrag) => {
+      const emoji = emojiIndex.search(messageFrag);
+      if (emoji && emoji.length > 0)
+        messageArray.push({ type: "emote", id: messageFrag });
+      else if (messageFrag.length > 0)
+        messageArray.push({ type: "text", msg: messageFrag });
+    });
+    const newMessage: IMessage = { type: "message", message: messageArray };
     const { replyTo, setReplyTo } = useMessage.getState();
     if (replyTo) {
       newMessage.reply = true;
