@@ -1,18 +1,30 @@
 import React from "react";
 import styled from "styled-components";
-import useChat from "../../../../stores/useChat";
-import useMessage from "../../../../stores/useMessage";
-import useProfile from "../../../../stores/useProfile";
+import useChat, { IMessage } from "../../../stores/useChat";
+import useProfile, { IUser } from "../../../stores/useProfile";
+import { IChat } from "../../ChatList/ChatListItem";
 
-const ReplyPreviewWrapper = styled.div`
-  max-height: 92px;
-  width: 100%;
+interface IReplyMessageProps {
+  message: IMessage;
+  chat: IChat;
+  user: IUser;
+}
+
+const ReplyMessageWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 5px 40px;
-  background: #f3f3f3;
-  padding: 10px 100px;
+  max-width: 65%;
+  min-height: 25px;
+  width: fit-content;
+  margin: 2px 0px;
+`;
+
+const PreviewDiv = styled.div`
   user-select: none;
+  border-left: 5px solid #525252;
+  padding-left: 12px;
+  overflow: hidden;
+  max-height: 90px;
 `;
 
 const PreviewHeader = styled.div`
@@ -46,32 +58,27 @@ const MessagePreview = styled.div`
   word-break: break-all;
 `;
 
-const PreviewDiv = styled.div`
-  border-left: 5px solid #525252;
-  padding-left: 12px;
-  overflow: hidden;
-`;
-
-const ReplyPreview: React.FC = () => {
-  const { user } = useProfile();
-  const { chat } = useChat();
-  const { replyTo, setReplyTo } = useMessage();
-  const sentByMe = replyTo && user._id === replyTo.sentBy;
+const ReplyMessage: React.FC<IReplyMessageProps> = ({
+  message,
+  chat,
+  user,
+  children,
+}) => {
+  const replyTo = message.replyTo as IMessage;
+  const sentByMe = message.reply ? replyTo.sentBy === user._id : false;
   return (
-    replyTo && (
-      <ReplyPreviewWrapper>
+    <ReplyMessageWrapper>
+      {message.reply && (
         <PreviewDiv>
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
-            <div style={{ cursor: "pointer" }} onClick={() => setReplyTo(null)}>
-              x
-            </div>
           </PreviewHeader>
           <MessagePreview>{replyTo.message}</MessagePreview>
         </PreviewDiv>
-      </ReplyPreviewWrapper>
-    )
+      )}
+      {children}
+    </ReplyMessageWrapper>
   );
 };
 
-export default ReplyPreview;
+export default ReplyMessage;
