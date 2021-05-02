@@ -3,6 +3,7 @@ import styled from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
+import { formatMessage } from "../../Body/utils";
 
 const ReplyPreviewWrapper = styled.div`
   max-height: 92px;
@@ -67,7 +68,7 @@ const ReplyPreview: React.FC = () => {
               x
             </div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message}</MessagePreview>
+          <MessagePreview>{replyTo.message.map(formatMessage)}</MessagePreview>
         </PreviewDiv>
       </ReplyPreviewWrapper>
     )

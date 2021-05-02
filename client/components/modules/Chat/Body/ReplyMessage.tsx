@@ -3,6 +3,7 @@ import styled from "styled-components";
 import useChat, { IMessage } from "../../../stores/useChat";
 import useProfile, { IUser } from "../../../stores/useProfile";
 import { IChat } from "../../ChatList/ChatListItem";
+import { formatMessage } from "./utils";
 
 interface IReplyMessageProps {
   message: IMessage;
@@ -73,7 +74,7 @@ const ReplyMessage: React.FC<IReplyMessageProps> = ({
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message}</MessagePreview>
+          <MessagePreview>{replyTo.message.map(formatMessage)}</MessagePreview>
         </PreviewDiv>
       )}
       {children}
