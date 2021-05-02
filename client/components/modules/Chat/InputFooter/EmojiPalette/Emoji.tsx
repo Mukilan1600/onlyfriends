@@ -25,7 +25,6 @@ const Emoji: React.FC<IEmoji> = ({onEmojiSelect}) => {
         }}
         emoji=""
         title=""
-        native={true}
         onSelect={onEmojiSelect}
       />
       <div style={{ position: "relative" }}>
