@@ -1,5 +1,5 @@
 import data from "emoji-mart/data/google.json";
-import { EmojiData, NimblePicker } from "emoji-mart";
+import { EmojiData, Picker } from "emoji-mart";
 import React, { useState } from "react";
 import styled from "styled-components";
 import EmojiIcon from "../../../../statics/icons/EmojiIcon";
@@ -28,7 +28,7 @@ const Emoji: React.FC<IEmoji> = ({ onEmojiSelect }) => {
   const [paletteOpen, setPaletteOpen] = useState<boolean>();
   return (
     <>
-      <NimblePicker
+      <Picker
         style={{
           position: "absolute",
           bottom: "100%",
@@ -37,7 +37,6 @@ const Emoji: React.FC<IEmoji> = ({ onEmojiSelect }) => {
           userSelect: "none",
         }}
         set="google"
-        data={data}
         emoji=""
         title=""
         onSelect={onEmojiSelect}
