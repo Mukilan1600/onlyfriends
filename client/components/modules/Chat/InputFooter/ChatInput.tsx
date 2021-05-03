@@ -68,9 +68,33 @@ const ChatInput: React.FC = () => {
   };
 
   const onEmojiSelect = (emoji: BaseEmoji) => {
-    const newMessage = message + emoji.colons;
+    const newMessage = insertAtCursor(message, emoji.colons);
     setMessage(newMessage);
     inputRef.current.innerHTML = newMessage;
+  };
+
+  const insertAtCursor = (message: string, value: string): string => {
+    if (window.getSelection) {
+      var sel = document.getSelection();
+      var range: Range;
+      if (sel.getRangeAt && sel.rangeCount) {
+        range = sel.getRangeAt(0);
+        if (sel.anchorNode.parentElement === inputRef.current) {
+          message =
+            message.substr(0, range.startOffset) +
+            value +
+            message.substr(range.endOffset, message.length - range.endOffset);
+        } else {
+          message += value;
+        }
+      } else {
+        message += value;
+      }
+    } else {
+      message += value;
+    }
+
+    return message;
   };
 
   const sendMessage = (message: string) => {

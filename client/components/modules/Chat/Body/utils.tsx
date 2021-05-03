@@ -1,15 +1,28 @@
 import { Emoji, emojiIndex } from "emoji-mart";
+import React from "react";
 import { IMessageFragment } from "../../../stores/useChat";
 import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
 
-export const formatMessage = (messageFragment: IMessageFragment) => {
-  if (messageFragment.type === "text") return messageFragment.msg;
+export const formatMessage = (
+  messageFragment: IMessageFragment,
+  index: number
+) => {
+  if (messageFragment.type === "text")
+    return <React.Fragment key={index}>{messageFragment.msg}</React.Fragment>;
   else if (messageFragment.type === "emote") {
     if (emojiIndex.search(messageFragment.id).length > 0)
-      return <Emoji emoji={messageFragment.id} size={18} tooltip={true} />;
+      return (
+        <Emoji
+          emoji={messageFragment.id}
+          size={18}
+          tooltip={true}
+          key={index}
+        />
+      );
     else
       return (
         <img
+          key={index}
           src={getCustomEmoteUrl(messageFragment.id)}
           width="21px"
           height="21px"
