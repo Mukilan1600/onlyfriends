@@ -5,6 +5,7 @@ import useChat, { IMessage, IMessageFragment } from "../../../stores/useChat";
 import { BaseEmoji, emojiIndex } from "emoji-mart";
 import Emoji from "./EmojiPalette/Emoji";
 import useMessage from "../../../stores/useMessage";
+import { isAnEmoji } from "../Body/utils";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
@@ -74,12 +75,18 @@ const ChatInput: React.FC = () => {
 
   const sendMessage = (message: string) => {
     const messageArray: IMessageFragment[] = [];
-    message.split(":").forEach((messageFrag) => {
+    const messageFragments = message.split(":");
+    messageFragments.forEach((messageFrag, i) => {
       const emoji = emojiIndex.search(messageFrag);
-      if (emoji && emoji.length > 0)
+      if (
+        i > 0 &&
+        i < messageFragments.length - 1 &&
+        ((emoji && emoji.length > 0 && emoji[0].id === messageFrag) ||
+          isAnEmoji(messageFrag))
+      )
         messageArray.push({ type: "emote", id: messageFrag });
-      else if (messageFrag.length > 0)
-        messageArray.push({ type: "text", msg: messageFrag });
+      else if (messageFrag.trim().length > 0)
+        messageArray.push({ type: "text", msg: messageFrag.trim() });
     });
     const newMessage: IMessage = { type: "message", message: messageArray };
     const { replyTo, setReplyTo } = useMessage.getState();
@@ -104,11 +111,18 @@ const ChatInput: React.FC = () => {
     }
   };
 
+  const onPaste = (e: ClipboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    var text = e.clipboardData.getData("text/plain").trim();
+    document.execCommand("insertHTML", false, text);
+  };
+
   const removeListeners = () => {
     if (inputRef.current) {
-      inputRef.current.removeEventListener("input", () => {});
-      inputRef.current.removeEventListener("keydown", () => {});
-      inputRef.current.removeEventListener("paste", () => {});
+      inputRef.current.removeEventListener("input", onMessage);
+      inputRef.current.removeEventListener("keydown", onKeyDown);
+      inputRef.current.removeEventListener("paste", onPaste);
     }
   };
 
@@ -119,12 +133,7 @@ const ChatInput: React.FC = () => {
 
     inputRef.current.addEventListener("keydown", onKeyDown);
     inputRef.current.addEventListener("input", onMessage);
-    inputRef.current.addEventListener("paste", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      var text = e.clipboardData.getData("text/plain").trim();
-      document.execCommand("insertHTML", false, text);
-    });
+    inputRef.current.addEventListener("paste", onPaste);
     return () => {
       removeListeners();
     };
