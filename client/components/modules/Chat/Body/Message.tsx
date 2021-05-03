@@ -27,10 +27,10 @@ const ReplyButton = styled.div<MessageProps>`
   display: none;
   cursor: pointer;
   position: absolute;
-  top: 50%;
-  left: ${({ sentByMe }) => (sentByMe ? "-30px" : "unset")};
-  right: ${({ sentByMe }) => (!sentByMe ? "-30px" : "unset")};
-  transform: translate(0%, -50%);
+  top: 0px;
+  left: ${({ sentByMe }) => (sentByMe ? "-25px" : "unset")};
+  right: ${({ sentByMe }) => (!sentByMe ? "-25px" : "unset")};
+  transform: translate(0%, 25%);
 `;
 
 const MessageWrapper = styled.div<MessageProps>`
