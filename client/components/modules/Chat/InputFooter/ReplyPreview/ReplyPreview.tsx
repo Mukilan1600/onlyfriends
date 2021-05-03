@@ -3,10 +3,10 @@ import styled from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
+import { formatMessage } from "../../Body/utils";
 
 const ReplyPreviewWrapper = styled.div`
   max-height: 92px;
-  width: 100%;
   display: flex;
   flex-direction: column;
   padding: 5px 40px;
@@ -31,7 +31,6 @@ const PreviewHeader = styled.div`
 const MessagePreview = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 3px;
   padding: 3px 9px;
   font-family: Raleway;
   font-style: normal;
@@ -50,6 +49,7 @@ const PreviewDiv = styled.div`
   border-left: 5px solid #525252;
   padding-left: 12px;
   overflow: hidden;
+  width: fit-content;
 `;
 
 const ReplyPreview: React.FC = () => {
@@ -67,7 +67,7 @@ const ReplyPreview: React.FC = () => {
               x
             </div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message}</MessagePreview>
+          <MessagePreview>{replyTo.message.map(formatMessage)}</MessagePreview>
         </PreviewDiv>
       </ReplyPreviewWrapper>
     )

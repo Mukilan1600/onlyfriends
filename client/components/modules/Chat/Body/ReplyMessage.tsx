@@ -1,8 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import useChat, { IMessage } from "../../../stores/useChat";
-import useProfile, { IUser } from "../../../stores/useProfile";
+import { IMessage } from "../../../stores/useChat";
+import { IUser } from "../../../stores/useProfile";
 import { IChat } from "../../ChatList/ChatListItem";
+import { formatMessage } from "./utils";
 
 interface IReplyMessageProps {
   message: IMessage;
@@ -24,7 +25,7 @@ const PreviewDiv = styled.div`
   border-left: 5px solid #525252;
   padding-left: 12px;
   overflow: hidden;
-  max-height: 90px;
+  max-height: 72px;
 `;
 
 const PreviewHeader = styled.div`
@@ -43,7 +44,6 @@ const PreviewHeader = styled.div`
 const MessagePreview = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 3px;
   padding: 3px 9px;
   font-family: Raleway;
   font-style: normal;
@@ -73,7 +73,7 @@ const ReplyMessage: React.FC<IReplyMessageProps> = ({
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message}</MessagePreview>
+          <MessagePreview>{replyTo.message.map(formatMessage)}</MessagePreview>
         </PreviewDiv>
       )}
       {children}
