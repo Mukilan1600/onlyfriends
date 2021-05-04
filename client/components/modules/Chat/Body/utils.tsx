@@ -5,7 +5,8 @@ import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
 
 export const formatMessage = (
   messageFragment: IMessageFragment,
-  index: number
+  index: number,
+  array: IMessageFragment[]
 ) => {
   if (messageFragment.type === "text")
     return <React.Fragment key={index}>{messageFragment.msg}</React.Fragment>;
@@ -14,7 +15,7 @@ export const formatMessage = (
       return (
         <Emoji
           emoji={messageFragment.id}
-          size={18}
+          size={array.length === 1 ? 44 : 18}
           tooltip={true}
           key={index}
         />
@@ -24,8 +25,8 @@ export const formatMessage = (
         <img
           key={index}
           src={getCustomEmoteUrl(messageFragment.id)}
-          width="21px"
-          height="21px"
+          width={array.length === 1 ? "45px" : "21px"}
+          height={array.length === 1 ? "45px" : "21px"}
         />
       );
   }
