@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { IMessage } from "../../../stores/useChat";
 import { IUser } from "../../../stores/useProfile";
 import { IChat } from "../../ChatList/ChatListItem";
-import { formatMessage } from "./utils";
+import { formatMessage, formatPreviewMessage } from "./utils";
 
 interface IReplyMessageProps {
   message: IMessage;
@@ -56,6 +56,11 @@ const MessagePreview = styled.div`
   border-radius: 5px;
   white-space: pre-wrap;
   word-break: break-all;
+
+  .emoji-mart-emoji{
+    vertical-align: top;
+    font-size: unset;
+  }
 `;
 
 const ReplyMessage: React.FC<IReplyMessageProps> = ({
@@ -73,7 +78,7 @@ const ReplyMessage: React.FC<IReplyMessageProps> = ({
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message.map(formatMessage)}</MessagePreview>
+          <MessagePreview>{replyTo.message.map(formatPreviewMessage)}</MessagePreview>
         </PreviewDiv>
       )}
       {children}

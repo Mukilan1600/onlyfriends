@@ -3,7 +3,7 @@ import styled, {keyframes} from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
-import { formatMessage } from "../../Body/utils";
+import { formatMessage, formatPreviewMessage } from "../../Body/utils";
 
 const slideUp = keyframes`
   from{
@@ -53,6 +53,11 @@ const MessagePreview = styled.div`
   border-radius: 5px;
   white-space: pre-wrap;
   word-break: break-all;
+
+  .emoji-mart-emoji{
+    vertical-align: top;
+    font-size: unset;
+  }
 `;
 
 const PreviewDiv = styled.div`
@@ -77,7 +82,7 @@ const ReplyPreview: React.FC = () => {
               x
             </div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message.map(formatMessage)}</MessagePreview>
+          <MessagePreview>{replyTo.message.map(formatPreviewMessage)}</MessagePreview>
         </PreviewDiv>
       </ReplyPreviewWrapper>
     )
