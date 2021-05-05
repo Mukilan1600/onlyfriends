@@ -59,9 +59,10 @@ const MessageDiv = styled.div<MessageProps>`
   font-style: normal;
   font-weight: normal;
   font-size: 14.2px;
+  line-height: 20px;
 
   .emoji-mart-emoji{
-    vertical-align: middle;
+    vertical-align: top;
     font-size: unset;
   }
 `;
