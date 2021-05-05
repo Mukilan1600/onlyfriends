@@ -41,7 +41,7 @@ const useLoadMessages = (): IUseLoadMessages => {
       if (newMessages.length === 0) setReachedEnd(true);
       messages.push(...newMessages);
       setMessages(messages);
-      setLoader({ messagesLoading: false, ...useLoader.getState() });
+      setLoader({ messagesLoading: false });
       sendMessageAcknowledgements(newMessages);
     });
 
@@ -80,7 +80,7 @@ const useLoadMessages = (): IUseLoadMessages => {
   const loadMoreMessages = () => {
     if (!reachedEnd) {
       socket.emit("get_messages", chat._id, messages.length);
-      setLoader({ messagesLoading: true, ...useLoader.getState() });
+      setLoader({ messagesLoading: true });
     }
   };
 
