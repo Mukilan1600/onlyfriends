@@ -42,8 +42,6 @@ const ChatBody: React.FC = () => {
     }
   };
 
-  console.log(messagesLoading);
-
   return (
     <>
       {messagesLoading && (
