@@ -59,7 +59,11 @@ const MessageDiv = styled.div<MessageProps>`
   font-style: normal;
   font-weight: normal;
   font-size: 14.2px;
-  line-height: 21px;
+
+  .emoji-mart-emoji{
+    vertical-align: middle;
+    font-size: unset;
+  }
 `;
 
 const TimeDiv = styled.div<MessageProps>`
@@ -110,12 +114,16 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
     else return date.toLocaleDateString();
   };
 
+  const replyToMessage = (message: IMessage) => {
+    setReplyTo(message);
+  }
+
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
         <div style={{ position: 'relative' }}>
           {sentByMe && (
-            <ReplyButton onClick={setReplyTo.bind(this, message)} sentByMe={sentByMe}>
+            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
               <ReplyIcon />
             </ReplyButton>
           )}
@@ -139,7 +147,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
             </TimeDiv>
           </MessageDiv>
           {!sentByMe && (
-            <ReplyButton onClick={setReplyTo.bind(this, message)} sentByMe={sentByMe}>
+            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
               <ReplyIcon />
             </ReplyButton>
           )}

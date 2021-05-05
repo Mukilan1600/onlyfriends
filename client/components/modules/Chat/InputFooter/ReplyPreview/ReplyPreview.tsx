@@ -1,9 +1,18 @@
 import React from "react";
-import styled from "styled-components";
+import styled, {keyframes} from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
 import { formatMessage } from "../../Body/utils";
+
+const slideUp = keyframes`
+  from{
+    max-height: 0px;
+  }
+  to{
+    max-height: 92px;
+  }
+`
 
 const ReplyPreviewWrapper = styled.div`
   max-height: 92px;
@@ -13,6 +22,7 @@ const ReplyPreviewWrapper = styled.div`
   background: #f3f3f3;
   padding: 10px 100px;
   user-select: none;
+  animation: ${slideUp} .3s;
 `;
 
 const PreviewHeader = styled.div`
@@ -63,7 +73,7 @@ const ReplyPreview: React.FC = () => {
         <PreviewDiv>
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
-            <div style={{ cursor: "pointer" }} onClick={() => setReplyTo(null)}>
+            <div style={{ cursor: "pointer", marginLeft: '10px' }} onClick={() => setReplyTo(null)}>
               x
             </div>
           </PreviewHeader>

@@ -1,7 +1,13 @@
 import { Emoji, emojiIndex } from "emoji-mart";
 import React from "react";
+import styled from "styled-components";
 import { IMessageFragment } from "../../../stores/useChat";
 import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
+
+const StickerImage = styled.img`
+  user-select: text;
+  image-rendering: -webkit-optimize-contrast;
+`;
 
 export const formatMessage = (
   messageFragment: IMessageFragment,
@@ -11,19 +17,21 @@ export const formatMessage = (
   if (messageFragment.type === "text")
     return <React.Fragment key={index}>{messageFragment.msg}</React.Fragment>;
   else if (messageFragment.type === "emote") {
-    if (emojiIndex.search(messageFragment.id).length > 0)
+    if (!isAnEmoji(messageFragment.id))
       return (
         <Emoji
           emoji={messageFragment.id}
-          size={array.length === 1 ? 44 : 18}
+          size={array.length === 1 ? 44 : 21}
           tooltip={true}
           key={index}
         />
       );
     else
       return (
-        <img
+        <StickerImage
+          draggable="false"
           key={index}
+          alt={`:${messageFragment.id}:`}
           src={getCustomEmoteUrl(messageFragment.id)}
           width={array.length === 1 ? "45px" : "21px"}
           height={array.length === 1 ? "45px" : "21px"}
