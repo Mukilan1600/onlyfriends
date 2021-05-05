@@ -112,6 +112,10 @@ const ChatInput: React.FC = () => {
       else if (messageFrag.trim().length > 0)
         messageArray.push({ type: "text", msg: messageFrag.trim() });
     });
+    
+
+    if(messageArray.length===0) return;
+
     const newMessage: IMessage = { type: "message", message: messageArray };
     const { replyTo, setReplyTo } = useMessage.getState();
     if (replyTo) {
