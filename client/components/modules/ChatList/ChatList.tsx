@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./ChatList.module.css";
 
 import { WebSocketContext } from "../../providers/WebSocketProvider";
-import ChatListItem, { IChatListItem } from "./ChatListItem";
+import ChatListItem, { IChat, IChatListItem } from "./ChatListItem";
 import useChatList from "../../stores/useChatList";
 import useProfile from "../../stores/useProfile";
 import Button from "../Button";
@@ -50,7 +50,7 @@ const ChatsList: React.FC = () => {
         return chat;
       });
       setChats(newChatList);
-      setLoader({ chatListLoading: false });
+      // useLoader.getState().setLoader({ chatListLoading: false });
     });
 
     socket.on("update_friend_status", (msg) => {
@@ -106,7 +106,7 @@ const ChatsList: React.FC = () => {
         <>
           {chats &&
             (chats.length > 0 ? (
-              chats.map((chat, i) => (
+              chats.map((chat: IChatListItem, i: number) => (
                 <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
               ))
             ) : (
