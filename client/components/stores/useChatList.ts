@@ -8,7 +8,7 @@ interface IUseChatList extends State {
 }
 
 const useChatList = create<IUseChatList>(
-  combine({ chats: [] }, (set) => ({
+  combine({ chats: null }, (set) => ({
     setChats: (chats: IChatListItem[]) => {
       set({ chats });
     },
