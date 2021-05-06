@@ -5,7 +5,7 @@ import { WebSocketContext } from "../../providers/WebSocketProvider";
 import useProfile from "../../stores/useProfile";
 import CircularSpinner from "../Spinner/CircularSpinner";
 
-const LoaderDiv = styled.div`
+export const LoaderDiv = styled.div`
   position: absolute;
   left: 50%;
   top: 50%;

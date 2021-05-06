@@ -5,6 +5,8 @@ import useChat from "../../stores/useChat";
 import useMessage from "../../stores/useMessage";
 import useProfile, { IUser } from "../../stores/useProfile";
 import { IChat } from "../ChatList/ChatListItem";
+import CircularSpinner from "../Spinner/CircularSpinner";
+import { LoaderDiv } from "./AuthenticatedPage";
 
 const CheckValidChat: React.FC = ({ children }) => {
   const router = useRouter();
@@ -33,7 +35,14 @@ const CheckValidChat: React.FC = ({ children }) => {
     };
   }, [router.query.id]);
 
-  if (!chat) return <>Loading...</>;
+  if (!chat)
+    return (
+      <div style={{ position: "relative", width: "100%" }}>
+        <LoaderDiv>
+          <CircularSpinner />
+        </LoaderDiv>
+      </div>
+    );
   return <>{children}</>;
 };
 
