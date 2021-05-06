@@ -100,7 +100,7 @@ const ChatsList: React.FC = () => {
 
   return (
     <div className={styles.body}>
-      {chatListLoading ? (
+      {chatListLoading && !chats ? (
         <Spinner />
       ) : (
         <>
