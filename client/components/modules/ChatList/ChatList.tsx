@@ -9,8 +9,11 @@ import useProfile from "../../stores/useProfile";
 import Button from "../Button";
 import EmptyChats from "../../statics/illustrations/EmptyChats";
 import useChat, { IMessage } from "../../stores/useChat";
+import useLoader from "../../stores/useLoader";
+import Spinner from "../Spinner/Spinner";
 
 const ChatsList: React.FC = () => {
+  const { setLoader, chatListLoading } = useLoader();
   const { chats, setChats } = useChatList();
   const { socket } = useContext(WebSocketContext);
   const { user } = useProfile();
@@ -47,6 +50,7 @@ const ChatsList: React.FC = () => {
         return chat;
       });
       setChats(newChatList);
+      setLoader({ chatListLoading: false });
     });
 
     socket.on("update_friend_status", (msg) => {
@@ -86,6 +90,7 @@ const ChatsList: React.FC = () => {
     });
 
     socket.emit("get_chat_list");
+    setLoader({ chatListLoading: true });
     return () => {
       socket.off("chat_list");
       socket.off("receive_message");
@@ -95,31 +100,37 @@ const ChatsList: React.FC = () => {
 
   return (
     <div className={styles.body}>
-      {chats &&
-        (chats.length > 0 ? (
-          chats.map((chat, i) => (
-            <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
-          ))
-        ) : (
-          <div className={styles.illustrationHolder}>
-            <p>Friend Request to get started</p>
-            <EmptyChats />
-          </div>
-        ))}
-      <Link href="/friendrequests">
-        <Button
-          style={{
-            position: "sticky",
-            left: "50%",
-            top: "82.5%",
-            transform: "translate(-25%, 0)",
-            width: "250px",
-            height: "58px",
-            fontWeight: 600,
-          }}
-          label="Friend Requests"
-        />
-      </Link>
+      {chatListLoading ? (
+        <Spinner />
+      ) : (
+        <>
+          {chats &&
+            (chats.length > 0 ? (
+              chats.map((chat, i) => (
+                <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
+              ))
+            ) : (
+              <div className={styles.illustrationHolder}>
+                <p>Friend Request to get started</p>
+                <EmptyChats />
+              </div>
+            ))}
+          <Link href="/friendrequests">
+            <Button
+              style={{
+                position: "sticky",
+                left: "50%",
+                top: "82.5%",
+                transform: "translate(-25%, 0)",
+                width: "250px",
+                height: "58px",
+                fontWeight: 600,
+              }}
+              label="Friend Requests"
+            />
+          </Link>
+        </>
+      )}
     </div>
   );
 };

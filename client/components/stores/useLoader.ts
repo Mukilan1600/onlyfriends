@@ -6,6 +6,7 @@ type keys = "friendRequest" | "messagesLoading";
 interface ILoaderState extends State {
   friendRequest: boolean;
   messagesLoading: boolean;
+  chatListLoading: boolean;
   clearLoaders: () => void;
   setLoader: (obj: LoaderSetProps) => void;
 }
@@ -13,9 +14,10 @@ interface ILoaderState extends State {
 interface LoaderSetProps {
   friendRequest?: boolean;
   messagesLoading?: boolean;
+  chatListLoading?: boolean;
 }
 
-const INITIAL_STATE = { friendRequest: false, messagesLoading: false };
+const INITIAL_STATE = { friendRequest: false, messagesLoading: false, chatListLoading: false };
 
 const useLoader = create<ILoaderState>(
   combine(INITIAL_STATE, (setState, get) => ({
