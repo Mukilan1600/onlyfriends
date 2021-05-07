@@ -62,6 +62,7 @@ const ChatInput: React.FC = () => {
   const inputRef = useRef<HTMLDivElement>();
   const { socket } = useContext(WebSocketContext);
   const { chat } = useChat();
+  const { replyTo } = useMessage()
 
   const onMessage = () => {
     setMessage(inputRef.current.innerHTML);
@@ -166,6 +167,11 @@ const ChatInput: React.FC = () => {
       removeListeners();
     };
   }, [inputRef.current]);
+
+  useEffect(() => {
+    if(replyTo!==null)
+      inputRef.current.focus();
+  },[replyTo])
 
   return (
     <ChatInputDiv>
