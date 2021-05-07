@@ -1,3 +1,4 @@
+import admin from "firebase-admin";
 import { Server } from "http";
 import socketio from "socket.io";
 import logger from "../Logger/Logger";
@@ -308,7 +309,13 @@ class WebSocket {
           { useFindAndModify: false, returnOriginal: false }
         ).populate("friends.user");
         this.updateOnlineStatus(profile);
-        socket.emit("profile", profile);
+
+        admin
+          .auth()
+          .createCustomToken(socket.oauthId)
+          .then((token) => {
+            socket.emit("profile", { ...profile, firebaseToken: token });
+          });
       } catch (err) {
         socket.emit("error", { msg: "Authentication error" }, 401);
         logger.error(err, { service: "socket.connect" });
