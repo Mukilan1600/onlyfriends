@@ -89,9 +89,23 @@ const ChatsList: React.FC = () => {
       }
     });
 
+    socket.on(
+      "is_typing",
+      (chatId: string, userId: string, isTyping: boolean) => {
+        let { chats } = useChatList.getState();
+        const index = chats.findIndex((chat) => chat.chat._id === chatId);
+        // Change for groups
+        if (index > -1) {
+          chats[index].chat.participants[0].user.isTyping = isTyping;
+          setChats(chats);
+        }
+      }
+    );
+
     socket.emit("get_chat_list");
     setLoader({ chatListLoading: true });
     return () => {
+      socket.off("is_typing");
       socket.off("chat_list");
       socket.off("receive_message");
       socket.off("update_friend_status");

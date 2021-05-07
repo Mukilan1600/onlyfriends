@@ -10,6 +10,7 @@ export interface IUser {
         username: string,
         _id: string,
         firebaseToken: string
+        isTyping?: boolean
 }
 
 interface IProfile extends State {

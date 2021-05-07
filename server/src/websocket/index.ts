@@ -268,6 +268,23 @@ class WebSocket {
         }
       });
 
+      socket.on("is_typing", async (chatId, isTyping) => {
+        try {
+          const chat = await Chat.findById(chatId, "-messages").populate(
+            "participants.user"
+          );
+          chat.participants.forEach((participant) => {
+            if (participant.user.oauthId !== socket.oauthId)
+              this.io
+                .to(participant.user.socketId)
+                .emit("is_typing", chatId, socket.oauthId, isTyping);
+          });
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.is_typing" });
+        }
+      });
+
       //Profile
       socket.on("change_username", async ({ username }) => {
         try {

@@ -58,13 +58,15 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
 `;
 
 const ChatInput: React.FC = () => {
+  const [typing, setTyping] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
   const { socket } = useContext(WebSocketContext);
   const { chat } = useChat();
-  const { replyTo } = useMessage()
+  const { replyTo } = useMessage();
 
   const onMessage = () => {
+    setTyping(true);
     setMessage(inputRef.current.innerHTML);
   };
 
@@ -113,9 +115,8 @@ const ChatInput: React.FC = () => {
       else if (messageFrag.trim().length > 0)
         messageArray.push({ type: "text", msg: messageFrag.trim() });
     });
-    
 
-    if(messageArray.length===0) return;
+    if (messageArray.length === 0) return;
 
     const newMessage: IMessage = { type: "message", message: messageArray };
     const { replyTo, setReplyTo } = useMessage.getState();
@@ -169,9 +170,21 @@ const ChatInput: React.FC = () => {
   }, [inputRef.current]);
 
   useEffect(() => {
-    if(replyTo!==null)
-      inputRef.current.focus();
-  },[replyTo])
+    if (replyTo !== null) inputRef.current.focus();
+  }, [replyTo]);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (typing === true) {
+      timeout = setTimeout(setTyping.bind(this, false), 3000);
+    }
+
+    socket.emit("is_typing", chat._id, typing);
+
+    return () => {
+      if (timeout !== undefined) clearTimeout(timeout);
+    };
+  }, [typing]);
 
   return (
     <ChatInputDiv>
@@ -180,7 +193,11 @@ const ChatInput: React.FC = () => {
         <MessagePlaceholder visible={message.length > 0}>
           Type your message here
         </MessagePlaceholder>
-        <MessageInput contentEditable ref={inputRef} />
+        <MessageInput
+          contentEditable
+          ref={inputRef}
+          onBlur={setTyping.bind(this, false)}
+        />
       </MessageContainer>
     </ChatInputDiv>
   );
