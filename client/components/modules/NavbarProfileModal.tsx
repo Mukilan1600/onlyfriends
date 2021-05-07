@@ -1,3 +1,5 @@
+import firebase from "firebase/app";
+import "firebase/auth";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { WebSocketContext } from "../providers/WebSocketProvider";
@@ -43,6 +45,7 @@ export default function NavbarProfileModal() {
 
   const onLogout = () => {
     useToken.getState().clearTokens();
+    firebase.auth().signOut();
     router.push(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/logout`);
   };
 

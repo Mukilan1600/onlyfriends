@@ -3,8 +3,10 @@ import React, { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { io, Socket } from "socket.io-client";
 import useLoader from "../stores/useLoader";
-import useProfile from "../stores/useProfile";
+import useProfile, { IUser } from "../stores/useProfile";
 import useToken from "../stores/useToken";
+import firebase from "firebase/app";
+import "firebase/auth";
 
 type ConnectionStatus =
   | "connecting"
@@ -41,6 +43,17 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
 
     setSocketStatus("connecting");
     const newSocket = io(process.env.NEXT_PUBLIC_SERVER, { query: { jwtTok } });
+    var firebaseConfig = {
+      apiKey: "AIzaSyCTvqxVRpAIp3cY4yvoC1ZL9mvFI5EDMN8",
+      authDomain: "onlyfriend-aa0ea.firebaseapp.com",
+      projectId: "onlyfriend-aa0ea",
+      storageBucket: "onlyfriend-aa0ea.appspot.com",
+      messagingSenderId: "218774560646",
+      appId: "1:218774560646:web:71c4f46516fdcda1915607",
+      measurementId: "G-RNCNN1CKX1",
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
 
     newSocket.on("disconnect", (msg) => {
       if (msg === "io server disconnect") {
@@ -63,8 +76,16 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       setSocketStatus("disconnected");
     });
 
-    newSocket.on("profile", (msg) => {
-      useProfile.getState().setUser(msg);
+    newSocket.on("profile", (msg: IUser) => {
+      firebase
+        .auth()
+        .signInWithCustomToken(msg.firebaseToken)
+        .then(() => {
+          useProfile.getState().setUser(msg);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     });
 
     newSocket.on("success", (msg) => {
@@ -81,7 +102,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     });
     setSocketStatus("connected");
     setSocket(newSocket);
-  }, [jwtTok]);
+  }, [jwtTok, firebase.auth]);
 
   // @todo Redirect to socket closed page
   if (socketStatus === "closed-by-server") return <>closed by server</>;

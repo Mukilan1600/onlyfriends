@@ -314,7 +314,10 @@ class WebSocket {
           .auth()
           .createCustomToken(socket.oauthId)
           .then((token) => {
-            socket.emit("profile", { ...profile, firebaseToken: token });
+            socket.emit("profile", {
+              ...profile.toJSON(),
+              firebaseToken: token,
+            });
           });
       } catch (err) {
         socket.emit("error", { msg: "Authentication error" }, 401);

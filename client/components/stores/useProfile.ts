@@ -9,6 +9,7 @@ export interface IUser {
         oauthId: string,
         username: string,
         _id: string,
+        firebaseToken: string
 }
 
 interface IProfile extends State {
