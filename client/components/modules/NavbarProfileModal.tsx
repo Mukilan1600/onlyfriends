@@ -43,10 +43,15 @@ export default function NavbarProfileModal() {
     toggleEditing();
   };
 
-  const onLogout = () => {
-    useToken.getState().clearTokens();
-    firebase.auth().signOut();
-    router.push(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/logout`);
+  const onLogout = async () => {
+    try {
+      useToken.getState().clearTokens();
+      await firebase.auth().signOut();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      router.push(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/logout`);
+    }
   };
 
   return (
