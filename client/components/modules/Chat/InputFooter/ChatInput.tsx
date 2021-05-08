@@ -58,6 +58,7 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
 `;
 
 const ChatInput: React.FC = () => {
+  let timeout: NodeJS.Timeout;
   const [typing, setTyping] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
@@ -66,6 +67,7 @@ const ChatInput: React.FC = () => {
   const { replyTo } = useMessage();
 
   const onMessage = () => {
+    resetTimer();
     setTyping(true);
     setMessage(inputRef.current.innerHTML);
   };
@@ -126,6 +128,7 @@ const ChatInput: React.FC = () => {
       setReplyTo(null);
     }
     socket.emit("send_message", chat._id, newMessage);
+    setTyping(false);
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -173,12 +176,12 @@ const ChatInput: React.FC = () => {
     if (replyTo !== null) inputRef.current.focus();
   }, [replyTo]);
 
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (typing === true) {
-      timeout = setTimeout(setTyping.bind(this, false), 3000);
-    }
+  const resetTimer = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(setTyping.bind(this, false), 3000);
+  };
 
+  useEffect(() => {
     socket.emit("is_typing", chat._id, typing);
 
     return () => {
