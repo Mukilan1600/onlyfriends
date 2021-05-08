@@ -1,4 +1,3 @@
-import path from "path";
 import dotenv from "dotenv";
 import admin from "firebase-admin";
 
@@ -11,7 +10,11 @@ dotenv.config();
 
 admin.initializeApp({
   credential: admin.credential.cert(
-    path.resolve("firebase-service-acc.json")
+    JSON.parse(
+      Buffer.from(process.env.FIREBASE_CONFIG_BASE64, "base64").toString(
+        "ascii"
+      )
+    )
   ),
 });
 
