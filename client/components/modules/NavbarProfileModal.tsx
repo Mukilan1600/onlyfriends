@@ -1,3 +1,5 @@
+import firebase from "firebase/app";
+import "firebase/auth";
 import { useRouter } from "next/router";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { WebSocketContext } from "../providers/WebSocketProvider";
@@ -41,9 +43,15 @@ export default function NavbarProfileModal() {
     toggleEditing();
   };
 
-  const onLogout = () => {
-    useToken.getState().clearTokens();
-    router.push(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/logout`);
+  const onLogout = async () => {
+    try {
+      useToken.getState().clearTokens();
+      await firebase.auth().signOut();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      router.push(`${process.env.NEXT_PUBLIC_SERVER}/api/auth/logout`);
+    }
   };
 
   return (

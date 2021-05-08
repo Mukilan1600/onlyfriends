@@ -21,7 +21,13 @@ const ChatListItem: React.FC<IChatListItem> = ({ unread, chat }) => {
   const router = useRouter();
   const getStatusDiv = () => {
     if (chat.type === "personal") {
-      if (chat.participants[0].user.online)
+      if (chat.participants[0].user.isTyping)
+        return (
+          <>
+            <p>Typing...</p>
+          </>
+        );
+      else if (chat.participants[0].user.online)
         return (
           <>
             <div className={styles.statusRingOnline} />

@@ -1,3 +1,4 @@
+import admin from "firebase-admin";
 import { Server } from "http";
 import socketio from "socket.io";
 import logger from "../Logger/Logger";
@@ -267,6 +268,23 @@ class WebSocket {
         }
       });
 
+      socket.on("is_typing", async (chatId, isTyping) => {
+        try {
+          const chat = await Chat.findById(chatId, "-messages").populate(
+            "participants.user"
+          );
+          chat.participants.forEach((participant) => {
+            if (participant.user.oauthId !== socket.oauthId)
+              this.io
+                .to(participant.user.socketId)
+                .emit("is_typing", chatId, socket.oauthId, isTyping);
+          });
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.is_typing" });
+        }
+      });
+
       //Profile
       socket.on("change_username", async ({ username }) => {
         try {
@@ -308,7 +326,16 @@ class WebSocket {
           { useFindAndModify: false, returnOriginal: false }
         ).populate("friends.user");
         this.updateOnlineStatus(profile);
-        socket.emit("profile", profile);
+
+        admin
+          .auth()
+          .createCustomToken(socket.oauthId)
+          .then((token) => {
+            socket.emit("profile", {
+              ...profile.toJSON(),
+              firebaseToken: token,
+            });
+          });
       } catch (err) {
         socket.emit("error", { msg: "Authentication error" }, 401);
         logger.error(err, { service: "socket.connect" });

@@ -3,7 +3,7 @@ import styled, {keyframes} from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
-import { formatMessage, formatPreviewMessage } from "../../Body/utils";
+import { formatPreviewMessage } from "../../Body/utils";
 
 const slideUp = keyframes`
   from{
@@ -18,9 +18,8 @@ const ReplyPreviewWrapper = styled.div`
   max-height: 92px;
   display: flex;
   flex-direction: column;
-  padding: 5px 40px;
   background: #f3f3f3;
-  padding: 10px 100px;
+  padding: 3px 100px;
   user-select: none;
   animation: ${slideUp} .3s;
 `;

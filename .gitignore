@@ -4,3 +4,4 @@ node_modules
 test-client
 target
 dist
+firebase-service-acc.json

@@ -58,12 +58,17 @@ const MessagePlaceholder = styled.div<MessagePlaceholderProps>`
 `;
 
 const ChatInput: React.FC = () => {
+  let timeout: NodeJS.Timeout;
+  const [typing, setTyping] = useState(false);
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLDivElement>();
   const { socket } = useContext(WebSocketContext);
   const { chat } = useChat();
+  const { replyTo } = useMessage();
 
   const onMessage = () => {
+    resetTimer();
+    setTyping(true);
     setMessage(inputRef.current.innerHTML);
   };
 
@@ -112,9 +117,8 @@ const ChatInput: React.FC = () => {
       else if (messageFrag.trim().length > 0)
         messageArray.push({ type: "text", msg: messageFrag.trim() });
     });
-    
 
-    if(messageArray.length===0) return;
+    if (messageArray.length === 0) return;
 
     const newMessage: IMessage = { type: "message", message: messageArray };
     const { replyTo, setReplyTo } = useMessage.getState();
@@ -124,6 +128,7 @@ const ChatInput: React.FC = () => {
       setReplyTo(null);
     }
     socket.emit("send_message", chat._id, newMessage);
+    setTyping(false);
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
@@ -167,6 +172,23 @@ const ChatInput: React.FC = () => {
     };
   }, [inputRef.current]);
 
+  useEffect(() => {
+    if (replyTo !== null) inputRef.current.focus();
+  }, [replyTo]);
+
+  const resetTimer = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(setTyping.bind(this, false), 3000);
+  };
+
+  useEffect(() => {
+    socket.emit("is_typing", chat._id, typing);
+
+    return () => {
+      if (timeout !== undefined) clearTimeout(timeout);
+    };
+  }, [typing]);
+
   return (
     <ChatInputDiv>
       <Emoji onEmojiSelect={onEmojiSelect} />
@@ -174,7 +196,11 @@ const ChatInput: React.FC = () => {
         <MessagePlaceholder visible={message.length > 0}>
           Type your message here
         </MessagePlaceholder>
-        <MessageInput contentEditable ref={inputRef} />
+        <MessageInput
+          contentEditable
+          ref={inputRef}
+          onBlur={setTyping.bind(this, false)}
+        />
       </MessageContainer>
     </ChatInputDiv>
   );
