@@ -16,7 +16,6 @@ const ReplyMessageWrapper = styled.div`
   flex-direction: column;
   max-width: 65%;
   min-height: 25px;
-  width: fit-content;
   margin: 2px 0px;
 `;
 
@@ -26,6 +25,7 @@ const PreviewDiv = styled.div`
   padding-left: 12px;
   overflow: hidden;
   max-height: 72px;
+  width: fit-content;
 `;
 
 const PreviewHeader = styled.div`
@@ -57,7 +57,7 @@ const MessagePreview = styled.div`
   white-space: pre-wrap;
   word-break: break-all;
 
-  .emoji-mart-emoji{
+  .emoji-mart-emoji {
     vertical-align: top;
     font-size: unset;
   }
@@ -78,7 +78,9 @@ const ReplyMessage: React.FC<IReplyMessageProps> = ({
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message.map(formatPreviewMessage)}</MessagePreview>
+          <MessagePreview>
+            {replyTo.message.map(formatPreviewMessage)}
+          </MessagePreview>
         </PreviewDiv>
       )}
       {children}
