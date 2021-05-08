@@ -34,7 +34,7 @@ interface IUseChat extends State {
 const useChat = create<IUseChat>(
   combine({ chat: null, messages: [], reachedEnd: false }, (set, get) => ({
     setChat: (chat: IChat) => {
-      set({ chat, messages: [] });
+      set({ chat });
     },
     setMessages: (messages: IMessage[]) => {
       set({ messages });

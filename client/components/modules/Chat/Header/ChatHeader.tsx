@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import useChat from "../../../stores/useChat";
+import StatusIndicator from "./StatusIndicator/StatusIndicator";
 
 const HeaderDiv = styled.div`
   display: flex;
@@ -17,7 +18,7 @@ const DetailsDiv = styled.div`
   display: flex;
   align-items: center;
   white-space: nowrap;
-  
+
   p {
     margin: 0;
     margin-left: 26px;
@@ -43,7 +44,10 @@ export default function ChatHeader() {
           width="38"
           style={{ borderRadius: "50%" }}
         />
-        <p>{chat.participants[0].user.name}</p>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <p>{chat.participants[0].user.name}</p>
+          <StatusIndicator />
+        </div>
       </DetailsDiv>
     </HeaderDiv>
   );

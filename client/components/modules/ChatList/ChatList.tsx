@@ -93,11 +93,17 @@ const ChatsList: React.FC = () => {
       "is_typing",
       (chatId: string, userId: string, isTyping: boolean) => {
         let { chats } = useChatList.getState();
+        let { chat, setChat } = useChat.getState();
         const index = chats.findIndex((chat) => chat.chat._id === chatId);
         // Change for groups
         if (index > -1) {
           chats[index].chat.participants[0].user.isTyping = isTyping;
           setChats(chats);
+        }
+
+        if (chat._id === chatId) {
+          chat.participants[0].user.isTyping = isTyping;
+          setChat(chat);
         }
       }
     );
