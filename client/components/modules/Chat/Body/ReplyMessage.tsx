@@ -27,6 +27,7 @@ const PreviewDiv = styled.div`
   overflow: hidden;
   max-height: 72px;
   width: fit-content;
+  margin: 2px 0px;
 `;
 
 const PreviewHeader = styled.div`

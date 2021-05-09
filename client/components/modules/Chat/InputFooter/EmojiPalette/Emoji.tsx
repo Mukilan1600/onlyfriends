@@ -132,7 +132,7 @@ const Emoji: React.FC<IEmoji> = ({ onEmojiSelect }) => {
         onSelect={onEmojiSelect}
         custom={customEmojis}
       />
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", marginLeft: "28px" }}>
         <EmojiButton onClick={() => setPaletteOpen(!paletteOpen)}>
           <EmojiIcon />
         </EmojiButton>

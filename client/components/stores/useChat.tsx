@@ -16,6 +16,7 @@ export interface IMessage {
   reply?: boolean;
   replyTo?: string | IMessage;
   fileUrl?: string;
+  fileName?: string;
   message?: IMessageFragment[];
   createdAt?: Date;
   readBy?: string[];

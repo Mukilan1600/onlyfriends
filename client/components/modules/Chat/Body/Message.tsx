@@ -6,7 +6,8 @@ import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
 import ReplyMessage from "./ReplyMessage";
-import { formatMessage } from "./utils";
+import { saveAs } from "file-saver";
+import { formatFileMessage, formatMessage } from "./utils";
 
 interface MessageProps {
   readonly sentByMe: boolean;
@@ -126,6 +127,25 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
     setReplyTo(message);
   };
 
+  const downloadFile = () => {
+    if (message.type === "file") {
+      fetch(message.fileUrl, {
+        method: "GET",
+      })
+        .then(async (res) => {
+          try{
+            const fileBlob = await res.blob();
+            saveAs(fileBlob, message.fileName);
+          }catch(error){
+            console.error(error);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  };
+
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
@@ -140,7 +160,11 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
           )}
           <MessageDiv sentByMe={sentByMe}>
             <div>
-              <span>{message.message.map(formatMessage)}</span>
+              {message.type === "file" ? (
+                formatFileMessage(message, downloadFile)
+              ) : (
+                <span>{message.message.map(formatMessage)}</span>
+              )}
               <span
                 style={{
                   width: isToday() ? "46px" : "72px",

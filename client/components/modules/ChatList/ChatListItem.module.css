@@ -43,15 +43,7 @@
   height: 8px;
   border-radius: 50%;
   background: #18ff21;
-  margin-right: 4px;
-}
-
-.statusRingOffline {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #6b6b6b;
-  margin-right: 4px;
+  margin-left: 4px;
 }
 
 .unreadDiv {
