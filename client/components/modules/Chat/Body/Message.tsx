@@ -65,7 +65,7 @@ const MessageDiv = styled.div<MessageProps>`
   line-height: 20px;
 
   a {
-    color: ${({ sentByMe }) => (sentByMe ? "#68bbe4" : "rgb(255,0,199)")};
+    color: ${({ sentByMe }) => (sentByMe ? "#68bbe4" : "#0000B8")};
   }
 
   .emoji-mart-emoji {
