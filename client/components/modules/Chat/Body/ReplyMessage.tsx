@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { IMessage } from "../../../stores/useChat";
 import { IUser } from "../../../stores/useProfile";
 import { IChat } from "../../ChatList/ChatListItem";
-import { formatMessage, formatPreviewMessage } from "./utils";
+import { formatFileMessage, formatMessage, formatPreviewMessage } from "./utils";
 
 interface IReplyMessageProps {
   message: IMessage;
@@ -81,7 +81,7 @@ const ReplyMessage: React.FC<IReplyMessageProps> = ({
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
           </PreviewHeader>
           <MessagePreview>
-            {replyTo.message.map(formatPreviewMessage)}
+            {replyTo.type==="file"? formatFileMessage(replyTo) :replyTo.message.map(formatPreviewMessage)}
           </MessagePreview>
         </PreviewDiv>
       )}

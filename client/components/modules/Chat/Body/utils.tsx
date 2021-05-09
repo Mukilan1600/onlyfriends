@@ -1,4 +1,5 @@
-import { Emoji, emojiIndex } from "emoji-mart";
+import { Emoji } from "emoji-mart";
+import { saveAs } from "file-saver";
 import React from "react";
 import styled from "styled-components";
 import { IMessage, IMessageFragment } from "../../../stores/useChat";
@@ -86,10 +87,26 @@ export const formatMessage = (
   }
 };
 
-export const formatFileMessage = (
-  message: IMessage,
-  downloadFile: () => void
-) => {
+const downloadFile = (message: IMessage) => {
+  if (message.type === "file") {
+    fetch(message.fileUrl, {
+      method: "GET",
+    })
+      .then(async (res) => {
+        try {
+          const fileBlob = await res.blob();
+          saveAs(fileBlob, message.fileName);
+        } catch (error) {
+          console.error(error);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+};
+
+export const formatFileMessage = (message: IMessage) => {
   return (
     <div
       style={{
@@ -108,7 +125,7 @@ export const formatFileMessage = (
       >
         {message.fileName}
       </span>
-      <button onClick={downloadFile}>download</button>
+      <button onClick={downloadFile.bind(this, message)}>download</button>
     </div>
   );
 };

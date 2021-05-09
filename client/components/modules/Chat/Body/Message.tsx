@@ -127,25 +127,6 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
     setReplyTo(message);
   };
 
-  const downloadFile = () => {
-    if (message.type === "file") {
-      fetch(message.fileUrl, {
-        method: "GET",
-      })
-        .then(async (res) => {
-          try{
-            const fileBlob = await res.blob();
-            saveAs(fileBlob, message.fileName);
-          }catch(error){
-            console.error(error);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-  };
-
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
@@ -161,7 +142,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
           <MessageDiv sentByMe={sentByMe}>
             <div>
               {message.type === "file" ? (
-                formatFileMessage(message, downloadFile)
+                formatFileMessage(message)
               ) : (
                 <span>{message.message.map(formatMessage)}</span>
               )}

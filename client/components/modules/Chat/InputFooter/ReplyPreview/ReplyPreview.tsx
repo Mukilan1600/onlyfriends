@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
-import { formatPreviewMessage } from "../../Body/utils";
+import { formatFileMessage, formatPreviewMessage } from "../../Body/utils";
 
 const slideUp = keyframes`
   from{
@@ -87,7 +87,9 @@ const ReplyPreview: React.FC = () => {
             </div>
           </PreviewHeader>
           <MessagePreview>
-            {replyTo.message.map(formatPreviewMessage)}
+            {replyTo.type === "file"
+              ? formatFileMessage(replyTo)
+              : replyTo.message.map(formatPreviewMessage)}
           </MessagePreview>
         </PreviewDiv>
       </ReplyPreviewWrapper>
