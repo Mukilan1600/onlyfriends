@@ -76,7 +76,9 @@ const ChatListItem: React.FC<IChatListItem> = ({ unread, chat }) => {
             width="38px"
             className={styles.friendImg}
           />
-          <p className={styles.nameSpan}>{getChatName()}</p>
+          <p className={styles.nameSpan} title={getChatName()}>
+            <span>{getChatName()}</span>
+          </p>
           {unread > 0 && <div className={styles.unreadDiv}>{unread}</div>}
         </div>
         <div className={styles.friendStatus}>{getStatusDiv()}</div>

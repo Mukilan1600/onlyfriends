@@ -80,18 +80,3 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-@keyframes moveTextonHover{
-  0%, 28%{
-    text-indent: 0%;
-  }
-  71%, 100%{
-    text-indent: -100%;
-  }
-}
-
-.friendItem:hover .nameSpan{
-  animation: moveTextonHover 7s linear 0s infinite alternate;
-}
-
-
