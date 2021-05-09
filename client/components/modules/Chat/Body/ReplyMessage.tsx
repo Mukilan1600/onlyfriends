@@ -20,6 +20,7 @@ const ReplyMessageWrapper = styled.div`
 `;
 
 const PreviewDiv = styled.div`
+  cursor: default;
   user-select: none;
   border-left: 5px solid #525252;
   padding-left: 12px;

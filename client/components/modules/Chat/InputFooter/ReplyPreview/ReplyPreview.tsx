@@ -1,5 +1,5 @@
 import React from "react";
-import styled, {keyframes} from "styled-components";
+import styled, { keyframes } from "styled-components";
 import useChat from "../../../../stores/useChat";
 import useMessage from "../../../../stores/useMessage";
 import useProfile from "../../../../stores/useProfile";
@@ -12,7 +12,7 @@ const slideUp = keyframes`
   to{
     max-height: 92px;
   }
-`
+`;
 
 const ReplyPreviewWrapper = styled.div`
   max-height: 92px;
@@ -21,7 +21,7 @@ const ReplyPreviewWrapper = styled.div`
   background: #f3f3f3;
   padding: 3px 100px;
   user-select: none;
-  animation: ${slideUp} .3s;
+  animation: ${slideUp} 0.3s;
 `;
 
 const PreviewHeader = styled.div`
@@ -53,13 +53,15 @@ const MessagePreview = styled.div`
   white-space: pre-wrap;
   word-break: break-all;
 
-  .emoji-mart-emoji{
+  .emoji-mart-emoji {
     vertical-align: top;
     font-size: unset;
   }
 `;
 
 const PreviewDiv = styled.div`
+  cursor: default;
+  user-select: none;
   border-left: 5px solid #525252;
   padding-left: 12px;
   overflow: hidden;
@@ -77,11 +79,16 @@ const ReplyPreview: React.FC = () => {
         <PreviewDiv>
           <PreviewHeader>
             <div>{sentByMe ? "You" : chat.participants[0].user.name}</div>
-            <div style={{ cursor: "pointer", marginLeft: '10px' }} onClick={() => setReplyTo(null)}>
+            <div
+              style={{ cursor: "pointer", marginLeft: "10px" }}
+              onClick={() => setReplyTo(null)}
+            >
               x
             </div>
           </PreviewHeader>
-          <MessagePreview>{replyTo.message.map(formatPreviewMessage)}</MessagePreview>
+          <MessagePreview>
+            {replyTo.message.map(formatPreviewMessage)}
+          </MessagePreview>
         </PreviewDiv>
       </ReplyPreviewWrapper>
     )

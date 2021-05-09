@@ -4,7 +4,7 @@ import { IChat } from "../modules/ChatList/ChatListItem";
 import { IUser } from "./useProfile";
 
 export interface IMessageFragment {
-    type: "emote" | "text";
+    type: "emote" | "text" | "link";
     id?: string;
     msg?: string;
 }

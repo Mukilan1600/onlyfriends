@@ -8,7 +8,7 @@ interface IText extends Document {
   replyTo?: string;
   fileUrl?: string;
   message?: {
-    type: "emote" | "text";
+    type: "emote" | "text" | "link";
     id?: string;
     msg?: string;
   };

@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import ReadTickIcon from "../../../statics/icons/ReadTickIcon";
 import ReplyIcon from "../../../statics/icons/ReplyIcon";
 import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
@@ -16,11 +17,13 @@ interface ReadReceiptProps {
 }
 
 const ReadReceipt = styled.div<ReadReceiptProps>`
+  svg {
+    display: block;
+    fill: ${({ allRead }) => (allRead ? "#34B7F1" : "#626262")};
+  }
   margin: -12px 0px -5px 4px;
-  border-radius: 50%;
-  width: 6px;
-  height: 6px;
-  background: ${({ allRead }) => (allRead ? "#0072FA" : "#F3F3F3")};
+  width: 11px;
+  height: 11px;
 `;
 
 const ReplyButton = styled.div<MessageProps>`
@@ -48,12 +51,12 @@ const MessageDiv = styled.div<MessageProps>`
   flex-direction: column;
   white-space: pre-wrap;
   word-wrap: break-word;
-  box-shadow: 0px 0px 14px -6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 0px 4px -0.5px rgba(0, 0, 0, 0.5);
   border-radius: 11px;
   padding: 5px 10px;
-  margin: 2px 0px;
-  background: ${({ sentByMe }) => (sentByMe ? "#55A3FF" : "#ffffff")};
-  color: ${({ sentByMe }) => (sentByMe ? "#FFF" : "#000")};
+  margin: 1px 0px;
+  background: ${({ sentByMe }) => (sentByMe ? "#ffffff" : "#55A3FF")};
+  color: ${({ sentByMe }) => (sentByMe ? "#000" : "#FFF")};
 
   font-family: Raleway;
   font-style: normal;
@@ -61,7 +64,11 @@ const MessageDiv = styled.div<MessageProps>`
   font-size: 14.2px;
   line-height: 20px;
 
-  .emoji-mart-emoji{
+  a {
+    color: ${({ sentByMe }) => (sentByMe ? "#68bbe4" : "rgb(255,0,199)")};
+  }
+
+  .emoji-mart-emoji {
     vertical-align: top;
     font-size: unset;
   }
@@ -80,7 +87,7 @@ const TimeDiv = styled.div<MessageProps>`
     font-weight: normal;
     font-size: 12px;
     color: ${({ sentByMe }) =>
-      sentByMe ? "rgba(255, 255, 255, 0.59)" : "rgba(82, 82, 82, 0.80)"};
+      sentByMe ? "rgba(82, 82, 82, 0.80)" : "rgba(255, 255, 255, 0.59)"};
   }
 `;
 
@@ -117,20 +124,23 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
 
   const replyToMessage = (message: IMessage) => {
     setReplyTo(message);
-  }
+  };
 
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: "relative" }}>
           {sentByMe && (
-            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
+            <ReplyButton
+              onClick={replyToMessage.bind(this, message)}
+              sentByMe={sentByMe}
+            >
               <ReplyIcon />
             </ReplyButton>
           )}
           <MessageDiv sentByMe={sentByMe}>
             <div>
-              <span >{message.message.map(formatMessage)}</span>
+              <span>{message.message.map(formatMessage)}</span>
               <span
                 style={{
                   width: isToday() ? "46px" : "72px",
@@ -143,12 +153,22 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               {sentByMe && (
                 <ReadReceipt
                   allRead={message.readBy.length > chat.participants.length}
-                />
+                  title={
+                    message.readBy.length > chat.participants.length
+                      ? "Read"
+                      : "Delivered"
+                  }
+                >
+                  <ReadTickIcon />
+                </ReadReceipt>
               )}
             </TimeDiv>
           </MessageDiv>
           {!sentByMe && (
-            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
+            <ReplyButton
+              onClick={replyToMessage.bind(this, message)}
+              sentByMe={sentByMe}
+            >
               <ReplyIcon />
             </ReplyButton>
           )}
