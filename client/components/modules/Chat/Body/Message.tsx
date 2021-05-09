@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import ReadTickIcon from "../../../statics/icons/ReadTickIcon";
 import ReplyIcon from "../../../statics/icons/ReplyIcon";
 import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
@@ -16,11 +17,13 @@ interface ReadReceiptProps {
 }
 
 const ReadReceipt = styled.div<ReadReceiptProps>`
+  svg {
+    display: block;
+    fill: ${({ allRead }) => (allRead ? "#34B7F1" : "#626262")};
+  }
   margin: -12px 0px -5px 4px;
-  border-radius: 50%;
-  width: 6px;
-  height: 6px;
-  background: ${({ allRead }) => (allRead ? "#0072FA" : "#F3F3F3")};
+  width: 11px;
+  height: 11px;
 `;
 
 const ReplyButton = styled.div<MessageProps>`
@@ -48,10 +51,10 @@ const MessageDiv = styled.div<MessageProps>`
   flex-direction: column;
   white-space: pre-wrap;
   word-wrap: break-word;
-  box-shadow: 0px 0px 14px -6px rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 0px 4px -0.5px rgba(0, 0, 0, 0.5);
   border-radius: 11px;
   padding: 5px 10px;
-  margin: 2px 0px;
+  margin: 1px 0px;
   background: ${({ sentByMe }) => (sentByMe ? "#ffffff" : "#55A3FF")};
   color: ${({ sentByMe }) => (sentByMe ? "#000" : "#FFF")};
 
@@ -150,7 +153,14 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               {sentByMe && (
                 <ReadReceipt
                   allRead={message.readBy.length > chat.participants.length}
-                />
+                  title={
+                    message.readBy.length > chat.participants.length
+                      ? "Read"
+                      : "Delivered"
+                  }
+                >
+                  <ReadTickIcon />
+                </ReadReceipt>
               )}
             </TimeDiv>
           </MessageDiv>
