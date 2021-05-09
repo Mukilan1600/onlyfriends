@@ -52,8 +52,8 @@ const MessageDiv = styled.div<MessageProps>`
   border-radius: 11px;
   padding: 5px 10px;
   margin: 2px 0px;
-  background: ${({ sentByMe }) => (sentByMe ? "#55A3FF" : "#ffffff")};
-  color: ${({ sentByMe }) => (sentByMe ? "#FFF" : "#000")};
+  background: ${({ sentByMe }) => (sentByMe ? "#ffffff" : "#55A3FF")};
+  color: ${({ sentByMe }) => (sentByMe ? "#000" : "#FFF")};
 
   font-family: Raleway;
   font-style: normal;
@@ -61,7 +61,11 @@ const MessageDiv = styled.div<MessageProps>`
   font-size: 14.2px;
   line-height: 20px;
 
-  .emoji-mart-emoji{
+  a {
+    color: ${({ sentByMe }) => (sentByMe ? "#68bbe4" : "rgb(255,0,199)")};
+  }
+
+  .emoji-mart-emoji {
     vertical-align: top;
     font-size: unset;
   }
@@ -80,7 +84,7 @@ const TimeDiv = styled.div<MessageProps>`
     font-weight: normal;
     font-size: 12px;
     color: ${({ sentByMe }) =>
-      sentByMe ? "rgba(255, 255, 255, 0.59)" : "rgba(82, 82, 82, 0.80)"};
+      sentByMe ? "rgba(82, 82, 82, 0.80)" : "rgba(255, 255, 255, 0.59)"};
   }
 `;
 
@@ -117,20 +121,23 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
 
   const replyToMessage = (message: IMessage) => {
     setReplyTo(message);
-  }
+  };
 
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: "relative" }}>
           {sentByMe && (
-            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
+            <ReplyButton
+              onClick={replyToMessage.bind(this, message)}
+              sentByMe={sentByMe}
+            >
               <ReplyIcon />
             </ReplyButton>
           )}
           <MessageDiv sentByMe={sentByMe}>
             <div>
-              <span >{message.message.map(formatMessage)}</span>
+              <span>{message.message.map(formatMessage)}</span>
               <span
                 style={{
                   width: isToday() ? "46px" : "72px",
@@ -148,7 +155,10 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
             </TimeDiv>
           </MessageDiv>
           {!sentByMe && (
-            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
+            <ReplyButton
+              onClick={replyToMessage.bind(this, message)}
+              sentByMe={sentByMe}
+            >
               <ReplyIcon />
             </ReplyButton>
           )}

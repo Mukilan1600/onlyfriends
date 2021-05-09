@@ -6,6 +6,7 @@ import { BaseEmoji, emojiIndex } from "emoji-mart";
 import Emoji from "./EmojiPalette/Emoji";
 import useMessage from "../../../stores/useMessage";
 import { isAnEmoji } from "../Body/utils";
+import { isLink } from "./utils";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
@@ -103,19 +104,46 @@ const ChatInput: React.FC = () => {
   };
 
   const sendMessage = (message: string) => {
-    const messageArray: IMessageFragment[] = [];
-    const messageFragments = message.split(":");
-    messageFragments.forEach((messageFrag, i) => {
-      const emoji = emojiIndex.search(messageFrag);
-      if (
-        i > 0 &&
-        i < messageFragments.length - 1 &&
-        ((emoji && emoji.length > 0 && emoji[0].id === messageFrag) ||
-          isAnEmoji(messageFrag))
-      )
-        messageArray.push({ type: "emote", id: messageFrag });
-      else if (messageFrag.trim().length > 0)
-        messageArray.push({ type: "text", msg: messageFrag.trim() });
+    let messageArray: IMessageFragment[] = [];
+
+    const itemsArray: IMessageFragment[] = [];
+    const itemFragments = message.trim().split(" ");
+
+    itemFragments.forEach((item, index) => {
+      var messageType: "text" | "link" = "text";
+      if (isLink(item)) {
+        messageType = "link";
+      }
+      itemsArray.push({
+        type: messageType,
+        msg: (index > 0 ? " " : "") + item,
+      });
+    });
+
+    itemsArray.forEach((fragment) => {
+      if (fragment.type === "text") {
+        let prevEmote = false;
+        const messageFragments = fragment.msg.split(":");
+        messageFragments.forEach((messageFrag, i) => {
+          const emoji = emojiIndex.search(messageFrag);
+          if (
+            !prevEmote &&
+            i > 0 &&
+            i < messageFragments.length - 1 &&
+            ((emoji && emoji.length > 0 && emoji[0].id === messageFrag) ||
+              isAnEmoji(messageFrag))
+          ) {
+            prevEmote = true;
+            messageArray.push({ type: "emote", id: messageFrag });
+          } else {
+            messageArray.push({
+              type: "text",
+              msg: (!prevEmote && i > 0 ? ":" : "") + messageFrag,
+            });
+            prevEmote = false;
+          }
+        });
+      } else messageArray.push(fragment);
     });
 
     if (messageArray.length === 0) return;

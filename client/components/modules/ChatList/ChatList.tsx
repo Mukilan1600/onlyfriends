@@ -59,7 +59,10 @@ const ChatsList: React.FC = () => {
         chats.map((chat) => {
           const newParticipants = chat.chat.participants.map((participant) => {
             if (participant.user.oauthId === msg.oauthId) {
-              return { ...participant, user: { ...participant.user, ...msg } };
+              return {
+                ...participant,
+                user: { ...participant.user, ...msg, isTyping: false },
+              };
             } else return participant;
           });
           chat.chat.participants = newParticipants;
@@ -101,7 +104,7 @@ const ChatsList: React.FC = () => {
           setChats(chats);
         }
 
-        if (chat._id === chatId) {
+        if (chat && chat._id === chatId) {
           chat.participants[0].user.isTyping = isTyping;
           setChat(chat);
         }

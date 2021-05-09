@@ -9,6 +9,12 @@ const StickerImage = styled.img`
   image-rendering: -webkit-optimize-contrast;
 `;
 
+const Link = styled.a`
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 export const formatPreviewMessage = (
   messageFragment: IMessageFragment,
   index: number,
@@ -64,6 +70,19 @@ export const formatMessage = (
         />
       );
     }
+  } else if (messageFragment.type === "link") {
+    return size === "normal" ? (
+      <Link
+        href={messageFragment.msg}
+        target="_blank"
+        title={messageFragment.msg}
+        key={index}
+      >
+        {messageFragment.msg}
+      </Link>
+    ) : (
+      <span key={index}>{messageFragment.msg}</span>
+    );
   }
 };
 
