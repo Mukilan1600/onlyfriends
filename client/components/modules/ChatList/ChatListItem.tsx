@@ -21,17 +21,11 @@ const ChatListItem: React.FC<IChatListItem> = ({ unread, chat }) => {
   const router = useRouter();
   const getStatusDiv = () => {
     if (chat.type === "personal") {
-      if (chat.participants[0].user.isTyping)
+      if (chat.participants[0].user.online)
         return (
           <>
-            <p>Typing...</p>
-          </>
-        );
-      else if (chat.participants[0].user.online)
-        return (
-          <>
+            <p>{chat.participants[0].user.isTyping ? "Typing..." : "Online"}</p>
             <div className={styles.statusRingOnline} />
-            <p>Online</p>
           </>
         );
       else {
@@ -76,7 +70,9 @@ const ChatListItem: React.FC<IChatListItem> = ({ unread, chat }) => {
             width="38px"
             className={styles.friendImg}
           />
-          <p className={styles.nameSpan}>{getChatName()}</p>
+          <p className={styles.nameSpan} title={getChatName()}>
+            <span>{getChatName()}</span>
+          </p>
           {unread > 0 && <div className={styles.unreadDiv}>{unread}</div>}
         </div>
         <div className={styles.friendStatus}>{getStatusDiv()}</div>

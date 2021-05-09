@@ -7,6 +7,7 @@ import Emoji from "./EmojiPalette/Emoji";
 import useMessage from "../../../stores/useMessage";
 import { isAnEmoji } from "../Body/utils";
 import { isLink } from "./utils";
+import UploadInput from "./FileUpload/UploadInput";
 
 const ChatInputDiv = styled.div`
   min-height: 67px;
@@ -219,6 +220,7 @@ const ChatInput: React.FC = () => {
 
   return (
     <ChatInputDiv>
+      <UploadInput />
       <Emoji onEmojiSelect={onEmojiSelect} />
       <MessageContainer>
         <MessagePlaceholder visible={message.length > 0}>

@@ -1,7 +1,8 @@
-import { Emoji, emojiIndex } from "emoji-mart";
+import { Emoji } from "emoji-mart";
+import { saveAs } from "file-saver";
 import React from "react";
 import styled from "styled-components";
-import { IMessageFragment } from "../../../stores/useChat";
+import { IMessage, IMessageFragment } from "../../../stores/useChat";
 import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
 
 const StickerImage = styled.img`
@@ -84,6 +85,49 @@ export const formatMessage = (
       <span key={index}>{messageFragment.msg}</span>
     );
   }
+};
+
+const downloadFile = (message: IMessage) => {
+  if (message.type === "file") {
+    fetch(message.fileUrl, {
+      method: "GET",
+    })
+      .then(async (res) => {
+        try {
+          const fileBlob = await res.blob();
+          saveAs(fileBlob, message.fileName);
+        } catch (error) {
+          console.error(error);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+};
+
+export const formatFileMessage = (message: IMessage) => {
+  return (
+    <div
+      style={{
+        height: "100%",
+        minHeight: "60px",
+        padding: "5px 10px",
+        whiteSpace: "nowrap",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "rgba(0,0,0,0.2)",
+      }}
+    >
+      <span
+        style={{ width: "80%", overflow: "hidden", textOverflow: "ellipsis" }}
+      >
+        {message.fileName}
+      </span>
+      <button onClick={downloadFile.bind(this, message)}>download</button>
+    </div>
+  );
 };
 
 export const isAnEmoji = (id: string) => {

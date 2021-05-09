@@ -6,7 +6,8 @@ import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
 import ReplyMessage from "./ReplyMessage";
-import { formatMessage } from "./utils";
+import { saveAs } from "file-saver";
+import { formatFileMessage, formatMessage } from "./utils";
 
 interface MessageProps {
   readonly sentByMe: boolean;
@@ -65,7 +66,7 @@ const MessageDiv = styled.div<MessageProps>`
   line-height: 20px;
 
   a {
-    color: ${({ sentByMe }) => (sentByMe ? "#68bbe4" : "rgb(255,0,199)")};
+    color: ${({ sentByMe }) => (sentByMe ? "#68bbe4" : "#0000B8")};
   }
 
   .emoji-mart-emoji {
@@ -140,7 +141,11 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
           )}
           <MessageDiv sentByMe={sentByMe}>
             <div>
-              <span>{message.message.map(formatMessage)}</span>
+              {message.type === "file" ? (
+                formatFileMessage(message)
+              ) : (
+                <span>{message.message.map(formatMessage)}</span>
+              )}
               <span
                 style={{
                   width: isToday() ? "46px" : "72px",
