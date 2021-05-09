@@ -79,16 +79,19 @@ const ChatsList: React.FC = () => {
         setMessages(messages);
         sendMessageAcknowledgements([msg]);
       } else if (msg.sentBy !== user._id) {
+        const notificationAudio = new Audio("/sounds/noti.wav");
         const { chats, setChats } = useChatList.getState();
         const newChats = [...chats].map((chat) => {
           if (chat.chat._id !== chatId) return chat;
-          else
+          else{
             return {
               ...chat,
-              unread: chat.unread + 1,
+              unread: (chat.unread ? chat.unread : 0) + 1,
             };
+          }
         });
         setChats(newChats);
+        notificationAudio.play();
       }
     });
 
