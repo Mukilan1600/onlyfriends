@@ -18,6 +18,7 @@ const ChatInputDiv = styled.div`
   display: flex;
   position: relative;
   align-items: center;
+  z-index: 10;
 `;
 
 const MessageContainer = styled.div`
@@ -118,10 +119,11 @@ const ChatInput: React.FC = () => {
       if (isLink(item)) {
         messageType = "link";
       }
-      itemsArray.push({
-        type: messageType,
-        msg: (index > 0 ? " " : "") + item,
-      });
+      if (item.length > 0 || index > 0)
+        itemsArray.push({
+          type: messageType,
+          msg: (index > 0 ? " " : "") + item,
+        });
     });
 
     itemsArray.forEach((fragment) => {
@@ -140,10 +142,11 @@ const ChatInput: React.FC = () => {
             prevEmote = true;
             messageArray.push({ type: "emote", id: messageFrag });
           } else {
-            messageArray.push({
-              type: "text",
-              msg: (!prevEmote && i > 0 ? ":" : "") + messageFrag,
-            });
+            if (messageFrag.length > 0)
+              messageArray.push({
+                type: "text",
+                msg: (!prevEmote && i > 0 ? ":" : "") + messageFrag,
+              });
             prevEmote = false;
           }
         });

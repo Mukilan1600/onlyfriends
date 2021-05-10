@@ -17,6 +17,7 @@ const ChatBodyDiv = styled.div`
   overflow-x: hidden;
   display: flex;
   flex-direction: column-reverse;
+  z-index: 1;
 `;
 
 const SpinnerWrapper = styled.div`
