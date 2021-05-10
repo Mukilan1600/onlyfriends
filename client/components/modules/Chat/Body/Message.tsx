@@ -20,11 +20,14 @@ interface ReadReceiptProps {
 const ReadReceipt = styled.div<ReadReceiptProps>`
   svg {
     display: block;
+  }
+
+  path {
     fill: ${({ allRead }) => (allRead ? "#34B7F1" : "#626262")};
   }
-  margin-left: 3px;
-  width: 11px;
-  height: 11px;
+  margin-left: 5px;
+  width: 12px;
+  height: 12px;
 `;
 
 const ReplyButton = styled.div<MessageProps>`
@@ -181,7 +184,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               )}
               <span
                 style={{
-                  width: isToday() ? "46px" : "72px",
+                  width: isToday() ? "48px" : "74px",
                   display: "inline-block",
                 }}
               ></span>
