@@ -3,6 +3,7 @@ import PaperClipIcon from "../../../../statics/icons/PaperClipIcon";
 import useChat, { IMessage } from "../../../../stores/useChat";
 import { WebSocketContext } from "../../../../providers/WebSocketProvider";
 import useFileUpload from "../../../../stores/useFileUpload";
+import { toast } from "react-toastify";
 
 const UploadInput: React.FC = () => {
   const { socket } = useContext(WebSocketContext);
@@ -10,7 +11,9 @@ const UploadInput: React.FC = () => {
   const { setFile } = useFileUpload();
   const onFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.currentTarget.files && event.currentTarget.files[0] && chat) {
-      setFile(event.currentTarget.files[0]);
+      if (event.currentTarget.files[0].size > 15000000)
+        toast("File size cannot exceed 15mb", { type: "error" });
+      else setFile(event.currentTarget.files[0]);
     }
   };
 

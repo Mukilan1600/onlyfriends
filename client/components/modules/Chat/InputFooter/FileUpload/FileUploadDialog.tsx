@@ -51,7 +51,6 @@ const FileUploadDialog: React.FC = () => {
       (snapshot) => {
         var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setProgress(progress);
-        console.log("Upload is " + progress + "% done");
       },
       (error) => {
         if (error.code !== "storage/canceled") console.error(error);
