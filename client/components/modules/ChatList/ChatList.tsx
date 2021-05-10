@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./ChatList.module.css";
 
 import { WebSocketContext } from "../../providers/WebSocketProvider";
-import ChatListItem, { IChat, IChatListItem } from "./ChatListItem";
+import ChatListItem, { IChatListItem } from "./ChatListItem";
 import useChatList from "../../stores/useChatList";
 import useProfile from "../../stores/useProfile";
 import Button from "../Button";
@@ -73,17 +73,27 @@ const ChatsList: React.FC = () => {
     });
 
     socket.on("receive_message", (chatId: string, msg: IMessage) => {
-      const { chat } = useChat.getState();
+      const {
+        chat,
+        setMessages,
+        messages,
+        setUnacknowledgedMessages,
+        unacknowledgedMessages,
+      } = useChat.getState();
       if (chat && chatId === chat._id) {
-        const { setMessages, messages } = useChat.getState();
         messages.unshift(msg);
         setMessages(messages);
-        sendMessageAcknowledgements([msg]);
+        if (document.hidden) {
+          notificationAudio.play();
+          setUnacknowledgedMessages([...unacknowledgedMessages, msg]);
+        } else {
+          sendMessageAcknowledgements([msg]);
+        }
       } else if (msg.sentBy !== user._id) {
         const { chats, setChats } = useChatList.getState();
         const newChats = [...chats].map((chat) => {
           if (chat.chat._id !== chatId) return chat;
-          else{
+          else {
             return {
               ...chat,
               unread: (chat.unread ? chat.unread : 0) + 1,
