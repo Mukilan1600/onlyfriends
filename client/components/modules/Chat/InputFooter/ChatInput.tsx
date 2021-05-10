@@ -16,7 +16,9 @@ const ChatInputDiv = styled.div`
   width: 100%;
   padding: 17px 50px;
   display: flex;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   align-items: center;
   z-index: 10;
 `;
@@ -225,26 +227,28 @@ const ChatInput: React.FC = () => {
   }, [typing]);
 
   return (
-    <ChatInputDiv>
-      {file ? (
-        <FileUploadDialog />
-      ) : (
-        <>
-          <UploadInput />
-          <Emoji onEmojiSelect={onEmojiSelect} />
-          <MessageContainer>
-            <MessagePlaceholder visible={message.length > 0}>
-              Type your message here
-            </MessagePlaceholder>
-            <MessageInput
-              contentEditable
-              ref={inputRef}
-              onBlur={setTyping.bind(this, false)}
-            />
-          </MessageContainer>
-        </>
+    <div style={{ position: "relative", height: "77px" }}>
+      <ChatInputDiv>
+        <UploadInput />
+        <Emoji onEmojiSelect={onEmojiSelect} />
+        <MessageContainer>
+          <MessagePlaceholder visible={message.length > 0}>
+            Type your message here
+          </MessagePlaceholder>
+          <MessageInput
+            spellCheck
+            contentEditable
+            ref={inputRef}
+            onBlur={setTyping.bind(this, false)}
+          />
+        </MessageContainer>
+      </ChatInputDiv>
+      {file && (
+        <ChatInputDiv>
+          <FileUploadDialog />
+        </ChatInputDiv>
       )}
-    </ChatInputDiv>
+    </div>
   );
 };
 
