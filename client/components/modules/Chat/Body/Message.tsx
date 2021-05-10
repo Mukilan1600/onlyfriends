@@ -6,11 +6,11 @@ import useChat, { IMessage } from "../../../stores/useChat";
 import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
 import ReplyMessage from "./ReplyMessage";
-import { saveAs } from "file-saver";
 import { formatFileMessage, formatMessage } from "./utils";
 
 interface MessageProps {
-  readonly sentByMe: boolean;
+  readonly sentByMe?: boolean;
+  readonly file?: boolean;
 }
 
 interface ReadReceiptProps {
@@ -22,7 +22,7 @@ const ReadReceipt = styled.div<ReadReceiptProps>`
     display: block;
     fill: ${({ allRead }) => (allRead ? "#34B7F1" : "#626262")};
   }
-  margin: -12px 0px -5px 4px;
+  margin-left: 3px;
   width: 11px;
   height: 11px;
 `;
@@ -47,14 +47,24 @@ const MessageWrapper = styled.div<MessageProps>`
   }
 `;
 
+const MessageBackground = styled.div<MessageProps>`
+  background: ${({ file }) =>
+    file ? "rgba(0, 0, 0, 0.1)" : "rgba(0, 0, 0, 0);"};
+  border-radius: 8px;
+  user-select: ${({ file }) => (file ? "none" : "inherit")};
+  cursor: ${({ file }) => (file ? "pointer" : "inherit")};
+  z-index: 10;
+`;
+
 const MessageDiv = styled.div<MessageProps>`
+  position: relative;
   display: flex;
   flex-direction: column;
   white-space: pre-wrap;
   word-wrap: break-word;
   box-shadow: 0px 0px 4px -0.5px rgba(0, 0, 0, 0.5);
   border-radius: 11px;
-  padding: 5px 10px;
+  padding: ${({ file }) => (file ? "8px" : "5px 10px")};
   margin: 1px 0px;
   background: ${({ sentByMe }) => (sentByMe ? "#ffffff" : "#55A3FF")};
   color: ${({ sentByMe }) => (sentByMe ? "#000" : "#FFF")};
@@ -76,13 +86,14 @@ const MessageDiv = styled.div<MessageProps>`
 `;
 
 const TimeDiv = styled.div<MessageProps>`
+  position: absolute;
   width: 100%;
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  right: ${({ file }) => (file ? "15px" : "10px")};
+  bottom: ${({ file }) => (file ? "6px" : "0px")};
   span {
-    float: right;
-    margin: -12px 0px -5px 4px;
     font-family: Raleway;
     font-style: normal;
     font-weight: normal;
@@ -127,6 +138,25 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
     setReplyTo(message);
   };
 
+  const downloadFile = () => {
+    if (message.type === "file") {
+      fetch(message.fileUrl, {
+        method: "GET",
+      })
+        .then(async (res) => {
+          try {
+            const fileBlob = await res.blob();
+            saveAs(fileBlob, message.fileName);
+          } catch (error) {
+            console.error(error);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  };
+
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
@@ -139,10 +169,13 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               <ReplyIcon />
             </ReplyButton>
           )}
-          <MessageDiv sentByMe={sentByMe}>
-            <div>
+          <MessageDiv sentByMe={sentByMe} file={message.type === "file"}>
+            <MessageBackground
+              file={message.type === "file"}
+              onClick={downloadFile}
+            >
               {message.type === "file" ? (
-                formatFileMessage(message)
+                formatFileMessage(message, false, sentByMe)
               ) : (
                 <span>{message.message.map(formatMessage)}</span>
               )}
@@ -152,8 +185,8 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
                   display: "inline-block",
                 }}
               ></span>
-            </div>
-            <TimeDiv sentByMe={sentByMe}>
+            </MessageBackground>
+            <TimeDiv sentByMe={sentByMe} file={message.type === "file"}>
               <span title={date.toLocaleString()}>{getFormattedTime()}</span>
               {sentByMe && (
                 <ReadReceipt
