@@ -8,9 +8,11 @@ import useMessage from "../../../stores/useMessage";
 import { isAnEmoji } from "../Body/utils";
 import { isLink } from "./utils";
 import UploadInput from "./FileUpload/UploadInput";
+import useFileUpload from "../../../stores/useFileUpload";
+import FileUploadDialog from "./FileUpload/FileUploadDialog";
 
 const ChatInputDiv = styled.div`
-  min-height: 67px;
+  height: 77px;
   width: 100%;
   padding: 17px 50px;
   display: flex;
@@ -67,6 +69,7 @@ const ChatInput: React.FC = () => {
   const { socket } = useContext(WebSocketContext);
   const { chat } = useChat();
   const { replyTo } = useMessage();
+  const { file } = useFileUpload();
 
   const onMessage = () => {
     resetTimer();
@@ -220,18 +223,24 @@ const ChatInput: React.FC = () => {
 
   return (
     <ChatInputDiv>
-      <UploadInput />
-      <Emoji onEmojiSelect={onEmojiSelect} />
-      <MessageContainer>
-        <MessagePlaceholder visible={message.length > 0}>
-          Type your message here
-        </MessagePlaceholder>
-        <MessageInput
-          contentEditable
-          ref={inputRef}
-          onBlur={setTyping.bind(this, false)}
-        />
-      </MessageContainer>
+      {file ? (
+        <FileUploadDialog />
+      ) : (
+        <>
+          <UploadInput />
+          <Emoji onEmojiSelect={onEmojiSelect} />
+          <MessageContainer>
+            <MessagePlaceholder visible={message.length > 0}>
+              Type your message here
+            </MessagePlaceholder>
+            <MessageInput
+              contentEditable
+              ref={inputRef}
+              onBlur={setTyping.bind(this, false)}
+            />
+          </MessageContainer>
+        </>
+      )}
     </ChatInputDiv>
   );
 };

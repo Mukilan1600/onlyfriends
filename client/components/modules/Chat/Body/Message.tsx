@@ -7,6 +7,7 @@ import useMessage from "../../../stores/useMessage";
 import useProfile from "../../../stores/useProfile";
 import ReplyMessage from "./ReplyMessage";
 import { formatFileMessage, formatMessage } from "./utils";
+import { saveAs } from "file-saver";
 
 interface MessageProps {
   readonly sentByMe?: boolean;
