@@ -2,6 +2,7 @@ import { Emoji } from "emoji-mart";
 import { saveAs } from "file-saver";
 import React from "react";
 import styled from "styled-components";
+import FileIcon from "../../../statics/icons/FileIcon";
 import { IMessage, IMessageFragment } from "../../../stores/useChat";
 import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
 
@@ -87,45 +88,41 @@ export const formatMessage = (
   }
 };
 
-const downloadFile = (message: IMessage) => {
-  if (message.type === "file") {
-    fetch(message.fileUrl, {
-      method: "GET",
-    })
-      .then(async (res) => {
-        try {
-          const fileBlob = await res.blob();
-          saveAs(fileBlob, message.fileName);
-        } catch (error) {
-          console.error(error);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }
-};
-
-export const formatFileMessage = (message: IMessage) => {
+export const formatFileMessage = (
+  message: IMessage,
+  prev: boolean = true,
+  sentByMe: boolean = true
+) => {
   return (
     <div
       style={{
-        height: "100%",
-        minHeight: "60px",
-        padding: "5px 10px",
+        padding: "10px 15px 0px 15px",
+        paddingBottom: prev ? "10px" : "0px",
         whiteSpace: "nowrap",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        background: "rgba(0,0,0,0.2)",
       }}
     >
-      <span
-        style={{ width: "80%", overflow: "hidden", textOverflow: "ellipsis" }}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+        }}
       >
-        {message.fileName}
-      </span>
-      <button onClick={downloadFile.bind(this, message)}>download</button>
+        <FileIcon fill={sentByMe ? "#525252" : "#FFFFFF"} />
+        <span
+          style={{
+            width: "170px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            marginLeft: "9px",
+          }}
+          title={message.fileName}
+        >
+          {message.fileName}
+        </span>
+      </div>
     </div>
   );
 };
