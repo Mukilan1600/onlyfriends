@@ -13,6 +13,7 @@ import useLoader from "../../stores/useLoader";
 import Spinner from "../Spinner/Spinner";
 
 const ChatsList: React.FC = () => {
+  const notificationAudio = new Audio("/sounds/noti.wav");
   const { setLoader, chatListLoading } = useLoader();
   const { chats, setChats } = useChatList();
   const { socket } = useContext(WebSocketContext);
@@ -79,7 +80,6 @@ const ChatsList: React.FC = () => {
         setMessages(messages);
         sendMessageAcknowledgements([msg]);
       } else if (msg.sentBy !== user._id) {
-        const notificationAudio = new Audio("/sounds/noti.wav");
         const { chats, setChats } = useChatList.getState();
         const newChats = [...chats].map((chat) => {
           if (chat.chat._id !== chatId) return chat;
