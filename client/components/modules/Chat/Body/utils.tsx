@@ -1,5 +1,4 @@
 import { Emoji } from "emoji-mart";
-import { saveAs } from "file-saver";
 import React from "react";
 import styled from "styled-components";
 import FileIcon from "../../../statics/icons/FileIcon";
@@ -98,7 +97,7 @@ export const formatFileMessage = (
   return (
     <div
       style={{
-        padding: "10px 15px 0px 15px",
+        padding: "10px 15px",
         paddingBottom: prev ? "10px" : "0px",
         whiteSpace: "nowrap",
         display: "flex",
