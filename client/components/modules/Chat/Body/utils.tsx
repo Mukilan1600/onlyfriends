@@ -6,9 +6,10 @@ import FileIcon from "../../../statics/icons/FileIcon";
 import { IMessage, IMessageFragment } from "../../../stores/useChat";
 import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
 
-const StickerImage = styled.img`
+const StickerImage = styled.img<{ single: boolean }>`
   user-select: text;
   image-rendering: -webkit-optimize-contrast;
+  margin: ${({ single }) => (single ? "0 17px 17px 17px" : "0px")};
 `;
 
 const Link = styled.a`
@@ -63,6 +64,7 @@ export const formatMessage = (
 
       return (
         <StickerImage
+          single={array.length === 1}
           draggable="false"
           key={index}
           alt={`:${messageFragment.id}:`}

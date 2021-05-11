@@ -12,6 +12,7 @@ import { saveAs } from "file-saver";
 interface MessageProps {
   readonly sentByMe?: boolean;
   readonly file?: boolean;
+  readonly single?: boolean;
 }
 
 interface ReadReceiptProps {
@@ -86,6 +87,7 @@ const MessageDiv = styled.div<MessageProps>`
   .emoji-mart-emoji {
     vertical-align: top;
     font-size: unset;
+    margin: ${({ single }) => (single ? "0 17px 12px 17px" : "0px")};
   }
 `;
 
@@ -161,6 +163,8 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
     }
   };
 
+  const rightPadding = `${(isToday() ? 48 : 74) + (sentByMe ? 17 : 0)}px`;
+
   return (
     <MessageWrapper sentByMe={sentByMe} id={`message-${idx}`}>
       <ReplyMessage message={message} chat={chat} user={user}>
@@ -173,7 +177,11 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               <ReplyIcon />
             </ReplyButton>
           )}
-          <MessageDiv sentByMe={sentByMe} file={message.type === "file"}>
+          <MessageDiv
+            sentByMe={sentByMe}
+            file={message.type === "file"}
+            single={message.message.length === 1}
+          >
             <MessageBackground
               file={message.type === "file"}
               onClick={downloadFile}
@@ -183,12 +191,16 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               ) : (
                 <span>{message.message.map(formatMessage)}</span>
               )}
-              <span
-                style={{
-                  width: isToday() ? "48px" : "74px",
-                  display: "inline-block",
-                }}
-              ></span>
+              {(message.message.length > 1 ||
+                (message.message.length === 1 &&
+                  message.message[0].type !== "emote")) && (
+                <span
+                  style={{
+                    width: rightPadding,
+                    display: "inline-block",
+                  }}
+                ></span>
+              )}
             </MessageBackground>
             <TimeDiv sentByMe={sentByMe} file={message.type === "file"}>
               <span title={date.toLocaleString()}>{getFormattedTime()}</span>
