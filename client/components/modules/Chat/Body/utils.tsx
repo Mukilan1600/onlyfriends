@@ -98,7 +98,6 @@ export const formatFileMessage = (
     <div
       style={{
         padding: "10px 15px",
-        paddingBottom: prev ? "10px" : "0px",
         whiteSpace: "nowrap",
         display: "flex",
         justifyContent: "space-between",
