@@ -118,6 +118,8 @@ export const formatFileMessage = (
             overflow: "hidden",
             textOverflow: "ellipsis",
             marginLeft: "9px",
+            direction: "rtl",
+            textAlign: "left",
           }}
           title={message.fileName}
         >
