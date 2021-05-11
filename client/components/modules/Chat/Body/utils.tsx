@@ -1,14 +1,14 @@
 import { Emoji } from "emoji-mart";
-import { saveAs } from "file-saver";
 import React from "react";
 import styled from "styled-components";
 import FileIcon from "../../../statics/icons/FileIcon";
 import { IMessage, IMessageFragment } from "../../../stores/useChat";
 import { customEmojis } from "../InputFooter/EmojiPalette/Emoji";
 
-const StickerImage = styled.img`
+const StickerImage = styled.img<{ single: boolean }>`
   user-select: text;
   image-rendering: -webkit-optimize-contrast;
+  margin: ${({ single }) => (single ? "0 17px 17px 17px" : "0px")};
 `;
 
 const Link = styled.a`
@@ -63,6 +63,7 @@ export const formatMessage = (
 
       return (
         <StickerImage
+          single={array.length === 1}
           draggable="false"
           key={index}
           alt={`:${messageFragment.id}:`}
@@ -96,7 +97,7 @@ export const formatFileMessage = (
   return (
     <div
       style={{
-        padding: "10px 15px 0px 15px",
+        padding: "10px 15px",
         paddingBottom: prev ? "10px" : "0px",
         whiteSpace: "nowrap",
         display: "flex",
@@ -117,6 +118,8 @@ export const formatFileMessage = (
             overflow: "hidden",
             textOverflow: "ellipsis",
             marginLeft: "9px",
+            direction: "rtl",
+            textAlign: "left",
           }}
           title={message.fileName}
         >

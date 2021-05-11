@@ -16,8 +16,11 @@ const ChatInputDiv = styled.div`
   width: 100%;
   padding: 17px 50px;
   display: flex;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   align-items: center;
+  z-index: 10;
 `;
 
 const MessageContainer = styled.div`
@@ -118,10 +121,11 @@ const ChatInput: React.FC = () => {
       if (isLink(item)) {
         messageType = "link";
       }
-      itemsArray.push({
-        type: messageType,
-        msg: (index > 0 ? " " : "") + item,
-      });
+      if (item.length > 0 || index > 0)
+        itemsArray.push({
+          type: messageType,
+          msg: (index > 0 ? " " : "") + item,
+        });
     });
 
     itemsArray.forEach((fragment) => {
@@ -140,10 +144,11 @@ const ChatInput: React.FC = () => {
             prevEmote = true;
             messageArray.push({ type: "emote", id: messageFrag });
           } else {
-            messageArray.push({
-              type: "text",
-              msg: (!prevEmote && i > 0 ? ":" : "") + messageFrag,
-            });
+            if (messageFrag.length > 0)
+              messageArray.push({
+                type: "text",
+                msg: (!prevEmote && i > 0 ? ":" : "") + messageFrag,
+              });
             prevEmote = false;
           }
         });
@@ -222,26 +227,28 @@ const ChatInput: React.FC = () => {
   }, [typing]);
 
   return (
-    <ChatInputDiv>
-      {file ? (
-        <FileUploadDialog />
-      ) : (
-        <>
-          <UploadInput />
-          <Emoji onEmojiSelect={onEmojiSelect} />
-          <MessageContainer>
-            <MessagePlaceholder visible={message.length > 0}>
-              Type your message here
-            </MessagePlaceholder>
-            <MessageInput
-              contentEditable
-              ref={inputRef}
-              onBlur={setTyping.bind(this, false)}
-            />
-          </MessageContainer>
-        </>
+    <div style={{ position: "relative", height: "77px" }}>
+      <ChatInputDiv>
+        <UploadInput />
+        <Emoji onEmojiSelect={onEmojiSelect} />
+        <MessageContainer>
+          <MessagePlaceholder visible={message.length > 0}>
+            Type your message here
+          </MessagePlaceholder>
+          <MessageInput
+            spellCheck
+            contentEditable
+            ref={inputRef}
+            onBlur={setTyping.bind(this, false)}
+          />
+        </MessageContainer>
+      </ChatInputDiv>
+      {file && (
+        <ChatInputDiv>
+          <FileUploadDialog />
+        </ChatInputDiv>
       )}
-    </ChatInputDiv>
+    </div>
   );
 };
 

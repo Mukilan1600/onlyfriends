@@ -1,12 +1,10 @@
-import React, { useContext } from "react";
+import React from "react";
 import PaperClipIcon from "../../../../statics/icons/PaperClipIcon";
-import useChat, { IMessage } from "../../../../stores/useChat";
-import { WebSocketContext } from "../../../../providers/WebSocketProvider";
+import useChat from "../../../../stores/useChat";
 import useFileUpload from "../../../../stores/useFileUpload";
 import { toast } from "react-toastify";
 
 const UploadInput: React.FC = () => {
-  const { socket } = useContext(WebSocketContext);
   const { chat } = useChat();
   const { setFile } = useFileUpload();
   const onFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {

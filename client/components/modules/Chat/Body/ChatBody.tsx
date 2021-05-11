@@ -1,9 +1,11 @@
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import styled from "styled-components";
+import { WebSocketContext } from "../../../providers/WebSocketProvider";
 
-import useChat from "../../../stores/useChat";
+import useChat, { IMessage } from "../../../stores/useChat";
 import useLoader from "../../../stores/useLoader";
 import useLoadMessages from "../../../stores/useLoadMessages";
+import useProfile from "../../../stores/useProfile";
 import Spinner from "../../Spinner/Spinner";
 import Message from "./Message";
 
@@ -17,6 +19,7 @@ const ChatBodyDiv = styled.div`
   overflow-x: hidden;
   display: flex;
   flex-direction: column-reverse;
+  z-index: 1;
 `;
 
 const SpinnerWrapper = styled.div`
@@ -31,6 +34,45 @@ const ChatBody: React.FC = () => {
   const chatBodyRef = useRef<HTMLDivElement>();
   const { loadMoreMessages } = useLoadMessages();
   const { messagesLoading } = useLoader();
+  const { socket } = useContext(WebSocketContext);
+  const { user } = useProfile();
+
+  const sendMessageAcknowledgements = (newMessages: IMessage[]) => {
+    const { chat } = useChat.getState();
+    const unAcknowledgedMessages = newMessages.filter(
+      (message) => !message.readBy.includes(user._id)
+    );
+    if (unAcknowledgedMessages.length > 0)
+      socket.emit(
+        "acknowledge_messages",
+        chat._id,
+        unAcknowledgedMessages.map((msg) => msg._id)
+      );
+  };
+
+  const handlePageVisibilityChange = () => {
+    const { unacknowledgedMessages, setUnacknowledgedMessages } =
+      useChat.getState();
+    if (!document.hidden && unacknowledgedMessages.length > 0) {
+      sendMessageAcknowledgements(unacknowledgedMessages);
+      setUnacknowledgedMessages([]);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener(
+      "visibilitychange",
+      handlePageVisibilityChange,
+      false
+    );
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        handlePageVisibilityChange,
+        false
+      );
+    };
+  }, []);
 
   const onChatScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
     if (

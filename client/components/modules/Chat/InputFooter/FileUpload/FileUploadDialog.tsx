@@ -6,10 +6,10 @@ import useFileUpload from "../../../../stores/useFileUpload";
 import FileIcon from "../../../../statics/icons/FileIcon";
 import useChat, { IMessage } from "../../../../stores/useChat";
 import { WebSocketContext } from "../../../../providers/WebSocketProvider";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 const ProgressBarWrapper = styled.div`
-  width: 100%;
+  width: 50%;
   height: 12px;
   border-radius: 6px;
   background: #525252;
@@ -30,6 +30,24 @@ const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => {
     </ProgressBarWrapper>
   );
 };
+
+const SlideIn = keyframes`
+  from{
+    margin-left: -150%
+  }
+  to{
+    margin-left: 0;
+  }
+`;
+
+const FileUploadDiv = styled.div`
+  display: flex;
+  background: white;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  animation: ${SlideIn} 0.4s 0s ease-in-out;
+`;
 
 const FileUploadDialog: React.FC = () => {
   const uploadTask = useRef<firebase.storage.UploadTask>();
@@ -79,14 +97,22 @@ const FileUploadDialog: React.FC = () => {
   };
 
   return (
-    <>
-      <button onClick={cancelUpload}>Back</button>
+    <FileUploadDiv>
+      <button onClick={cancelUpload} style={{ marginRight: "10px" }}>
+        Back
+      </button>
       <FileIcon fill={"#525252"} />
+      <span>{file.name}</span>
       <ProgressBar progress={progress} />
-      <button onClick={sendFile} disabled={progress < 100.1}>
+      <span>{progress > 100 ? 100 : progress.toFixed(2)}%</span>
+      <button
+        onClick={sendFile}
+        style={{ marginLeft: "10px" }}
+        disabled={progress < 100.1}
+      >
         Send
       </button>
-    </>
+    </FileUploadDiv>
   );
 };
 
