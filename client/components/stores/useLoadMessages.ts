@@ -12,14 +12,8 @@ interface IUseLoadMessages {
 const useLoadMessages = (): IUseLoadMessages => {
   const { user } = useProfile();
   const { socket } = useContext(WebSocketContext);
-  const {
-    messages,
-    chat,
-    reachedEnd,
-    resetChat,
-    setReachedEnd,
-    setMessages,
-  } = useChat();
+  const { messages, chat, reachedEnd, resetChat, setReachedEnd, setMessages } =
+    useChat();
   const { setLoader } = useLoader();
 
   const sendMessageAcknowledgements = (newMessages: IMessage[]) => {
@@ -45,30 +39,23 @@ const useLoadMessages = (): IUseLoadMessages => {
       sendMessageAcknowledgements(newMessages);
     });
 
-    socket.on("message_acks", (chatId: string, messageIds: string[],userId: string) => {
-      const { chats, setChats } = useChatList.getState();
-      const newChats = [...chats].map((chat) => {
-        if (chat.chat._id !== chatId) return chat;
-        else
-          return {
-            ...chat,
-            unread: chat.unread - messageIds.length,
-          };
-      });
-      setChats(newChats);
-      if (chatId !== chat._id) return;
-      const { messages } = useChat.getState();
-      setMessages(
-        messages.map((message) => {
-          if (
-            messageIds.includes(message._id) &&
-            !message.readBy.includes(userId)
-          )
-            message.readBy.push(userId);
-          return message;
-        })
-      );
-    });
+    socket.on(
+      "message_acks",
+      (chatId: string, messageIds: string[], userId: string) => {
+        if (chatId !== chat._id) return;
+        const { messages } = useChat.getState();
+        setMessages(
+          messages.map((message) => {
+            if (
+              messageIds.includes(message._id) &&
+              !message.readBy.includes(userId)
+            )
+              message.readBy.push(userId);
+            return message;
+          })
+        );
+      }
+    );
 
     return () => {
       socket.off("messages");

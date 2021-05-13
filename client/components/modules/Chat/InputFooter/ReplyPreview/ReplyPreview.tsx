@@ -19,7 +19,7 @@ const ReplyPreviewWrapper = styled.div`
   display: flex;
   flex-direction: column;
   background: #f3f3f3;
-  padding: 3px 100px;
+  padding: 3px 100px 3px 127px;
   user-select: none;
   animation: ${slideUp} 0.3s;
 `;
