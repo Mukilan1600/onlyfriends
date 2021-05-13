@@ -223,6 +223,7 @@ export const getChatList = async (userId: string) => {
       oauthId: userId,
     }).populate({
       path: "chats.chat",
+      select: "-messages",
       populate: {
         path: "participants.user",
         select: "name oauthId avatarUrl socketId online lastSeen",
