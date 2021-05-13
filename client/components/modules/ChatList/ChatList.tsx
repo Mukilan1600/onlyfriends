@@ -51,7 +51,7 @@ const ChatsList: React.FC = () => {
         return chat;
       });
       setChats(newChatList);
-      // useLoader.getState().setLoader({ chatListLoading: false });
+      useLoader.getState().setLoader({ chatListLoading: false });
     });
 
     socket.on("update_friend_status", (msg) => {

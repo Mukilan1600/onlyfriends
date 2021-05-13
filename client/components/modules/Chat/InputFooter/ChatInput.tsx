@@ -14,7 +14,7 @@ import FileUploadDialog from "./FileUpload/FileUploadDialog";
 const ChatInputDiv = styled.div`
   height: 77px;
   width: 100%;
-  padding: 17px 50px;
+  padding: 17px 26px;
   display: flex;
   position: absolute;
   left: 0;
