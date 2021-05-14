@@ -156,8 +156,8 @@ const ChatsList: React.FC = () => {
               style={{
                 position: "sticky",
                 left: "50%",
-                top: "82.5%",
-                transform: "translate(-25%, 0)",
+                top: "calc(100% - 56px)",
+                transform: "translate(-25%, -50%)",
                 width: "250px",
                 height: "58px",
                 fontWeight: 600,

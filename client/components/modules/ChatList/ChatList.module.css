@@ -1,8 +1,7 @@
 .body {
   overflow-y: auto;
-  height: calc(100vh - 70px);
-  width: 380px;
-  min-width: 380px;
+  height: 100%;
+  width: 100%;
   background-color: white;
   position: relative;
   border-right: 2px solid rgba(122, 121, 121, 0.13);
