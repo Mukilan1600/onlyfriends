@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import AudioCallIcon from "../../../statics/icons/AudioCallIcon";
+import useCall from "../../../stores/useCall";
 import useChat from "../../../stores/useChat";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 
@@ -8,8 +10,9 @@ const HeaderDiv = styled.div`
   height: 77px;
   width: 100%;
   background: #ffffff;
-  padding: 20px 25px;
+  padding: 20px 40px;
   align-items: center;
+  justify-content: space-between;
 `;
 
 const DetailsDiv = styled.div`
@@ -32,8 +35,15 @@ const DetailsDiv = styled.div`
   }
 `;
 
+const ActionsDiv = styled.div`
+  svg {
+    cursor: pointer;
+  }
+`;
+
 export default function ChatHeader() {
   const { chat } = useChat();
+  const { makeCall } = useCall();
   return (
     <HeaderDiv>
       <DetailsDiv>
@@ -49,6 +59,17 @@ export default function ChatHeader() {
           <StatusIndicator />
         </div>
       </DetailsDiv>
+      <ActionsDiv>
+        <div
+          onClick={makeCall.bind(
+            this,
+            chat.participants[0].user.oauthId,
+            false
+          )}
+        >
+          <AudioCallIcon />
+        </div>
+      </ActionsDiv>
     </HeaderDiv>
   );
 }

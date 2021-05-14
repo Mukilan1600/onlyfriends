@@ -7,6 +7,7 @@ import useProfile, { IUser } from "../stores/useProfile";
 import useToken from "../stores/useToken";
 import firebase from "firebase/app";
 import "firebase/auth";
+import useCall, { RejectReason } from "../stores/useCall";
 
 type ConnectionStatus =
   | "connecting"
@@ -28,11 +29,11 @@ interface ConnectionError {
 }
 
 const WebSocketProvider: React.FC<{}> = ({ children }) => {
-  const [socketStatus, setSocketStatus] = useState<ConnectionStatus>(
-    "connecting"
-  );
+  const [socketStatus, setSocketStatus] =
+    useState<ConnectionStatus>("connecting");
   const [socket, setSocket] = useState(null);
   const { jwtTok, clearTokens } = useToken();
+  const { callState, rejectCall } = useCall();
   const router = useRouter();
 
   useEffect(() => {
@@ -100,6 +101,21 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       toast(msg.msg, { type: "error" });
       useLoader.getState().clearLoaders();
     });
+
+    newSocket.on("incoming_call", (receiverId: string, video: boolean) => {
+      if (callState.incomingCall || callState.inCall) {
+        rejectCall("BUSY", receiverId);
+      } else {
+        callState.setStatus("call_incoming");
+        callState.setReceiverId(receiverId);
+      }
+    });
+
+    newSocket.on("call_rejected", (reason: RejectReason) => {
+      callState.setRejectReason(reason);
+      callState.setStatus("call_rejected");
+    });
+
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok, firebase.auth]);

@@ -8,6 +8,7 @@ import User, {
   getChatList,
   getFriendRequestsSent,
   getFriendsList,
+  getSocketId,
   IUser,
   sendFriendRequest,
 } from "../database/Models/User";
@@ -319,6 +320,14 @@ class WebSocket {
           logger.error(err, { service: "socket.disconnect" });
         }
       });
+
+      // Call
+      socket.on("make_call", async (receiverId: string, video: boolean) => {
+        const socketId = await getSocketId(receiverId);
+        if (socketId)
+          this.io.to(socketId).emit("incoming_call", socket.oauthId, video);
+      });
+
       try {
         const profile = await User.findOneAndUpdate(
           { oauthId: socket.oauthId },

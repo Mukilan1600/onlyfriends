@@ -1,6 +1,6 @@
 import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { WebSocketContext } from "../providers/WebSocketProvider";
 import { IUser } from "./useProfile";
 
