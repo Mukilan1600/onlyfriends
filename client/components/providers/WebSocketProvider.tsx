@@ -7,7 +7,8 @@ import useProfile, { IUser } from "../stores/useProfile";
 import useToken from "../stores/useToken";
 import firebase from "firebase/app";
 import "firebase/auth";
-import useCall, { RejectReason } from "../stores/useCall";
+import useCall, { findUserFromChat, RejectReason } from "../stores/useCall";
+import useChatList from "../stores/useChatList";
 
 type ConnectionStatus =
   | "connecting"
@@ -108,6 +109,9 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       } else {
         callState.setStatus("call_incoming");
         callState.setReceiverId(receiverId);
+        callState.setReceiverProfile(
+          findUserFromChat(useChatList.getState().chats, receiverId)
+        );
       }
     });
 

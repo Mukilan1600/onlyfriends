@@ -2,6 +2,9 @@ import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
 import { useContext } from "react";
 import { WebSocketContext } from "../providers/WebSocketProvider";
+import { IUser } from "./useProfile";
+import useChatList from "./useChatList";
+import { IChatListItem } from "../modules/ChatList/ChatListItem";
 
 type CallStatus =
   | "idle"
@@ -15,11 +18,13 @@ interface IUseCallStateProps extends State {
   rejectReason: RejectReason;
   callStatus: CallStatus;
   receiverId: string;
+  receiverProfile: IUser;
   isVideo: boolean;
 }
 
 interface IUseCallState extends IUseCallStateProps {
   setReceiverId: (receiverId: string) => void;
+  setReceiverProfile: (receiverProfile: IUser) => void;
   setStatus: (status: CallStatus) => void;
   setIsVideo: (isVideo: boolean) => void;
   setRejectReason: (rejectReason: RejectReason) => void;
@@ -29,6 +34,7 @@ const initialState: IUseCallStateProps = {
   rejectReason: null,
   callStatus: "idle",
   receiverId: null,
+  receiverProfile: null,
   isVideo: false,
 };
 
@@ -38,12 +44,25 @@ const useCallState = create<IUseCallState>(
     setStatus: (status: CallStatus) => set({ callStatus: status }),
     setIsVideo: (isVideo: boolean) => set({ isVideo }),
     setRejectReason: (rejectReason: RejectReason) => set({ rejectReason }),
+    setReceiverProfile: (receiverProfile: IUser) => set({ receiverProfile }),
   }))
 );
+
+export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
+  const chat = chats.find((chat) => {
+    return (
+      chat.chat.participants[0].user.oauthId === userId &&
+      chat.chat.type === "personal"
+    );
+  });
+  if (chat) return chat.chat.participants[0].user;
+  else return null;
+};
 
 const useCall = () => {
   const callState = useCallState();
   const { socket } = useContext(WebSocketContext);
+  const { chats } = useChatList();
 
   const rejectCall = (reason: RejectReason, receiverId?: string) => {
     socket.emit("reject_call", receiverId ?? callState.receiverId, reason);
@@ -63,6 +82,7 @@ const useCall = () => {
     socket.emit("make_call", receiverId, video);
     callState.setStatus("call_outgoing");
     callState.setReceiverId(receiverId);
+    callState.setReceiverProfile(findUserFromChat(chats, receiverId));
   };
 
   return {

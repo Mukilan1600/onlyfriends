@@ -35,12 +35,14 @@ const DetailsDiv = styled.div`
   }
 `;
 
-const ActionsDiv = styled.div`
-  svg {
-    cursor: pointer;
+const ActionsDiv = styled.div``;
+
+const AudioCallButton = styled.div<{ disabled: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
+  svg path {
+    fill: ${({ disabled }) => (disabled ? "#525252" : "#000")};
   }
 `;
-
 export default function ChatHeader() {
   const { chat } = useChat();
   const { makeCall } = useCall();
@@ -60,15 +62,16 @@ export default function ChatHeader() {
         </div>
       </DetailsDiv>
       <ActionsDiv>
-        <div
-          onClick={makeCall.bind(
-            this,
-            chat.participants[0].user.oauthId,
-            false
-          )}
+        <AudioCallButton
+          onClick={
+            chat.participants[0].user.online
+              ? makeCall.bind(this, chat.participants[0].user.oauthId, false)
+              : null
+          }
+          disabled={!chat.participants[0].user.online}
         >
           <AudioCallIcon />
-        </div>
+        </AudioCallButton>
       </ActionsDiv>
     </HeaderDiv>
   );

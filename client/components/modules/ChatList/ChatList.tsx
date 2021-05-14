@@ -56,6 +56,7 @@ const ChatsList: React.FC = () => {
 
     socket.on("update_friend_status", (msg) => {
       const { chats } = useChatList.getState();
+      const { chat, setChat } = useChat.getState();
       setChats(
         chats.map((chat) => {
           const newParticipants = chat.chat.participants.map((participant) => {
@@ -70,6 +71,16 @@ const ChatsList: React.FC = () => {
           return chat;
         })
       );
+      const newParticipants = chat.participants.map((participant) => {
+        if (participant.user.oauthId === msg.oauthId) {
+          return {
+            ...participant,
+            user: { ...participant.user, ...msg, isTyping: false },
+          };
+        } else return participant;
+      });
+      chat.participants = newParticipants;
+      setChat(chat);
     });
 
     socket.on("receive_message", (chatId: string, msg: IMessage) => {
