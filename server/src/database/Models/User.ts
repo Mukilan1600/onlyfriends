@@ -232,3 +232,10 @@ export const getChatList = async (userId: string) => {
     if (user) return user.chats;
   } catch (error) {}
 };
+
+export const getSocketId = async (oauthId: string) => {
+  try {
+    const user = await User.findOne({ oauthId });
+    return user.socketId;
+  } catch (error) {}
+};

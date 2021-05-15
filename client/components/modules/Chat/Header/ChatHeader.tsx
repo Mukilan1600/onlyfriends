@@ -1,5 +1,8 @@
 import React from "react";
 import styled from "styled-components";
+import AudioCallIcon from "../../../statics/icons/AudioCallIcon";
+import VideoCallIcon from "../../../statics/icons/VideoCallIcon";
+import useCall from "../../../stores/useCall";
 import useChat from "../../../stores/useChat";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 
@@ -8,8 +11,9 @@ const HeaderDiv = styled.div`
   height: 77px;
   width: 100%;
   background: #ffffff;
-  padding: 20px 25px;
+  padding: 20px 40px;
   align-items: center;
+  justify-content: space-between;
 `;
 
 const DetailsDiv = styled.div`
@@ -32,8 +36,20 @@ const DetailsDiv = styled.div`
   }
 `;
 
+const ActionsDiv = styled.div`
+  display: flex;
+`;
+
+const CallButton = styled.div<{ disabled: boolean }>`
+  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
+  margin-left: 21px;
+  svg path {
+    fill: ${({ disabled }) => (disabled ? "#525252" : "#000")};
+  }
+`;
 export default function ChatHeader() {
   const { chat } = useChat();
+  const { makeCall } = useCall();
   return (
     <HeaderDiv>
       <DetailsDiv>
@@ -49,6 +65,28 @@ export default function ChatHeader() {
           <StatusIndicator />
         </div>
       </DetailsDiv>
+      <ActionsDiv>
+        <CallButton
+          onClick={
+            chat.participants[0].user.online
+              ? makeCall.bind(this, chat.participants[0].user.oauthId, false)
+              : null
+          }
+          disabled={!chat.participants[0].user.online}
+        >
+          <AudioCallIcon />
+        </CallButton>
+        <CallButton
+          onClick={
+            chat.participants[0].user.online
+              ? makeCall.bind(this, chat.participants[0].user.oauthId, true)
+              : null
+          }
+          disabled={!chat.participants[0].user.online}
+        >
+          <VideoCallIcon />
+        </CallButton>
+      </ActionsDiv>
     </HeaderDiv>
   );
 }

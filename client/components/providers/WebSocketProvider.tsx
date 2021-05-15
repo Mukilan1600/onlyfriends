@@ -7,6 +7,9 @@ import useProfile, { IUser } from "../stores/useProfile";
 import useToken from "../stores/useToken";
 import firebase from "firebase/app";
 import "firebase/auth";
+import useCall, { findUserFromChat, RejectReason } from "../stores/useCall";
+import useChatList from "../stores/useChatList";
+import { SignalData } from "simple-peer";
 
 type ConnectionStatus =
   | "connecting"
@@ -28,11 +31,11 @@ interface ConnectionError {
 }
 
 const WebSocketProvider: React.FC<{}> = ({ children }) => {
-  const [socketStatus, setSocketStatus] = useState<ConnectionStatus>(
-    "connecting"
-  );
+  const [socketStatus, setSocketStatus] =
+    useState<ConnectionStatus>("connecting");
   const [socket, setSocket] = useState(null);
   const { jwtTok, clearTokens } = useToken();
+  const { callState, receiveSignalData, rejectCall, callAccepted } = useCall();
   const router = useRouter();
 
   useEffect(() => {
@@ -100,6 +103,28 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       toast(msg.msg, { type: "error" });
       useLoader.getState().clearLoaders();
     });
+
+    newSocket.on("incoming_call", (receiverId: string, video: boolean) => {
+      if (callState.incomingCall || callState.inCall) {
+        rejectCall("BUSY", receiverId);
+      } else {
+        callState.setReceiverProfile(
+          findUserFromChat(useChatList.getState().chats, receiverId)
+        );
+        callState.setReceiverId(receiverId);
+        callState.setStatus("call_incoming");
+      }
+    });
+
+    newSocket.on("call_rejected", (reason: RejectReason) => {
+      callState.setRejectReason(reason);
+      callState.setStatus("call_rejected");
+    });
+
+    newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
+
+    newSocket.on("signal_data", receiveSignalData);
+
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok, firebase.auth]);
