@@ -1,6 +1,5 @@
 import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
-import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import useMediaConfigurations, {
   IMediaConfigurations,
@@ -11,7 +10,7 @@ interface IUseMediaStreamState extends State {
   setMediaStream: (mediaStream: MediaStream) => void;
 }
 
-const useMediaStreamState = create<IUseMediaStreamState>(
+export const useMediaStreamState = create<IUseMediaStreamState>(
   combine({ mediaStream: null }, (set) => ({
     setMediaStream: (mediaStream: MediaStream) => set({ mediaStream }),
   }))
@@ -62,8 +61,8 @@ const useMediaStream = () => {
         audio: newMediaConfigurations.audioEnabled,
       });
       setMediaStream(stream);
-
       navigator.mediaDevices.ondevicechange = () => getMediaStream();
+      return stream;
     } catch (error) {
       console.error(error);
     }

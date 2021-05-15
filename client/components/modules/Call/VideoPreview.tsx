@@ -29,9 +29,11 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
   const videoRef = useRef<HTMLVideoElement>();
 
   useEffect(() => {
+    if (!muted && video) console.log(video.getAudioTracks());
     if (video && video.getVideoTracks().length > 0) {
       videoRef.current.muted = muted;
       videoRef.current.srcObject = video;
+      videoRef.current.play();
     }
   }, [video]);
 

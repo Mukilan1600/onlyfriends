@@ -35,7 +35,7 @@ const CallStatus = styled.div`
 
 const CallPreview: React.FC = () => {
   const { user } = useProfile();
-  const { callState } = useCall();
+  const { callState, acceptCall } = useCall();
   const { mediaStream } = useMediaStream();
 
   const getPreviewStatus = () => {
@@ -56,6 +56,24 @@ const CallPreview: React.FC = () => {
     }
   };
 
+  const getCallControls = () => {
+    switch (callState.callStatus) {
+      case "call_incoming":
+        return (
+          <>
+            <button onClick={acceptCall}>Accept</button>
+            <button>Reject</button>
+          </>
+        );
+      case "call_outgoing":
+        return (
+          <>
+            <button>Cancel</button>
+          </>
+        );
+    }
+  };
+
   return (
     <PreviewWrapper closed={callState.callStatus === "idle"}>
       {callState.callStatus !== "idle" && (
@@ -67,8 +85,13 @@ const CallPreview: React.FC = () => {
               muted={true}
               video={mediaStream}
             />
-            <VideoPreview avatarUrl={callState.receiverProfile.avatarUrl} />
+            <VideoPreview
+              avatarUrl={callState.receiverProfile.avatarUrl}
+              video={callState.receiverStream}
+            />
           </div>
+
+          <div style={{ display: "flex" }}>{getCallControls()}</div>
         </>
       )}
     </PreviewWrapper>

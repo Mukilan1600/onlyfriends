@@ -9,6 +9,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import useCall, { findUserFromChat, RejectReason } from "../stores/useCall";
 import useChatList from "../stores/useChatList";
+import { SignalData } from "simple-peer";
 
 type ConnectionStatus =
   | "connecting"
@@ -34,7 +35,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     useState<ConnectionStatus>("connecting");
   const [socket, setSocket] = useState(null);
   const { jwtTok, clearTokens } = useToken();
-  const { callState, rejectCall } = useCall();
+  const { callState, receiveSignalData, rejectCall, callAccepted } = useCall();
   const router = useRouter();
 
   useEffect(() => {
@@ -107,11 +108,11 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       if (callState.incomingCall || callState.inCall) {
         rejectCall("BUSY", receiverId);
       } else {
-        callState.setStatus("call_incoming");
-        callState.setReceiverId(receiverId);
         callState.setReceiverProfile(
           findUserFromChat(useChatList.getState().chats, receiverId)
         );
+        callState.setReceiverId(receiverId);
+        callState.setStatus("call_incoming");
       }
     });
 
@@ -119,6 +120,10 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       callState.setRejectReason(reason);
       callState.setStatus("call_rejected");
     });
+
+    newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
+
+    newSocket.on("signal_data", receiveSignalData);
 
     setSocketStatus("connected");
     setSocket(newSocket);
