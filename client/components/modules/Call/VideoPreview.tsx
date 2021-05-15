@@ -29,14 +29,14 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
   const videoRef = useRef<HTMLVideoElement>();
 
   useEffect(() => {
-    if (video) {
+    if (video && video.getVideoTracks().length > 0) {
       videoRef.current.muted = muted;
       videoRef.current.srcObject = video;
     }
   }, [video]);
 
-  return video ? (
-    <video ref={videoRef} />
+  return video && video.getVideoTracks().length > 0 ? (
+    <video ref={videoRef} height="100px" width="130px" autoPlay />
   ) : (
     <NoVideoTemplate>
       <img src={avatarUrl} height="35px" width="35px" alt="call thumbmail" />

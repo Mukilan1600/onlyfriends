@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import useMediaStream from "../../stores/call/useMediaStream";
 import useCall from "../../stores/useCall";
 import useProfile from "../../stores/useProfile";
 import VideoPreview from "./VideoPreview";
@@ -35,6 +36,7 @@ const CallStatus = styled.div`
 const CallPreview: React.FC = () => {
   const { user } = useProfile();
   const { callState } = useCall();
+  const { mediaStream } = useMediaStream();
 
   const getPreviewStatus = () => {
     switch (callState.callStatus) {
@@ -60,7 +62,11 @@ const CallPreview: React.FC = () => {
         <>
           <CallStatus>{getPreviewStatus()}</CallStatus>
           <div style={{ display: "flex" }}>
-            <VideoPreview avatarUrl={user.avatarUrl} muted={true} />
+            <VideoPreview
+              avatarUrl={user.avatarUrl}
+              muted={true}
+              video={mediaStream}
+            />
             <VideoPreview avatarUrl={callState.receiverProfile.avatarUrl} />
           </div>
         </>

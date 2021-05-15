@@ -5,6 +5,8 @@ import { WebSocketContext } from "../providers/WebSocketProvider";
 import { IUser } from "./useProfile";
 import useChatList from "./useChatList";
 import { IChatListItem } from "../modules/ChatList/ChatListItem";
+import useMediaStream from "./call/useMediaStream";
+import useMediaConfigurations from "./call/useMediaConfiguration";
 
 type CallStatus =
   | "idle"
@@ -61,8 +63,11 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const useCall = () => {
   const callState = useCallState();
+  const { setVideoEnabled, setAudioEnabled, videoEnabled } =
+    useMediaConfigurations();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
+  const { mediaStream, getMediaStream } = useMediaStream();
 
   const rejectCall = (reason: RejectReason, receiverId?: string) => {
     socket.emit("reject_call", receiverId ?? callState.receiverId, reason);
@@ -78,11 +83,14 @@ const useCall = () => {
     callState.setReceiverId(null);
   };
 
-  const makeCall = (receiverId: string, video: boolean = false) => {
+  const makeCall = async (receiverId: string, video: boolean = false) => {
     socket.emit("make_call", receiverId, video);
     callState.setStatus("call_outgoing");
     callState.setReceiverId(receiverId);
     callState.setReceiverProfile(findUserFromChat(chats, receiverId));
+    setVideoEnabled(video);
+    setAudioEnabled(true);
+    getMediaStream({ videoEnabled: video, audioEnabled: true });
   };
 
   return {

@@ -71,16 +71,18 @@ const ChatsList: React.FC = () => {
           return chat;
         })
       );
-      const newParticipants = chat.participants.map((participant) => {
-        if (participant.user.oauthId === msg.oauthId) {
-          return {
-            ...participant,
-            user: { ...participant.user, ...msg, isTyping: false },
-          };
-        } else return participant;
-      });
-      chat.participants = newParticipants;
-      setChat(chat);
+      if (chat) {
+        const newParticipants = chat.participants.map((participant) => {
+          if (participant.user.oauthId === msg.oauthId) {
+            return {
+              ...participant,
+              user: { ...participant.user, ...msg, isTyping: false },
+            };
+          } else return participant;
+        });
+        chat.participants = newParticipants;
+        setChat(chat);
+      }
     });
 
     socket.on("receive_message", (chatId: string, msg: IMessage) => {
