@@ -53,6 +53,31 @@ const CallPreview: React.FC = () => {
             call...
           </>
         );
+      case "call_rejected":
+        return callState.rejectReason === "BUSY" ? (
+          <>
+            <TitleName>{callState.receiverProfile.name}</TitleName> is on
+            another call...
+          </>
+        ) : (
+          <>
+            <TitleName>{callState.receiverProfile.name}</TitleName> is
+            unavailable to take calls...
+          </>
+        );
+      case "call_ended":
+        return (
+          <>
+            Your call with{" "}
+            <TitleName>{callState.receiverProfile.name}</TitleName> has ended
+          </>
+        );
+      case "call":
+        return (
+          <>
+            In call with <TitleName>{callState.receiverProfile.name}</TitleName>
+          </>
+        );
     }
   };
 
@@ -61,7 +86,7 @@ const CallPreview: React.FC = () => {
       case "call_incoming":
         return (
           <>
-            <button onClick={acceptCall}>Accept</button>
+            <button onClick={acceptCall.bind(this, false)}>Accept</button>
             <button>Reject</button>
           </>
         );

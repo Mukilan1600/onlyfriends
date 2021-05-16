@@ -15,7 +15,8 @@ type CallStatus =
   | "call"
   | "call_outgoing"
   | "call_incoming"
-  | "call_rejected";
+  | "call_rejected"
+  | "call_ended";
 export type RejectReason = "BUSY" | "REJECT";
 
 interface IUseCallStateProps extends State {
@@ -88,9 +89,9 @@ const useCall = () => {
     }
   }, [mediaStream]);
 
-  const make_peer_call = async () => {
+  const make_peer_call = async (video: boolean) => {
     const stream = await getMediaStream({
-      videoEnabled: true,
+      videoEnabled: video,
       audioEnabled: true,
     });
     const newPeer = new Peer({ initiator: true, stream: stream });
@@ -102,18 +103,19 @@ const useCall = () => {
     callState.setReceiverId(null);
   };
 
-  const acceptCall = async () => {
+  const acceptCall = async (video: boolean = false) => {
     try {
-      const newPeer = await make_peer_call();
+      const newPeer = await make_peer_call(video);
       newPeer.on("signal", (signalData) => {
         const { callStatus, receiverId, setStatus } = useCallState.getState();
         if (callStatus === "call_incoming") {
           socket.emit("accept_call", receiverId, signalData);
           setStatus("call");
+        } else {
+          socket.emit("signal_data", receiverId, signalData);
         }
       });
-      newPeer.on("stream", (stream) => {
-        console.log(stream);
+      newPeer.on("stream", (stream: MediaStream) => {
         callState.setReceiverStream(stream);
       });
       newPeer.on("error", (error) => {
@@ -151,13 +153,12 @@ const useCall = () => {
       newPeer.signal(signalData);
       newPeer.on("signal", (data) => {
         const callState = useCallState.getState();
+        socket.emit("signal_data", receiverId, data);
         if (callState.callStatus === "call_outgoing") {
-          socket.emit("signal_data", receiverId, data);
           callState.setStatus("call");
         }
       });
-      newPeer.on("stream", (stream) => {
-        console.log(stream);
+      newPeer.on("stream", (stream: MediaStream) => {
         callState.setReceiverStream(stream);
       });
       newPeer.on("error", (error) => {
@@ -177,6 +178,27 @@ const useCall = () => {
     peer.signal(signalData);
   };
 
+  const onCallDisconnect = (msg) => {
+    const callState = useCallState.getState();
+    if (!msg.online) {
+      if (callState.receiverId === msg.oauthId) {
+        switch (callState.callStatus) {
+          case "call":
+            callState.setStatus("call_ended");
+            break;
+          case "call_incoming":
+            callState.setStatus("idle");
+            callState.setReceiverId(null);
+            callState.setReceiverProfile(null);
+            break;
+          case "call_outgoing":
+            callState.setStatus("call_ended");
+            break;
+        }
+      }
+    }
+  };
+
   return {
     callState,
     rejectCall,
@@ -185,6 +207,7 @@ const useCall = () => {
     makeCall,
     callAccepted,
     receiveSignalData,
+    onCallDisconnect,
   };
 };
 

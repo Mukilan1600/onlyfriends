@@ -11,6 +11,7 @@ import EmptyChats from "../../statics/illustrations/EmptyChats";
 import useChat, { IMessage } from "../../stores/useChat";
 import useLoader from "../../stores/useLoader";
 import Spinner from "../Spinner/Spinner";
+import useCall from "../../stores/useCall";
 
 const ChatsList: React.FC = () => {
   const notificationAudio = new Audio("/sounds/noti.wav");
@@ -52,37 +53,6 @@ const ChatsList: React.FC = () => {
       });
       setChats(newChatList);
       useLoader.getState().setLoader({ chatListLoading: false });
-    });
-
-    socket.on("update_friend_status", (msg) => {
-      const { chats } = useChatList.getState();
-      const { chat, setChat } = useChat.getState();
-      setChats(
-        chats.map((chat) => {
-          const newParticipants = chat.chat.participants.map((participant) => {
-            if (participant.user.oauthId === msg.oauthId) {
-              return {
-                ...participant,
-                user: { ...participant.user, ...msg, isTyping: false },
-              };
-            } else return participant;
-          });
-          chat.chat.participants = newParticipants;
-          return chat;
-        })
-      );
-      if (chat) {
-        const newParticipants = chat.participants.map((participant) => {
-          if (participant.user.oauthId === msg.oauthId) {
-            return {
-              ...participant,
-              user: { ...participant.user, ...msg, isTyping: false },
-            };
-          } else return participant;
-        });
-        chat.participants = newParticipants;
-        setChat(chat);
-      }
     });
 
     socket.on("receive_message", (chatId: string, msg: IMessage) => {
