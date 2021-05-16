@@ -10,6 +10,7 @@ import "firebase/auth";
 import useCall, { findUserFromChat, RejectReason } from "../stores/useCall";
 import useChatList from "../stores/useChatList";
 import { SignalData } from "simple-peer";
+import useChat from "../stores/useChat";
 
 type ConnectionStatus =
   | "connecting"
@@ -35,7 +36,13 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     useState<ConnectionStatus>("connecting");
   const [socket, setSocket] = useState(null);
   const { jwtTok, clearTokens } = useToken();
-  const { callState, receiveSignalData, rejectCall, callAccepted } = useCall();
+  const {
+    callState,
+    receiveSignalData,
+    rejectCall,
+    callAccepted,
+    onCallDisconnect,
+  } = useCall();
   const router = useRouter();
 
   useEffect(() => {
@@ -104,8 +111,11 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       useLoader.getState().clearLoaders();
     });
 
-    newSocket.on("incoming_call", (receiverId: string, video: boolean) => {
-      if (callState.incomingCall || callState.inCall) {
+    newSocket.on("incoming_call", (receiverId: string) => {
+      if (
+        callState.callStatus === "call_incoming" ||
+        callState.callStatus === "call"
+      ) {
         rejectCall("BUSY", receiverId);
       } else {
         callState.setReceiverProfile(
@@ -124,6 +134,43 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
 
     newSocket.on("signal_data", receiveSignalData);
+
+    newSocket.on("update_friend_status", (msg) => {
+      const { chats, setChats } = useChatList.getState();
+      const { chat, setChat } = useChat.getState();
+
+      onCallDisconnect(msg);
+
+      if (chats)
+        setChats(
+          chats.map((chat) => {
+            const newParticipants = chat.chat.participants.map(
+              (participant) => {
+                if (participant.user.oauthId === msg.oauthId) {
+                  return {
+                    ...participant,
+                    user: { ...participant.user, ...msg, isTyping: false },
+                  };
+                } else return participant;
+              }
+            );
+            chat.chat.participants = newParticipants;
+            return chat;
+          })
+        );
+      if (chat) {
+        const newParticipants = chat.participants.map((participant) => {
+          if (participant.user.oauthId === msg.oauthId) {
+            return {
+              ...participant,
+              user: { ...participant.user, ...msg, isTyping: false },
+            };
+          } else return participant;
+        });
+        chat.participants = newParticipants;
+        setChat(chat);
+      }
+    });
 
     setSocketStatus("connected");
     setSocket(newSocket);

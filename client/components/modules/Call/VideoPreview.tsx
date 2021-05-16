@@ -27,22 +27,33 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
   muted,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
+  const audioRef = useRef<HTMLAudioElement>();
 
   useEffect(() => {
-    if (!muted && video) console.log(video.getAudioTracks());
     if (video && video.getVideoTracks().length > 0) {
       videoRef.current.muted = muted;
       videoRef.current.srcObject = video;
-      videoRef.current.play();
     }
+    audioRef.current.srcObject = video;
+    audioRef.current.muted = muted;
   }, [video]);
 
-  return video && video.getVideoTracks().length > 0 ? (
-    <video ref={videoRef} height="100px" width="130px" autoPlay />
-  ) : (
-    <NoVideoTemplate>
-      <img src={avatarUrl} height="35px" width="35px" alt="call thumbmail" />
-    </NoVideoTemplate>
+  return (
+    <>
+      {video && video.getVideoTracks().length > 0 ? (
+        <video ref={videoRef} height="100px" width="130px" autoPlay muted />
+      ) : (
+        <NoVideoTemplate>
+          <img
+            src={avatarUrl}
+            height="35px"
+            width="35px"
+            alt="call thumbmail"
+          />
+        </NoVideoTemplate>
+      )}
+      <audio ref={audioRef} autoPlay />
+    </>
   );
 };
 
