@@ -340,6 +340,11 @@ class WebSocket {
           this.io.to(socketId).emit("signal_data", socket.oauthId, data);
       });
 
+      socket.on("receiver_state", async (receiverId: string, data: any) => {
+        const socketId = await getSocketId(receiverId);
+        if (socketId) this.io.to(socketId).emit("receiver_state", data);
+      });
+
       try {
         const profile = await User.findOneAndUpdate(
           { oauthId: socket.oauthId },

@@ -1,5 +1,10 @@
 import React from "react";
 import styled from "styled-components";
+import EndCall from "../../statics/icons/EndCall";
+import MicOn from "../../statics/icons/MicOn";
+import SpeakerOn from "../../statics/icons/SpeakerOn";
+import VideoOn from "../../statics/icons/VideoOn";
+import useMediaConfigurations from "../../stores/call/useMediaConfiguration";
 import useMediaStream from "../../stores/call/useMediaStream";
 import useCall from "../../stores/useCall";
 import useProfile from "../../stores/useProfile";
@@ -33,10 +38,40 @@ const CallStatus = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
+const ButtonPanel = styled.div`
+  background: linear-gradient(95.16deg, #ff00c7 -24.95%, #3d98e7 124.85%);
+  border-radius: 12px;
+  padding: 0px 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const ControlButton = styled.button`
+  width: 50px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+`;
+
 const CallPreview: React.FC = () => {
   const { user } = useProfile();
   const { callState, acceptCall } = useCall();
   const { mediaStream } = useMediaStream();
+  const { videoEnabled, setVideoEnabled } = useMediaConfigurations();
+
+  const toggleVideo = () => {
+    callState.setUserState({
+      ...callState.userState,
+      video: !callState.userState.video,
+    });
+  };
 
   const getPreviewStatus = () => {
     switch (callState.callStatus) {
@@ -65,13 +100,6 @@ const CallPreview: React.FC = () => {
             unavailable to take calls...
           </>
         );
-      case "call_ended":
-        return (
-          <>
-            Your call with{" "}
-            <TitleName>{callState.receiverProfile.name}</TitleName> has ended
-          </>
-        );
       case "call":
         return (
           <>
@@ -96,6 +124,23 @@ const CallPreview: React.FC = () => {
             <button>Cancel</button>
           </>
         );
+      case "call":
+        return (
+          <ButtonPanel>
+            <ControlButton onClick={() => toggleVideo()}>
+              <VideoOn />
+            </ControlButton>
+            <ControlButton>
+              <SpeakerOn />
+            </ControlButton>
+            <ControlButton>
+              <MicOn />
+            </ControlButton>
+            <ControlButton>
+              <EndCall />
+            </ControlButton>
+          </ButtonPanel>
+        );
     }
   };
 
@@ -109,10 +154,12 @@ const CallPreview: React.FC = () => {
               avatarUrl={user.avatarUrl}
               muted={true}
               video={mediaStream}
+              enabled={callState.userState.video}
             />
             <VideoPreview
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream}
+              enabled={callState.receiverState.video}
             />
           </div>
 

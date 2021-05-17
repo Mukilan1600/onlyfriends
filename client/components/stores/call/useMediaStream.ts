@@ -18,8 +18,6 @@ export const useMediaStreamState = create<IUseMediaStreamState>(
 
 const useMediaStream = () => {
   const { mediaStream, setMediaStream } = useMediaStreamState();
-  const { setAudioEnabled, setVideoEnabled, ...mediaConfigState } =
-    useMediaConfigurations();
 
   const checkDevicesExist = async (video: boolean, audio: boolean) => {
     try {
@@ -43,6 +41,8 @@ const useMediaStream = () => {
   };
 
   const getMediaStream = async (mediaConfigurations?: IMediaConfigurations) => {
+    const { setAudioEnabled, setVideoEnabled, ...mediaConfigState } =
+      useMediaConfigurations.getState();
     try {
       let newMediaConfigurations = {
         ...mediaConfigState,

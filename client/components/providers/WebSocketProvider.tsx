@@ -42,6 +42,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     rejectCall,
     callAccepted,
     onCallDisconnect,
+    updateReceiverState
   } = useCall();
   const router = useRouter();
 
@@ -134,6 +135,8 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
     newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
 
     newSocket.on("signal_data", receiveSignalData);
+
+    newSocket.on("receiver_state",updateReceiverState)
 
     newSocket.on("update_friend_status", (msg) => {
       const { chats, setChats } = useChatList.getState();

@@ -1,8 +1,8 @@
 import create, { State } from "zustand";
 import { combine, devtools } from "zustand/middleware";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { WebSocketContext } from "../providers/WebSocketProvider";
-import useProfile, { IUser } from "./useProfile";
+import { IUser } from "./useProfile";
 import useChatList from "./useChatList";
 import { IChatListItem } from "../modules/ChatList/ChatListItem";
 import useMediaStream, { useMediaStreamState } from "./call/useMediaStream";
@@ -15,17 +15,23 @@ type CallStatus =
   | "call"
   | "call_outgoing"
   | "call_incoming"
-  | "call_rejected"
-  | "call_ended";
+  | "call_rejected";
 export type RejectReason = "BUSY" | "REJECT";
 
+interface CallUserState {
+  muted: boolean;
+  deafened: boolean;
+  video: boolean;
+}
+
 interface IUseCallStateProps extends State {
+  userState: CallUserState;
   rejectReason: RejectReason;
   callStatus: CallStatus;
   receiverId: string;
   receiverProfile: IUser;
-  isVideo: boolean;
   receiverStream: MediaStream;
+  receiverState: CallUserState;
   peer: Peer.Instance;
 }
 
@@ -33,20 +39,31 @@ interface IUseCallState extends IUseCallStateProps {
   setReceiverId: (receiverId: string) => void;
   setReceiverProfile: (receiverProfile: IUser) => void;
   setStatus: (status: CallStatus) => void;
-  setIsVideo: (isVideo: boolean) => void;
   setRejectReason: (rejectReason: RejectReason) => void;
   setReceiverStream: (receiverStream: MediaStream) => void;
   setPeer: (peer: Peer.Instance) => void;
+  setReceiverState: (receiverState: CallUserState) => void;
+  setUserState: (userState: CallUserState) => void;
+  resetCallState: () => void;
 }
 
 const initialState: IUseCallStateProps = {
+  userState: {
+    muted: false,
+    video: false,
+    deafened: false,
+  },
   rejectReason: null,
   callStatus: "idle",
   receiverId: null,
   receiverProfile: null,
-  isVideo: false,
   receiverStream: null,
   peer: null,
+  receiverState: {
+    muted: false,
+    video: false,
+    deafened: false,
+  },
 };
 
 const useCallState = create<IUseCallState>(
@@ -54,17 +71,34 @@ const useCallState = create<IUseCallState>(
     combine(initialState, (set) => ({
       setReceiverId: (receiverId: string) => set({ receiverId }),
       setStatus: (status: CallStatus) => set({ callStatus: status }),
-      setIsVideo: (isVideo: boolean) => set({ isVideo }),
       setRejectReason: (rejectReason: RejectReason) => set({ rejectReason }),
       setReceiverProfile: (receiverProfile: IUser) => set({ receiverProfile }),
       setReceiverStream: (receiverStream: MediaStream) =>
         set({ receiverStream }),
       setPeer: (peer: Peer.Instance) => set({ peer }),
+      setReceiverState: (receiverState: CallUserState) =>
+        set({ receiverState }),
+      setUserState: (userState: CallUserState) => set({ userState }),
+      resetCallState: () => {
+        set({
+          receiverState: {
+            muted: false,
+            video: false,
+            deafened: false,
+          },
+          userState: {
+            muted: false,
+            video: false,
+            deafened: false,
+          },
+        });
+      },
     }))
   )
 );
 
 export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
+  if (!chats) return null;
   const chat = chats.find((chat) => {
     return (
       chat.chat.participants[0].user.oauthId === userId &&
@@ -77,21 +111,45 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const useCall = () => {
   const callState = useCallState();
-  const { setVideoEnabled, setAudioEnabled, videoEnabled } =
+  const { setVideoEnabled, setAudioEnabled, ...mediaConfig } =
     useMediaConfigurations();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
-  const { getMediaStream, mediaStream } = useMediaStream();
+  const { getMediaStream, mediaStream, setMediaStream } = useMediaStream();
 
   useEffect(() => {
-    if (callState.callStatus === "call" && callState.peer) {
-      callState.peer.addStream(mediaStream);
+    if (socket)
+      socket.emit("receiver_state", callState.receiverId, callState.userState);
+    if (mediaStream) {
+      mediaStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = callState.userState.video));
+      mediaStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = !callState.userState.muted));
+      setMediaStream(mediaStream);
     }
-  }, [mediaStream]);
+  }, [callState.userState, mediaStream]);
 
-  const make_peer_call = async (video: boolean) => {
+  useEffect(() => {
+    if (
+      callState.callStatus !== "call_outgoing" &&
+      callState.callStatus !== "call"
+    ) {
+      if (mediaStream) mediaStream.getTracks().forEach((track) => track.stop());
+      if (callState.peer) {
+        callState.peer.destroy();
+        callState.setPeer(null);
+        callState.setReceiverStream(null);
+      }
+    }
+  }, [callState.callStatus]);
+
+  const make_peer_call = async () => {
+    setAudioEnabled(true);
+    setVideoEnabled(true);
     const stream = await getMediaStream({
-      videoEnabled: video,
+      videoEnabled: true,
       audioEnabled: true,
     });
     const newPeer = new Peer({ initiator: true, stream: stream });
@@ -103,9 +161,14 @@ const useCall = () => {
     callState.setReceiverId(null);
   };
 
-  const acceptCall = async (video: boolean = false) => {
+  const acceptCall = async (video: boolean) => {
     try {
-      const newPeer = await make_peer_call(video);
+      const newPeer = await make_peer_call();
+      callState.setUserState({
+        muted: false,
+        video: video,
+        deafened: false,
+      });
       newPeer.on("signal", (signalData) => {
         const { callStatus, receiverId, setStatus } = useCallState.getState();
         if (callStatus === "call_incoming") {
@@ -131,12 +194,17 @@ const useCall = () => {
   };
 
   const makeCall = async (receiverId: string, video: boolean = false) => {
-    socket.emit("make_call", receiverId, video);
+    socket.emit("make_call", receiverId);
     callState.setStatus("call_outgoing");
     callState.setReceiverId(receiverId);
     callState.setReceiverProfile(findUserFromChat(chats, receiverId));
     setVideoEnabled(video);
     setAudioEnabled(true);
+    callState.setUserState({
+      muted: false,
+      video,
+      deafened: false,
+    });
     getMediaStream({ videoEnabled: video, audioEnabled: true });
   };
 
@@ -171,11 +239,15 @@ const useCall = () => {
   };
 
   const receiveSignalData = (
-    receiverId: string,
+    _receiverId: string,
     signalData: Peer.SignalData
   ) => {
     const { peer } = useCallState.getState();
-    peer.signal(signalData);
+    if (peer) peer.signal(signalData);
+  };
+
+  const updateReceiverState = (receiverState: CallUserState) => {
+    callState.setReceiverState(receiverState);
   };
 
   const onCallDisconnect = (msg) => {
@@ -184,7 +256,7 @@ const useCall = () => {
       if (callState.receiverId === msg.oauthId) {
         switch (callState.callStatus) {
           case "call":
-            callState.setStatus("call_ended");
+            callState.setStatus("idle");
             break;
           case "call_incoming":
             callState.setStatus("idle");
@@ -192,9 +264,10 @@ const useCall = () => {
             callState.setReceiverProfile(null);
             break;
           case "call_outgoing":
-            callState.setStatus("call_ended");
+            callState.setStatus("idle");
             break;
         }
+        callState.resetCallState();
       }
     }
   };
@@ -208,6 +281,7 @@ const useCall = () => {
     callAccepted,
     receiveSignalData,
     onCallDisconnect,
+    updateReceiverState,
   };
 };
 

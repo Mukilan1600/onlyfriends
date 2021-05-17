@@ -5,9 +5,12 @@ interface VideoPreviewProps {
   video?: MediaStream;
   avatarUrl: string;
   muted?: boolean;
+  enabled?: boolean;
 }
 
-const NoVideoTemplate = styled.div`
+const VideoTemplate = styled.div`
+  max-height: 100px;
+  max-width: 130px;
   height: 100px;
   width: 130px;
   background-color: black;
@@ -25,32 +28,36 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({
   video,
   avatarUrl,
   muted,
+  enabled,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
   const audioRef = useRef<HTMLAudioElement>();
 
   useEffect(() => {
-    if (video && video.getVideoTracks().length > 0) {
+    if (video && videoRef.current) {
       videoRef.current.muted = muted;
       videoRef.current.srcObject = video;
     }
-    audioRef.current.srcObject = video;
-    audioRef.current.muted = muted;
-  }, [video]);
-
+    if (audioRef.current) {
+      audioRef.current.srcObject = video;
+      audioRef.current.muted = muted;
+    }
+  }, [video, videoRef.current, audioRef.current]);
   return (
     <>
-      {video && video.getVideoTracks().length > 0 ? (
-        <video ref={videoRef} height="100px" width="130px" autoPlay muted />
+      {video && video.getVideoTracks().length > 0 && enabled ? (
+        <VideoTemplate>
+          <video ref={videoRef} height="100px" width="130px" autoPlay muted />
+        </VideoTemplate>
       ) : (
-        <NoVideoTemplate>
+        <VideoTemplate>
           <img
             src={avatarUrl}
             height="35px"
             width="35px"
             alt="call thumbmail"
           />
-        </NoVideoTemplate>
+        </VideoTemplate>
       )}
       <audio ref={audioRef} autoPlay />
     </>
