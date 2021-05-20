@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
+import { PeerCallContext, usePeerCallState } from "../../providers/PeerCallWrapper";
 import EndCall from "../../statics/icons/EndCall";
 import MicOn from "../../statics/icons/MicOn";
 import SpeakerOn from "../../statics/icons/SpeakerOn";
@@ -62,9 +63,10 @@ const ControlButton = styled.button`
 
 const CallPreview: React.FC = () => {
   const { user } = useProfile();
-  const { callState, acceptCall } = useCall();
+  const callState = usePeerCallState();
+  const { acceptCall } = useContext(PeerCallContext);
   const { mediaStream } = useMediaStream();
-  const { videoEnabled, setVideoEnabled } = useMediaConfigurations();
+  const { hasAudio, hasVideo } = useMediaConfigurations();
 
   const toggleVideo = () => {
     callState.setUserState({
@@ -84,20 +86,7 @@ const CallPreview: React.FC = () => {
       case "call_incoming":
         return (
           <>
-            <TitleName>{callState.receiverProfile.name}</TitleName> incoming
-            call...
-          </>
-        );
-      case "call_rejected":
-        return callState.rejectReason === "BUSY" ? (
-          <>
-            <TitleName>{callState.receiverProfile.name}</TitleName> is on
-            another call...
-          </>
-        ) : (
-          <>
-            <TitleName>{callState.receiverProfile.name}</TitleName> is
-            unavailable to take calls...
+            <TitleName>{callState.receiverProfile.name}</TitleName> incoming call...
           </>
         );
       case "call":
@@ -150,17 +139,8 @@ const CallPreview: React.FC = () => {
         <>
           <CallStatus>{getPreviewStatus()}</CallStatus>
           <div style={{ display: "flex" }}>
-            <VideoPreview
-              avatarUrl={user.avatarUrl}
-              muted={true}
-              video={mediaStream}
-              enabled={callState.userState.video}
-            />
-            <VideoPreview
-              avatarUrl={callState.receiverProfile.avatarUrl}
-              video={callState.receiverStream}
-              enabled={callState.receiverState.video}
-            />
+            <VideoPreview avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
+            <VideoPreview avatarUrl={callState.receiverProfile.avatarUrl} video={callState.receiverStream} enabled={callState.receiverState.video} />
           </div>
 
           <div style={{ display: "flex" }}>{getCallControls()}</div>

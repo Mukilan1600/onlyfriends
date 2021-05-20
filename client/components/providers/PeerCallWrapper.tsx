@@ -1,0 +1,275 @@
+import { createContext, useContext, useEffect, useState } from "react";
+import useMediaStream, { useMediaStreamState } from "../stores/call/useMediaStream";
+import { IUser } from "../stores/useProfile";
+import Peer from "simple-peer";
+import { WebSocketContext } from "./WebSocketProvider";
+import create, { State } from "zustand";
+import { combine } from "zustand/middleware";
+import { IChatListItem } from "../modules/ChatList/ChatListItem";
+import useChatList from "../stores/useChatList";
+import { Socket } from "socket.io-client";
+import useChat from "../stores/useChat";
+
+type CallStatus = "idle" | "call" | "call_outgoing" | "call_incoming";
+export type RejectReason = "BUSY" | "REJECT";
+
+interface UserCallOptions {
+  muted: boolean;
+  video: boolean;
+  deafened: boolean;
+}
+
+interface IPeerCallState extends State {
+  userState: UserCallOptions;
+  callStatus: CallStatus;
+  receiverId: string;
+  receiverProfile: IUser;
+  receiverStream: MediaStream;
+  receiverState: UserCallOptions;
+  peer: Peer.Instance;
+}
+
+const initialCallOptions: UserCallOptions = {
+  muted: true,
+  video: false,
+  deafened: false,
+};
+
+const initialPeerCallState: IPeerCallState = {
+  userState: initialCallOptions,
+  callStatus: "idle",
+  receiverId: null,
+  receiverProfile: null,
+  receiverStream: null,
+  peer: null,
+  receiverState: initialCallOptions,
+};
+
+interface IPeerCallStateSetters extends IPeerCallState {
+  setReceiverId: (receiverId: string) => void;
+  setReceiverProfile: (receiverProfile: IUser) => void;
+  setStatus: (status: CallStatus) => void;
+  setRejectReason: (rejectReason: RejectReason) => void;
+  setReceiverStream: (receiverStream: MediaStream) => void;
+  setPeer: (peer: Peer.Instance) => void;
+  setReceiverState: (receiverState: UserCallOptions) => void;
+  setUserState: (userState: UserCallOptions) => void;
+  resetCallState: () => void;
+}
+
+export const usePeerCallState = create<IPeerCallStateSetters>(
+  combine(initialPeerCallState, (set) => ({
+    setReceiverId: (receiverId: string) => set({ receiverId }),
+    setStatus: (status: CallStatus) => set({ callStatus: status }),
+    setRejectReason: (rejectReason: RejectReason) => set({ rejectReason }),
+    setReceiverProfile: (receiverProfile: IUser) => set({ receiverProfile }),
+    setReceiverStream: (receiverStream: MediaStream) => set({ receiverStream }),
+    setPeer: (peer: Peer.Instance) => set({ peer }),
+    setReceiverState: (receiverState: UserCallOptions) => set({ receiverState }),
+    setUserState: (userState: UserCallOptions) => set({ userState }),
+    resetCallState: () =>
+      set({
+        receiverState: initialCallOptions,
+        userState: initialCallOptions,
+      }),
+  }))
+);
+
+interface IPeerCallContext {
+  makeCall: (receiverId: string, video: boolean) => Promise<void>;
+  acceptCall: (video: boolean) => Promise<void>;
+}
+
+export const PeerCallContext = createContext<IPeerCallContext>(null);
+
+export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
+  if (!chats) return null;
+  const chat = chats.find((chat) => {
+    return chat.chat.participants[0].user.oauthId === userId && chat.chat.type === "personal";
+  });
+  if (chat) return chat.chat.participants[0].user;
+  else return null;
+};
+
+const PeerCallWrapper: React.FC = ({ children }) => {
+  const peerCallState = usePeerCallState();
+  const { waitForMediaStream } = useMediaStream();
+  const { socket } = useContext(WebSocketContext);
+  const { chats } = useChatList();
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("incoming_call", (receiverId: string) => {
+      const peerCallState = usePeerCallState.getState();
+
+      if (peerCallState.callStatus === "call_incoming" || peerCallState.callStatus === "call") {
+        rejectCall("BUSY", receiverId);
+      } else {
+        peerCallState.setReceiverProfile(findUserFromChat(useChatList.getState().chats, receiverId));
+        peerCallState.setReceiverId(receiverId);
+        peerCallState.setStatus("call_incoming");
+      }
+    });
+
+    socket.on("call_rejected", (reason: RejectReason) => {
+      const peerCallState = usePeerCallState.getState();
+
+      peerCallState.setReceiverId(null);
+      peerCallState.setStatus("idle");
+    });
+
+    socket.on("call_accepted", callAccepted.bind(this, socket));
+
+    socket.on("signal_data", receiveSignalData);
+
+    socket.on("receiver_state", updateReceiverState);
+
+    socket.on("update_friend_status", (msg) => {
+      const { chats, setChats } = useChatList.getState();
+      const { chat, setChat } = useChat.getState();
+
+      onCallDisconnect(msg);
+
+      if (chats)
+        setChats(
+          chats.map((chat) => {
+            const newParticipants = chat.chat.participants.map((participant) => {
+              if (participant.user.oauthId === msg.oauthId) {
+                return {
+                  ...participant,
+                  user: { ...participant.user, ...msg, isTyping: false },
+                };
+              } else return participant;
+            });
+            chat.chat.participants = newParticipants;
+            return chat;
+          })
+        );
+      if (chat) {
+        const newParticipants = chat.participants.map((participant) => {
+          if (participant.user.oauthId === msg.oauthId) {
+            return {
+              ...participant,
+              user: { ...participant.user, ...msg, isTyping: false },
+            };
+          } else return participant;
+        });
+        chat.participants = newParticipants;
+        setChat(chat);
+      }
+    });
+  }, [socket]);
+
+  const rejectCall = (reason: RejectReason, receiverId?: string) => {
+    socket.emit("reject_call", receiverId ?? peerCallState.receiverId, reason);
+    peerCallState.setReceiverId(null);
+  };
+
+  const acceptCall = async (video: boolean) => {
+    try {
+      const mediaStream = await waitForMediaStream();
+      const newPeer = new Peer({ initiator: true, stream: mediaStream });
+      peerCallState.setUserState({
+        muted: false,
+        video: video,
+        deafened: false,
+      });
+      newPeer.on("signal", (signalData) => {
+        const { callStatus, receiverId, setStatus } = usePeerCallState.getState();
+        if (callStatus === "call_incoming") {
+          socket.emit("accept_call", receiverId, signalData);
+          setStatus("call");
+        } else {
+          socket.emit("signal_data", receiverId, signalData);
+        }
+      });
+      newPeer.on("stream", (stream: MediaStream) => {
+        peerCallState.setReceiverStream(stream);
+      });
+      newPeer.on("error", (error) => {
+        console.error(error);
+      });
+      peerCallState.setPeer(newPeer);
+    } catch (error) {}
+  };
+
+  const cancelCall = () => {
+    peerCallState.setStatus("idle");
+    socket.emit("cancel_call",peerCallState.receiverId);
+    peerCallState.setReceiverId(null);
+  };
+
+  const makeCall = async (receiverId: string, video: boolean = false) => {
+    socket.emit("make_call", receiverId, video);
+    peerCallState.setStatus("call_outgoing");
+    peerCallState.setReceiverId(receiverId);
+    peerCallState.setReceiverProfile(findUserFromChat(chats, receiverId));
+    peerCallState.setUserState({
+      muted: false,
+      video,
+      deafened: false,
+    });
+    waitForMediaStream();
+  };
+
+  const callAccepted = async (socket: Socket, receiverId: string, signalData: Peer.SignalData) => {
+    const callState = usePeerCallState.getState();
+    const { mediaStream } = useMediaStreamState.getState();
+    if (receiverId !== callState.receiverId) return;
+    try {
+      const newPeer = new Peer({ initiator: false, stream: mediaStream });
+      newPeer.signal(signalData);
+      newPeer.on("signal", (data) => {
+        const callState = usePeerCallState.getState();
+        socket.emit("signal_data", receiverId, data);
+        if (callState.callStatus === "call_outgoing") {
+          callState.setStatus("call");
+        }
+      });
+      newPeer.on("stream", (stream: MediaStream) => {
+        callState.setReceiverStream(stream);
+      });
+      newPeer.on("error", (error) => {
+        console.error(error);
+      });
+      callState.setPeer(newPeer);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const receiveSignalData = (_receiverId: string, signalData: Peer.SignalData) => {
+    const { peer } = usePeerCallState.getState();
+    if (peer) peer.signal(signalData);
+  };
+
+  const updateReceiverState = (receiverState: UserCallOptions) => {
+    peerCallState.setReceiverState(receiverState);
+  };
+
+  const onCallDisconnect = (msg) => {
+    const peerCallState = usePeerCallState.getState();
+    if (!msg.online) {
+      if (peerCallState.receiverId === msg.oauthId) {
+        switch (peerCallState.callStatus) {
+          case "call":
+            peerCallState.setStatus("idle");
+            break;
+          case "call_incoming":
+            peerCallState.setStatus("idle");
+            peerCallState.setReceiverId(null);
+            peerCallState.setReceiverProfile(null);
+            break;
+          case "call_outgoing":
+            peerCallState.setStatus("idle");
+            break;
+        }
+        peerCallState.resetCallState();
+      }
+    }
+  };
+
+  return <PeerCallContext.Provider value={{ acceptCall, makeCall }}>{children}</PeerCallContext.Provider>;
+};
+
+export default PeerCallWrapper;
