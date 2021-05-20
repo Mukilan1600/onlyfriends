@@ -32,8 +32,9 @@ const useMediaStream = () => {
         videoEnabled: hasVideo && video,
         audioEnabled: hasAudio && audio,
       };
-      if (video && !hasVideo) toast("No camera found", { type: "error" });
-      if (audio && !hasAudio) toast("No Mic found", { type: "error" });
+      // if (video && !hasVideo) toast("No camera found", { type: "error" });
+      // if (audio && !hasAudio) toast("No Mic found", { type: "error" });
+      setAvailableDevices(hasVideo, hasAudio);
       return correctedConfig;
     } catch (error) {
       console.error(error);
@@ -41,16 +42,21 @@ const useMediaStream = () => {
   };
 
   const onMediaDeviceChange = async () => {
-    const { peer } = usePeerCallState.getState();
+    const { peer, setUserState, userState } = usePeerCallState.getState();
     const { mediaStream } = useMediaStreamState.getState();
-    let newMediaConfigurations = await checkDevicesExist(true, true);
-    setAvailableDevices(newMediaConfigurations.videoEnabled, newMediaConfigurations.audioEnabled);
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: newMediaConfigurations.videoEnabled,
-      audio: newMediaConfigurations.audioEnabled,
-    });
-    setMediaStream(stream);
     try {
+      let newMediaConfigurations = await checkDevicesExist(true, true);
+      setUserState({
+        muted: userState.muted || !newMediaConfigurations.audioEnabled,
+        video: userState.video && newMediaConfigurations.videoEnabled,
+        deafened: userState.deafened,
+      });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: newMediaConfigurations.videoEnabled,
+        audio: newMediaConfigurations.audioEnabled,
+      });
+      setMediaStream(stream);
+
       if (mediaStream) {
         let exists = false;
         stream.getTracks().forEach((track) => {
@@ -74,13 +80,11 @@ const useMediaStream = () => {
     }
   };
 
-  const waitForMediaStream = async () => {
+  const waitForMediaStream = async (video: boolean, audio: boolean) => {
     try {
-      let newMediaConfigurations = await checkDevicesExist(true, true);
-      setAvailableDevices(newMediaConfigurations.videoEnabled, newMediaConfigurations.audioEnabled);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: newMediaConfigurations.videoEnabled,
-        audio: newMediaConfigurations.audioEnabled,
+        video: video,
+        audio: audio,
       });
       setMediaStream(stream);
       navigator.mediaDevices.ondevicechange = onMediaDeviceChange;
@@ -90,7 +94,7 @@ const useMediaStream = () => {
     }
   };
 
-  return { mediaStream, waitForMediaStream, setMediaStream };
+  return { mediaStream, waitForMediaStream, setMediaStream, checkDevicesExist };
 };
 
 export default useMediaStream;

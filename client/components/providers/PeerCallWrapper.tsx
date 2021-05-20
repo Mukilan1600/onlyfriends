@@ -93,9 +93,16 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const PeerCallWrapper: React.FC = ({ children }) => {
   const peerCallState = usePeerCallState();
-  const { waitForMediaStream } = useMediaStream();
+  const { mediaStream, waitForMediaStream, checkDevicesExist } = useMediaStream();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
+
+  useEffect(() => {
+    if (mediaStream) {
+      mediaStream.getVideoTracks().forEach((track) => (track.enabled = peerCallState.userState.video));
+      mediaStream.getAudioTracks().forEach((track) => (track.enabled = !peerCallState.userState.muted));
+    }
+  }, [peerCallState.userState]);
 
   useEffect(() => {
     if (!socket) return;
@@ -167,11 +174,13 @@ const PeerCallWrapper: React.FC = ({ children }) => {
 
   const acceptCall = async (video: boolean) => {
     try {
-      const mediaStream = await waitForMediaStream();
+      const availableMedia = await checkDevicesExist(video, true);
+      const mediaStream = await waitForMediaStream(availableMedia.videoEnabled, availableMedia.audioEnabled);
+
       const newPeer = new Peer({ initiator: true, stream: mediaStream });
       peerCallState.setUserState({
-        muted: false,
-        video: video,
+        muted: !availableMedia.audioEnabled,
+        video: availableMedia.videoEnabled,
         deafened: false,
       });
       newPeer.on("signal", (signalData) => {
@@ -190,26 +199,33 @@ const PeerCallWrapper: React.FC = ({ children }) => {
         console.error(error);
       });
       peerCallState.setPeer(newPeer);
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const cancelCall = () => {
     peerCallState.setStatus("idle");
-    socket.emit("cancel_call",peerCallState.receiverId);
+    socket.emit("cancel_call", peerCallState.receiverId);
     peerCallState.setReceiverId(null);
   };
 
   const makeCall = async (receiverId: string, video: boolean = false) => {
-    socket.emit("make_call", receiverId, video);
-    peerCallState.setStatus("call_outgoing");
-    peerCallState.setReceiverId(receiverId);
-    peerCallState.setReceiverProfile(findUserFromChat(chats, receiverId));
-    peerCallState.setUserState({
-      muted: false,
-      video,
-      deafened: false,
-    });
-    waitForMediaStream();
+    try {
+      socket.emit("make_call", receiverId, video);
+      peerCallState.setStatus("call_outgoing");
+      peerCallState.setReceiverId(receiverId);
+      peerCallState.setReceiverProfile(findUserFromChat(chats, receiverId));
+      const availableMedia = await checkDevicesExist(video, true);
+      const mediaStream = await waitForMediaStream(availableMedia.videoEnabled, availableMedia.audioEnabled);
+      peerCallState.setUserState({
+        muted: availableMedia.audioEnabled,
+        video: availableMedia.videoEnabled,
+        deafened: false,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const callAccepted = async (socket: Socket, receiverId: string, signalData: Peer.SignalData) => {

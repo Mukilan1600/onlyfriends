@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 import { PeerCallContext, usePeerCallState } from "../../providers/PeerCallWrapper";
 import EndCall from "../../statics/icons/EndCall";
+import MicOff from "../../statics/icons/MicOff";
 import MicOn from "../../statics/icons/MicOn";
 import SpeakerOn from "../../statics/icons/SpeakerOn";
 import VideoOn from "../../statics/icons/VideoOn";
@@ -75,6 +76,13 @@ const CallPreview: React.FC = () => {
     });
   };
 
+  const toggleAudio = () => {
+    callState.setUserState({
+      ...callState.userState,
+      muted: !callState.userState.muted,
+    });
+  };
+
   const getPreviewStatus = () => {
     switch (callState.callStatus) {
       case "call_outgoing":
@@ -122,9 +130,7 @@ const CallPreview: React.FC = () => {
             <ControlButton>
               <SpeakerOn />
             </ControlButton>
-            <ControlButton>
-              <MicOn />
-            </ControlButton>
+            <ControlButton onClick={() => toggleAudio()}>{callState.userState.muted ? <MicOff /> : <MicOn />}</ControlButton>
             <ControlButton>
               <EndCall />
             </ControlButton>
