@@ -93,7 +93,7 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const PeerCallWrapper: React.FC = ({ children }) => {
   const peerCallState = usePeerCallState();
-  const { mediaStream, waitForMediaStream, checkDevicesExist } = useMediaStream();
+  const { mediaStream, waitForMediaStream, checkDevicesExist, endMediaStream } = useMediaStream();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
 
@@ -102,7 +102,11 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       mediaStream.getVideoTracks().forEach((track) => (track.enabled = peerCallState.userState.video));
       mediaStream.getAudioTracks().forEach((track) => (track.enabled = !peerCallState.userState.muted));
     }
-  }, [peerCallState.userState]);
+  }, [peerCallState.userState, mediaStream]);
+
+  useEffect(() => {
+    if (socket && peerCallState.receiverId) socket.emit("receiver_state", peerCallState.receiverId, peerCallState.userState);
+  }, [peerCallState.userState, peerCallState.receiverId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -267,20 +271,11 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     const peerCallState = usePeerCallState.getState();
     if (!msg.online) {
       if (peerCallState.receiverId === msg.oauthId) {
-        switch (peerCallState.callStatus) {
-          case "call":
-            peerCallState.setStatus("idle");
-            break;
-          case "call_incoming":
-            peerCallState.setStatus("idle");
-            peerCallState.setReceiverId(null);
-            peerCallState.setReceiverProfile(null);
-            break;
-          case "call_outgoing":
-            peerCallState.setStatus("idle");
-            break;
-        }
+        peerCallState.setStatus("idle");
+        peerCallState.setReceiverId(null);
+        peerCallState.setReceiverProfile(null);
         peerCallState.resetCallState();
+        endMediaStream();
       }
     }
   };
