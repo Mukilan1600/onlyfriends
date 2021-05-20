@@ -8,7 +8,6 @@ import SpeakerOn from "../../statics/icons/SpeakerOn";
 import VideoOn from "../../statics/icons/VideoOn";
 import useMediaConfigurations from "../../stores/call/useMediaConfiguration";
 import useMediaStream from "../../stores/call/useMediaStream";
-import useCall from "../../stores/useCall";
 import useProfile from "../../stores/useProfile";
 import VideoPreview from "./VideoPreview";
 
@@ -65,7 +64,7 @@ const ControlButton = styled.button`
 const CallPreview: React.FC = () => {
   const { user } = useProfile();
   const callState = usePeerCallState();
-  const { acceptCall } = useContext(PeerCallContext);
+  const { acceptCall, endCall } = useContext(PeerCallContext);
   const { mediaStream } = useMediaStream();
   const { hasAudio, hasVideo } = useMediaConfigurations();
 
@@ -131,7 +130,7 @@ const CallPreview: React.FC = () => {
               <SpeakerOn />
             </ControlButton>
             <ControlButton onClick={() => toggleAudio()}>{callState.userState.muted ? <MicOff /> : <MicOn />}</ControlButton>
-            <ControlButton>
+            <ControlButton onClick={() => endCall()}>
               <EndCall />
             </ControlButton>
           </ButtonPanel>

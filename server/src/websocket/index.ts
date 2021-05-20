@@ -34,11 +34,7 @@ class WebSocket {
         credentials: true,
       },
     }).use((socket: Socket, next: any) => {
-      if (
-        socket.handshake.query &&
-        socket.handshake.query.jwtTok &&
-        socket.handshake.query.jwtTok !== "null"
-      ) {
+      if (socket.handshake.query && socket.handshake.query.jwtTok && socket.handshake.query.jwtTok !== "null") {
         const token = socket.handshake.query.jwtTok as string;
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded: any) => {
           if (err) {
@@ -56,12 +52,7 @@ class WebSocket {
 
   private initializeSocketListeners() {
     this.io.on("connection", async (socket: Socket) => {
-      if (
-        !this.AuthenticateUserAndDropPreviousConnections(
-          socket.id,
-          socket.oauthId
-        )
-      ) {
+      if (!this.AuthenticateUserAndDropPreviousConnections(socket.id, socket.oauthId)) {
         socket.disconnect(true);
         return;
       }
@@ -106,9 +97,7 @@ class WebSocket {
         try {
           const user = await sendFriendRequest(socket.oauthId, username);
           if (user) {
-            this.io
-              .to(user.socketId)
-              .emit("friend_requests", user.friendRequests);
+            this.io.to(user.socketId).emit("friend_requests", user.friendRequests);
             const sentRequests = await getFriendRequestsSent(socket.oauthId);
             socket.emit("friend_requests_sent", sentRequests);
             socket.emit("success", { msg: "Request sent successfully" });
@@ -141,12 +130,8 @@ class WebSocket {
 
       socket.on("ignore_friend_request", async ({ userId }) => {
         try {
-          const user = await User.findOne({ oauthId: socket.oauthId }).populate(
-            "friendRequests.user"
-          );
-          const index = user.friendRequests.findIndex(
-            (request) => request.user.oauthId == userId
-          );
+          const user = await User.findOne({ oauthId: socket.oauthId }).populate("friendRequests.user");
+          const index = user.friendRequests.findIndex((request) => request.user.oauthId == userId);
           if (index !== -1) {
             user.friendRequests[index].ignored = true;
           }
@@ -173,9 +158,7 @@ class WebSocket {
 
       socket.on("send_message", async (chatId, msg) => {
         try {
-          const chat = await Chat.findById(chatId).populate(
-            "participants.user"
-          );
+          const chat = await Chat.findById(chatId).populate("participants.user");
           const user = await User.findOne({ oauthId: socket.oauthId });
           msg.sentBy = user._id;
           msg.readBy = [user._id];
@@ -195,13 +178,11 @@ class WebSocket {
           );
           await message.save();
           chat.participants.forEach((participant) => {
-            this.io
-              .to(participant.user.socketId)
-              .emit("receive_message", chatId, {
-                ...message.toObject(),
-                createdAt: Date.now(),
-                replyTo: msg.replyTo,
-              });
+            this.io.to(participant.user.socketId).emit("receive_message", chatId, {
+              ...message.toObject(),
+              createdAt: Date.now(),
+              replyTo: msg.replyTo,
+            });
           });
         } catch (error) {
           socket.emit("error", { msg: "Internal server error" });
@@ -221,46 +202,28 @@ class WebSocket {
         }
       });
 
-      socket.on(
-        "acknowledge_messages",
-        async (chatId: string, messageIds: string[]) => {
-          try {
-            const user = await User.findOne({ oauthId: socket.oauthId });
-            const messagesAck = await Message.updateMany(
-              { _id: { $in: messageIds } },
-              { $addToSet: { readBy: user } }
-            );
-            const chat = await Chat.findById(chatId).populate(
-              "participants.user"
-            );
-            const participantIndex = chat.participants.findIndex(
-              (participant) => participant.user.oauthId === socket.oauthId
-            );
-            const setIndexQuery = `participants.${participantIndex}.unread`;
-            await Chat.updateOne(
-              { _id: chat._id },
-              { $inc: { [setIndexQuery]: -messagesAck.nModified } }
-            );
-            chat.participants.forEach((participant, i) => {
-              this.io
-                .to(participant.user.socketId)
-                .emit("message_acks", chatId, messageIds, user._id);
-            });
-          } catch (error) {
-            socket.emit("error", { msg: "Internal server error" });
-            logger.error(error, { service: "socket.acknowledge_messages" });
-          }
+      socket.on("acknowledge_messages", async (chatId: string, messageIds: string[]) => {
+        try {
+          const user = await User.findOne({ oauthId: socket.oauthId });
+          const messagesAck = await Message.updateMany({ _id: { $in: messageIds } }, { $addToSet: { readBy: user } });
+          const chat = await Chat.findById(chatId).populate("participants.user");
+          const participantIndex = chat.participants.findIndex((participant) => participant.user.oauthId === socket.oauthId);
+          const setIndexQuery = `participants.${participantIndex}.unread`;
+          await Chat.updateOne({ _id: chat._id }, { $inc: { [setIndexQuery]: -messagesAck.nModified } });
+          chat.participants.forEach((participant, i) => {
+            this.io.to(participant.user.socketId).emit("message_acks", chatId, messageIds, user._id);
+          });
+        } catch (error) {
+          socket.emit("error", { msg: "Internal server error" });
+          logger.error(error, { service: "socket.acknowledge_messages" });
         }
-      );
+      });
 
       socket.on("get_chat_details", async (chatId) => {
         try {
           var chat = null;
           if (Types.ObjectId.isValid(chatId)) {
-            chat = await Chat.findById(chatId, "-messages").populate(
-              "participants.user",
-              "name avatarUrl online lastSeen oauthId"
-            );
+            chat = await Chat.findById(chatId, "-messages").populate("participants.user", "name avatarUrl online lastSeen oauthId");
           }
           socket.emit("chat_details", chat);
         } catch (error) {
@@ -271,14 +234,10 @@ class WebSocket {
 
       socket.on("is_typing", async (chatId, isTyping) => {
         try {
-          const chat = await Chat.findById(chatId, "-messages").populate(
-            "participants.user"
-          );
+          const chat = await Chat.findById(chatId, "-messages").populate("participants.user");
           chat.participants.forEach((participant) => {
             if (participant.user.oauthId !== socket.oauthId)
-              this.io
-                .to(participant.user.socketId)
-                .emit("is_typing", chatId, socket.oauthId, isTyping);
+              this.io.to(participant.user.socketId).emit("is_typing", chatId, socket.oauthId, isTyping);
           });
         } catch (error) {
           socket.emit("error", { msg: "Internal server error" });
@@ -324,25 +283,27 @@ class WebSocket {
       // Call
       socket.on("make_call", async (receiverId: string, video: boolean) => {
         const socketId = await getSocketId(receiverId);
-        if (socketId)
-          this.io.to(socketId).emit("incoming_call", socket.oauthId, video);
+        if (socketId) this.io.to(socketId).emit("incoming_call", socket.oauthId, video);
       });
 
       socket.on("accept_call", async (receiverId: string, data: any) => {
         const socketId = await getSocketId(receiverId);
-        if (socketId)
-          this.io.to(socketId).emit("call_accepted", socket.oauthId, data);
+        if (socketId) this.io.to(socketId).emit("call_accepted", socket.oauthId, data);
       });
 
       socket.on("signal_data", async (receiverId: string, data: any) => {
         const socketId = await getSocketId(receiverId);
-        if (socketId)
-          this.io.to(socketId).emit("signal_data", socket.oauthId, data);
+        if (socketId) this.io.to(socketId).emit("signal_data", socket.oauthId, data);
       });
 
       socket.on("receiver_state", async (receiverId: string, data: any) => {
         const socketId = await getSocketId(receiverId);
         if (socketId) this.io.to(socketId).emit("receiver_state", data);
+      });
+
+      socket.on("end_call", async (receiverId: string) => {
+        const socketId = await getSocketId(receiverId);
+        if (socketId) this.io.to(socketId).emit("end_call");
       });
 
       try {
@@ -367,22 +328,13 @@ class WebSocket {
         logger.error(err, { service: "socket.connect" });
       }
 
-      logger.info(
-        `Incoming socket connection Id: ${socket.id} UserId: ${socket.oauthId}`
-      );
+      logger.info(`Incoming socket connection Id: ${socket.id} UserId: ${socket.oauthId}`);
     });
   }
 
-  private async AuthenticateUserAndDropPreviousConnections(
-    socketId: string,
-    oauthId: string
-  ): Promise<boolean> {
+  private async AuthenticateUserAndDropPreviousConnections(socketId: string, oauthId: string): Promise<boolean> {
     try {
-      const doc = await User.findOneAndUpdate(
-        { oauthId },
-        { socketId },
-        { returnOriginal: true, useFindAndModify: false }
-      );
+      const doc = await User.findOneAndUpdate({ oauthId }, { socketId }, { returnOriginal: true, useFindAndModify: false });
       if (!doc) {
         return false;
       }

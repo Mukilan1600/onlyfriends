@@ -78,6 +78,7 @@ export const usePeerCallState = create<IPeerCallStateSetters>(
 interface IPeerCallContext {
   makeCall: (receiverId: string, video: boolean) => Promise<void>;
   acceptCall: (video: boolean) => Promise<void>;
+  endCall: () => void;
 }
 
 export const PeerCallContext = createContext<IPeerCallContext>(null);
@@ -93,7 +94,7 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const PeerCallWrapper: React.FC = ({ children }) => {
   const peerCallState = usePeerCallState();
-  const { mediaStream, waitForMediaStream, checkDevicesExist, endMediaStream } = useMediaStream();
+  const { mediaStream, waitForMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream } = useMediaStream();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
 
@@ -134,6 +135,8 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     socket.on("signal_data", receiveSignalData);
 
     socket.on("receiver_state", updateReceiverState);
+
+    socket.on("end_call", resetCallState);
 
     socket.on("update_friend_status", (msg) => {
       const { chats, setChats } = useChatList.getState();
@@ -208,10 +211,20 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     }
   };
 
-  const cancelCall = () => {
+  const endCall = () => {
+    socket.emit("end_call", peerCallState.receiverId);
+    resetCallState();
+  };
+
+  const resetCallState = () => {
     peerCallState.setStatus("idle");
-    socket.emit("cancel_call", peerCallState.receiverId);
     peerCallState.setReceiverId(null);
+    peerCallState.resetCallState();
+    if (peerCallState.peer) {
+      peerCallState.peer.end();
+      peerCallState.setPeer(null);
+    }
+    asyncEndMediaStream();
   };
 
   const makeCall = async (receiverId: string, video: boolean = false) => {
@@ -280,7 +293,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     }
   };
 
-  return <PeerCallContext.Provider value={{ acceptCall, makeCall }}>{children}</PeerCallContext.Provider>;
+  return <PeerCallContext.Provider value={{ acceptCall, makeCall, endCall }}>{children}</PeerCallContext.Provider>;
 };
 
 export default PeerCallWrapper;

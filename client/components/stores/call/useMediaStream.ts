@@ -27,6 +27,15 @@ const useMediaStream = () => {
     setMediaStream(null);
   };
 
+  const asyncEndMediaStream = () => {
+    const { mediaStream, setMediaStream } = useMediaStreamState.getState();
+    if (mediaStream)
+      mediaStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    setMediaStream(null);
+  };
+
   const checkDevicesExist = async (video: boolean, audio: boolean) => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -103,7 +112,7 @@ const useMediaStream = () => {
     }
   };
 
-  return { mediaStream, waitForMediaStream, setMediaStream, checkDevicesExist, endMediaStream };
+  return { mediaStream, waitForMediaStream, setMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream };
 };
 
 export default useMediaStream;
