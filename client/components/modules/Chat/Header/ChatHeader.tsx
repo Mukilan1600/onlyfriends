@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
+import { PeerCallContext } from "../../../providers/PeerCallWrapper";
 import AudioCallIcon from "../../../statics/icons/AudioCallIcon";
 import VideoCallIcon from "../../../statics/icons/VideoCallIcon";
-import useCall from "../../../stores/useCall";
 import useChat from "../../../stores/useChat";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 
@@ -49,17 +49,11 @@ const CallButton = styled.div<{ disabled: boolean }>`
 `;
 export default function ChatHeader() {
   const { chat } = useChat();
-  const { makeCall } = useCall();
+  const { makeCall } = useContext(PeerCallContext);
   return (
     <HeaderDiv>
       <DetailsDiv>
-        <img
-          src={chat.participants[0].user.avatarUrl}
-          alt="friend"
-          height="38"
-          width="38"
-          style={{ borderRadius: "50%" }}
-        />
+        <img src={chat.participants[0].user.avatarUrl} alt="friend" height="38" width="38" style={{ borderRadius: "50%" }} />
         <div style={{ display: "flex", flexDirection: "column" }}>
           <p>{chat.participants[0].user.name}</p>
           <StatusIndicator />
@@ -67,21 +61,13 @@ export default function ChatHeader() {
       </DetailsDiv>
       <ActionsDiv>
         <CallButton
-          onClick={
-            chat.participants[0].user.online
-              ? makeCall.bind(this, chat.participants[0].user.oauthId, false)
-              : null
-          }
+          onClick={chat.participants[0].user.online ? makeCall.bind(this, chat.participants[0].user.oauthId, false) : null}
           disabled={!chat.participants[0].user.online}
         >
           <AudioCallIcon />
         </CallButton>
         <CallButton
-          onClick={
-            chat.participants[0].user.online
-              ? makeCall.bind(this, chat.participants[0].user.oauthId, true)
-              : null
-          }
+          onClick={chat.participants[0].user.online ? makeCall.bind(this, chat.participants[0].user.oauthId, true) : null}
           disabled={!chat.participants[0].user.online}
         >
           <VideoCallIcon />

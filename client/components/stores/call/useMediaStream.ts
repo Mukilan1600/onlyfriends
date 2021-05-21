@@ -1,9 +1,8 @@
 import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
 import { toast } from "react-toastify";
-import useMediaConfigurations, {
-  IMediaConfigurations,
-} from "./useMediaConfiguration";
+import useMediaConfigurations from "./useMediaConfiguration";
+import { usePeerCallState } from "../../providers/PeerCallWrapper";
 
 interface IUseMediaStreamState extends State {
   mediaStream: MediaStream;
@@ -18,8 +17,24 @@ export const useMediaStreamState = create<IUseMediaStreamState>(
 
 const useMediaStream = () => {
   const { mediaStream, setMediaStream } = useMediaStreamState();
-  const { setAudioEnabled, setVideoEnabled, ...mediaConfigState } =
-    useMediaConfigurations();
+  const { setAvailableDevices } = useMediaConfigurations();
+
+  const endMediaStream = () => {
+    if (mediaStream)
+      mediaStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    setMediaStream(null);
+  };
+
+  const asyncEndMediaStream = () => {
+    const { mediaStream, setMediaStream } = useMediaStreamState.getState();
+    if (mediaStream)
+      mediaStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    setMediaStream(null);
+  };
 
   const checkDevicesExist = async (video: boolean, audio: boolean) => {
     try {
@@ -34,41 +49,70 @@ const useMediaStream = () => {
         videoEnabled: hasVideo && video,
         audioEnabled: hasAudio && audio,
       };
-      if (video && !hasVideo) toast("No camera found", { type: "error" });
-      if (audio && !hasAudio) toast("No Mic found", { type: "error" });
+      // if (video && !hasVideo) toast("No camera found", { type: "error" });
+      // if (audio && !hasAudio) toast("No Mic found", { type: "error" });
+      setAvailableDevices(hasVideo, hasAudio);
       return correctedConfig;
     } catch (error) {
       console.error(error);
     }
   };
 
-  const getMediaStream = async (mediaConfigurations?: IMediaConfigurations) => {
+  const onMediaDeviceChange = async () => {
+    const { peer, setUserState, userState } = usePeerCallState.getState();
+    const { mediaStream } = useMediaStreamState.getState();
     try {
-      let newMediaConfigurations = {
-        ...mediaConfigState,
-        ...mediaConfigurations,
-      };
-      newMediaConfigurations = {
-        ...newMediaConfigurations,
-        ...(await checkDevicesExist(
-          newMediaConfigurations.videoEnabled,
-          newMediaConfigurations.audioEnabled
-        )),
-      };
-      if (mediaStream) mediaStream.getTracks().forEach((track) => track.stop());
+      let newMediaConfigurations = await checkDevicesExist(true, true);
+      setUserState({
+        muted: userState.muted || !newMediaConfigurations.audioEnabled,
+        video: userState.video && newMediaConfigurations.videoEnabled,
+        deafened: userState.deafened,
+      });
       const stream = await navigator.mediaDevices.getUserMedia({
         video: newMediaConfigurations.videoEnabled,
         audio: newMediaConfigurations.audioEnabled,
       });
       setMediaStream(stream);
-      navigator.mediaDevices.ondevicechange = () => getMediaStream();
-      return stream;
+
+      if (mediaStream) {
+        let exists = false;
+        stream.getTracks().forEach((track) => {
+          mediaStream.getTracks().forEach((track1) => {
+            if (track.id === track1.id) {
+              peer.replaceTrack(track1, track, mediaStream);
+              exists = true;
+            }
+          });
+          if (!exists) {
+            peer.addTrack(track, mediaStream);
+          }
+          console.log(track);
+        });
+      } else {
+        peer.addStream(stream);
+      }
+      setMediaStream(stream);
     } catch (error) {
       console.error(error);
     }
   };
 
-  return { mediaStream, getMediaStream, setMediaStream };
+  const waitForMediaStream = async (video: boolean, audio: boolean) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: video,
+        audio: audio,
+      });
+      setMediaStream(stream);
+      navigator.mediaDevices.ondevicechange = onMediaDeviceChange;
+      return stream;
+    } catch (error) {
+      console.error(error);
+      onMediaDeviceChange();
+    }
+  };
+
+  return { mediaStream, waitForMediaStream, setMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream };
 };
 
 export default useMediaStream;

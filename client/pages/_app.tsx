@@ -12,6 +12,7 @@ import { ToastContainer, Flip } from "react-toastify";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import Headers from "../components/modules/Headers/Headers";
+import PeerCallWrapper from "../components/providers/PeerCallWrapper";
 
 TimeAgo.locale(en);
 
@@ -27,20 +28,22 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Headers />
       <WebSocketProvider>
-        <Component {...pageProps} />
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss={false}
-          draggable={false}
-          limit={3}
-          transition={Flip}
-          closeButton={false}
-          pauseOnHover
-        />
+        <PeerCallWrapper>
+          <Component {...pageProps} />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable={false}
+            limit={3}
+            transition={Flip}
+            closeButton={false}
+            pauseOnHover
+          />
+        </PeerCallWrapper>
       </WebSocketProvider>
     </>
   );

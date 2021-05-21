@@ -9,6 +9,7 @@ import Layout from "./Layout";
 const LeftPane = styled.div`
   height: calc(100vh - 70px);
   width: 380px;
+  min-width: 380px;
   display: flex;
   flex-direction: column;
 `;

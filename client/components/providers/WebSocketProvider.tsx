@@ -7,16 +7,8 @@ import useProfile, { IUser } from "../stores/useProfile";
 import useToken from "../stores/useToken";
 import firebase from "firebase/app";
 import "firebase/auth";
-import useCall, { findUserFromChat, RejectReason } from "../stores/useCall";
-import useChatList from "../stores/useChatList";
-import { SignalData } from "simple-peer";
-import useChat from "../stores/useChat";
 
-type ConnectionStatus =
-  | "connecting"
-  | "connected"
-  | "closed-by-server"
-  | "disconnected";
+type ConnectionStatus = "connecting" | "connected" | "closed-by-server" | "disconnected";
 
 export const WebSocketContext = createContext<{
   socket: Socket;
@@ -32,17 +24,9 @@ interface ConnectionError {
 }
 
 const WebSocketProvider: React.FC<{}> = ({ children }) => {
-  const [socketStatus, setSocketStatus] =
-    useState<ConnectionStatus>("connecting");
+  const [socketStatus, setSocketStatus] = useState<ConnectionStatus>("connecting");
   const [socket, setSocket] = useState(null);
   const { jwtTok, clearTokens } = useToken();
-  const {
-    callState,
-    receiveSignalData,
-    rejectCall,
-    callAccepted,
-    onCallDisconnect,
-  } = useCall();
   const router = useRouter();
 
   useEffect(() => {
@@ -111,66 +95,68 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       useLoader.getState().clearLoaders();
     });
 
-    newSocket.on("incoming_call", (receiverId: string) => {
-      if (
-        callState.callStatus === "call_incoming" ||
-        callState.callStatus === "call"
-      ) {
-        rejectCall("BUSY", receiverId);
-      } else {
-        callState.setReceiverProfile(
-          findUserFromChat(useChatList.getState().chats, receiverId)
-        );
-        callState.setReceiverId(receiverId);
-        callState.setStatus("call_incoming");
-      }
-    });
+    // newSocket.on("incoming_call", (receiverId: string) => {
+    //   if (
+    //     callState.callStatus === "call_incoming" ||
+    //     callState.callStatus === "call"
+    //   ) {
+    //     rejectCall("BUSY", receiverId);
+    //   } else {
+    //     callState.setReceiverProfile(
+    //       findUserFromChat(useChatList.getState().chats, receiverId)
+    //     );
+    //     callState.setReceiverId(receiverId);
+    //     callState.setStatus("call_incoming");
+    //   }
+    // });
 
-    newSocket.on("call_rejected", (reason: RejectReason) => {
-      callState.setRejectReason(reason);
-      callState.setStatus("call_rejected");
-    });
+    // newSocket.on("call_rejected", (reason: RejectReason) => {
+    //   callState.setRejectReason(reason);
+    //   callState.setStatus("call_rejected");
+    // });
 
-    newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
+    // newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
 
-    newSocket.on("signal_data", receiveSignalData);
+    // newSocket.on("signal_data", receiveSignalData);
 
-    newSocket.on("update_friend_status", (msg) => {
-      const { chats, setChats } = useChatList.getState();
-      const { chat, setChat } = useChat.getState();
+    // newSocket.on("receiver_state",updateReceiverState)
 
-      onCallDisconnect(msg);
+    // newSocket.on("update_friend_status", (msg) => {
+    //   const { chats, setChats } = useChatList.getState();
+    //   const { chat, setChat } = useChat.getState();
 
-      if (chats)
-        setChats(
-          chats.map((chat) => {
-            const newParticipants = chat.chat.participants.map(
-              (participant) => {
-                if (participant.user.oauthId === msg.oauthId) {
-                  return {
-                    ...participant,
-                    user: { ...participant.user, ...msg, isTyping: false },
-                  };
-                } else return participant;
-              }
-            );
-            chat.chat.participants = newParticipants;
-            return chat;
-          })
-        );
-      if (chat) {
-        const newParticipants = chat.participants.map((participant) => {
-          if (participant.user.oauthId === msg.oauthId) {
-            return {
-              ...participant,
-              user: { ...participant.user, ...msg, isTyping: false },
-            };
-          } else return participant;
-        });
-        chat.participants = newParticipants;
-        setChat(chat);
-      }
-    });
+    //   onCallDisconnect(msg);
+
+    //   if (chats)
+    //     setChats(
+    //       chats.map((chat) => {
+    //         const newParticipants = chat.chat.participants.map(
+    //           (participant) => {
+    //             if (participant.user.oauthId === msg.oauthId) {
+    //               return {
+    //                 ...participant,
+    //                 user: { ...participant.user, ...msg, isTyping: false },
+    //               };
+    //             } else return participant;
+    //           }
+    //         );
+    //         chat.chat.participants = newParticipants;
+    //         return chat;
+    //       })
+    //     );
+    //   if (chat) {
+    //     const newParticipants = chat.participants.map((participant) => {
+    //       if (participant.user.oauthId === msg.oauthId) {
+    //         return {
+    //           ...participant,
+    //           user: { ...participant.user, ...msg, isTyping: false },
+    //         };
+    //       } else return participant;
+    //     });
+    //     chat.participants = newParticipants;
+    //     setChat(chat);
+    //   }
+    // });
 
     setSocketStatus("connected");
     setSocket(newSocket);
@@ -179,11 +165,7 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
   // @todo Redirect to socket closed page
   if (socketStatus === "closed-by-server") return <>closed by server</>;
 
-  return (
-    <WebSocketContext.Provider value={{ socket, socketStatus }}>
-      {children}
-    </WebSocketContext.Provider>
-  );
+  return <WebSocketContext.Provider value={{ socket, socketStatus }}>{children}</WebSocketContext.Provider>;
 };
 
 export default WebSocketProvider;
