@@ -1,6 +1,5 @@
 import create, { State } from "zustand";
 import { combine } from "zustand/middleware";
-import { toast } from "react-toastify";
 import useMediaConfigurations from "./useMediaConfiguration";
 import { usePeerCallState } from "../../providers/PeerCallWrapper";
 
@@ -41,6 +40,7 @@ const useMediaStream = () => {
       const devices = await navigator.mediaDevices.enumerateDevices();
       let hasVideo = false,
         hasAudio = false;
+      console.log(devices);
       devices.forEach((device) => {
         if (device.kind === "audioinput") hasAudio = true;
         if (device.kind === "videoinput") hasVideo = true;
@@ -73,24 +73,37 @@ const useMediaStream = () => {
         video: newMediaConfigurations.videoEnabled,
         audio: newMediaConfigurations.audioEnabled,
       });
-      setMediaStream(stream);
 
-      if (mediaStream) {
-        let exists = false;
-        stream.getTracks().forEach((track) => {
-          mediaStream.getTracks().forEach((track1) => {
-            if (track.id === track1.id) {
-              peer.replaceTrack(track1, track, mediaStream);
-              exists = true;
+      if (peer) {
+        if (mediaStream) {
+          let exists = false;
+          stream.getTracks().forEach((track) => {
+            mediaStream.getTracks().forEach((track1) => {
+              if (track.id === track1.id) {
+                peer.replaceTrack(track1, track, mediaStream);
+                exists = true;
+              }
+            });
+            if (!exists) {
+              peer.addTrack(track, mediaStream);
             }
           });
-          if (!exists) {
-            peer.addTrack(track, mediaStream);
-          }
-          console.log(track);
-        });
-      } else {
-        peer.addStream(stream);
+
+          console.log(stream.getTracks(), mediaStream.getTracks());
+          mediaStream.getTracks().forEach((track) => {
+            exists = false;
+            stream.getTracks().forEach((track1) => {
+              if (track.id === track1.id) {
+                exists = true;
+              }
+            });
+            if (!exists) {
+              peer.removeTrack(track, mediaStream);
+            }
+          });
+        } else {
+          peer.addStream(stream);
+        }
       }
       setMediaStream(stream);
     } catch (error) {
