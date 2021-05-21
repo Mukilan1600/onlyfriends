@@ -11,7 +11,6 @@ import EmptyChats from "../../statics/illustrations/EmptyChats";
 import useChat, { IMessage } from "../../stores/useChat";
 import useLoader from "../../stores/useLoader";
 import Spinner from "../Spinner/Spinner";
-import useCall from "../../stores/useCall";
 
 const ChatsList: React.FC = () => {
   const notificationAudio = new Audio("/sounds/noti.wav");
@@ -22,9 +21,7 @@ const ChatsList: React.FC = () => {
 
   const sendMessageAcknowledgements = (newMessages: IMessage[]) => {
     const { chat } = useChat.getState();
-    const unAcknowledgedMessages = newMessages.filter(
-      (message) => !message.readBy.includes(user._id)
-    );
+    const unAcknowledgedMessages = newMessages.filter((message) => !message.readBy.includes(user._id));
     if (unAcknowledgedMessages.length > 0)
       socket.emit(
         "acknowledge_messages",
@@ -56,13 +53,7 @@ const ChatsList: React.FC = () => {
     });
 
     socket.on("receive_message", (chatId: string, msg: IMessage) => {
-      const {
-        chat,
-        setMessages,
-        messages,
-        setUnacknowledgedMessages,
-        unacknowledgedMessages,
-      } = useChat.getState();
+      const { chat, setMessages, messages, setUnacknowledgedMessages, unacknowledgedMessages } = useChat.getState();
       if (chat && chatId === chat._id) {
         messages.unshift(msg);
         setMessages(messages);
@@ -88,24 +79,21 @@ const ChatsList: React.FC = () => {
       }
     });
 
-    socket.on(
-      "is_typing",
-      (chatId: string, userId: string, isTyping: boolean) => {
-        let { chats } = useChatList.getState();
-        let { chat, setChat } = useChat.getState();
-        const index = chats.findIndex((chat) => chat.chat._id === chatId);
-        // Change for groups
-        if (index > -1) {
-          chats[index].chat.participants[0].user.isTyping = isTyping;
-          setChats(chats);
-        }
-
-        if (chat && chat._id === chatId) {
-          chat.participants[0].user.isTyping = isTyping;
-          setChat(chat);
-        }
+    socket.on("is_typing", (chatId: string, userId: string, isTyping: boolean) => {
+      let { chats } = useChatList.getState();
+      let { chat, setChat } = useChat.getState();
+      const index = chats.findIndex((chat) => chat.chat._id === chatId);
+      // Change for groups
+      if (index > -1) {
+        chats[index].chat.participants[0].user.isTyping = isTyping;
+        setChats(chats);
       }
-    );
+
+      if (chat && chat._id === chatId) {
+        chat.participants[0].user.isTyping = isTyping;
+        setChat(chat);
+      }
+    });
 
     socket.emit("get_chat_list");
     setLoader({ chatListLoading: true });
@@ -125,9 +113,7 @@ const ChatsList: React.FC = () => {
         <>
           {chats &&
             (chats.length > 0 ? (
-              chats.map((chat: IChatListItem, i: number) => (
-                <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
-              ))
+              chats.map((chat: IChatListItem, i: number) => <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />)
             ) : (
               <div className={styles.illustrationHolder}>
                 <p>Friend Request to get started</p>
@@ -137,10 +123,10 @@ const ChatsList: React.FC = () => {
           <Link href="/friendrequests">
             <Button
               style={{
-                position: "sticky",
-                left: "50%",
+                position: "fixed",
+                left: "180px",
                 top: "calc(100% - 56px)",
-                transform: "translate(-25%, -50%)",
+                transform: "translate(-50%, -50%)",
                 width: "250px",
                 height: "58px",
                 fontWeight: 600,

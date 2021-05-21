@@ -100,8 +100,11 @@ const PeerCallWrapper: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (mediaStream) {
-      mediaStream.getVideoTracks().forEach((track) => (track.enabled = peerCallState.userState.video));
-      mediaStream.getAudioTracks().forEach((track) => (track.enabled = !peerCallState.userState.muted));
+      const videoTracks = mediaStream.getVideoTracks();
+      const audioTracks = mediaStream.getAudioTracks();
+
+      videoTracks.forEach((track) => (track.enabled = peerCallState.userState.video));
+      audioTracks.forEach((track) => (track.enabled = !peerCallState.userState.muted));
     }
   }, [peerCallState.userState, mediaStream]);
 
@@ -234,7 +237,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       peerCallState.setReceiverId(receiverId);
       peerCallState.setReceiverProfile(findUserFromChat(chats, receiverId));
       const availableMedia = await checkDevicesExist(video, true);
-      const mediaStream = await waitForMediaStream(availableMedia.videoEnabled, availableMedia.audioEnabled);
+      await waitForMediaStream(availableMedia.videoEnabled, availableMedia.audioEnabled);
       peerCallState.setUserState({
         muted: availableMedia.audioEnabled,
         video: availableMedia.videoEnabled,
