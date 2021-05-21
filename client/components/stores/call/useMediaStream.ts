@@ -49,8 +49,6 @@ const useMediaStream = () => {
         videoEnabled: hasVideo && video,
         audioEnabled: hasAudio && audio,
       };
-      // if (video && !hasVideo) toast("No camera found", { type: "error" });
-      // if (audio && !hasAudio) toast("No Mic found", { type: "error" });
       setAvailableDevices(hasVideo, hasAudio);
       return correctedConfig;
     } catch (error) {
@@ -59,8 +57,11 @@ const useMediaStream = () => {
   };
 
   const onMediaDeviceChange = async () => {
-    const { peer, setUserState, userState } = usePeerCallState.getState();
+    const { peer, setUserState, userState, callStatus } = usePeerCallState.getState();
+    if (callStatus !== "call_outgoing" && callStatus !== "call") return;
+
     const { mediaStream } = useMediaStreamState.getState();
+
     try {
       let newMediaConfigurations = await checkDevicesExist(true, true);
       setUserState({
