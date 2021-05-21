@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { PeerCallContext } from "../../../providers/PeerCallWrapper";
 import AudioCallIcon from "../../../statics/icons/AudioCallIcon";
 import VideoCallIcon from "../../../statics/icons/VideoCallIcon";
-import useCall from "../../../stores/useCall";
 import useChat from "../../../stores/useChat";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 
