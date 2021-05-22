@@ -11,6 +11,7 @@ import SpeakerOn from "../../../statics/icons/SpeakerOn";
 import VideoOff from "../../../statics/icons/VideoOff";
 import VideoOn from "../../../statics/icons/VideoOn";
 import useMediaStream from "../../../stores/call/useMediaStream";
+import Spinner from "../../Spinner/Spinner";
 
 const ButtonPanel = styled.div`
   background: linear-gradient(95.16deg, #ff00c7 -24.95%, #3d98e7 124.85%);
@@ -140,6 +141,12 @@ const CallControls: React.FC = () => {
             <EndCall />
           </ControlButton>
         </ButtonPanel>
+      );
+    case "rtc_connecting":
+      return (
+        <div style={{ height: "42px" }}>
+          <Spinner />
+        </div>
       );
     default:
       return null;

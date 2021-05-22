@@ -73,6 +73,8 @@ const CallPreview: React.FC = () => {
             In call with <TitleName>{callState.receiverProfile.name}</TitleName>
           </>
         );
+      case "rtc_connecting":
+        return "RTC Connecting...";
     }
   };
 
