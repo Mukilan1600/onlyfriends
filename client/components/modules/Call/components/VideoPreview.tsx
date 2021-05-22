@@ -59,14 +59,18 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ video, avatarUrl, muted, en
 
   useEffect(() => {
     if (video && videoRef.current) {
-      videoRef.current.muted = muted;
       videoRef.current.srcObject = video;
     }
     if (audioRef.current) {
       audioRef.current.srcObject = video;
+    }
+  }, [video, videoRef.current, audioRef.current]);
+
+  useEffect(() => {
+    if (audioRef.current) {
       audioRef.current.muted = muted;
     }
-  }, [video, videoRef.current, audioRef.current, muted]);
+  }, [muted]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume / 100;

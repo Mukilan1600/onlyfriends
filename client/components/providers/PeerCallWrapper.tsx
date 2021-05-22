@@ -94,7 +94,7 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const PeerCallWrapper: React.FC = ({ children }) => {
   const peerCallState = usePeerCallState();
-  const { mediaStream, waitForMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream } = useMediaStream();
+  const { mediaStream, waitForMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream, setMediaStream } = useMediaStream();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
 
@@ -105,6 +105,8 @@ const PeerCallWrapper: React.FC = ({ children }) => {
 
       videoTracks.forEach((track) => (track.enabled = peerCallState.userState.video));
       audioTracks.forEach((track) => (track.enabled = !peerCallState.userState.muted));
+
+      setMediaStream(mediaStream);
     }
   }, [peerCallState.userState, mediaStream]);
 
@@ -184,13 +186,13 @@ const PeerCallWrapper: React.FC = ({ children }) => {
 
   const acceptCall = async (video: boolean) => {
     try {
-      const availableMedia = await checkDevicesExist(video, true);
+      const availableMedia = await checkDevicesExist(true, true);
       const mediaStream = await waitForMediaStream(availableMedia.videoEnabled, availableMedia.audioEnabled);
 
       const newPeer = new Peer({ initiator: true, stream: mediaStream });
       peerCallState.setUserState({
         muted: !availableMedia.audioEnabled,
-        video: availableMedia.videoEnabled,
+        video: availableMedia.videoEnabled && video,
         deafened: false,
       });
       newPeer.on("signal", (signalData) => {
