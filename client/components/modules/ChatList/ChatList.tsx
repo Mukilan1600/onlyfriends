@@ -101,7 +101,6 @@ const ChatsList: React.FC = () => {
       socket.off("is_typing");
       socket.off("chat_list");
       socket.off("receive_message");
-      socket.off("update_friend_status");
     };
   }, [socket]);
 
@@ -113,7 +112,12 @@ const ChatsList: React.FC = () => {
         <>
           {chats &&
             (chats.length > 0 ? (
-              chats.map((chat: IChatListItem, i: number) => <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />)
+              <>
+                {chats.map((chat: IChatListItem, i: number) => (
+                  <ChatListItem key={i} unread={chat.unread} chat={chat.chat} />
+                ))}
+                <div style={{ height: "120px" }} />
+              </>
             ) : (
               <div className={styles.illustrationHolder}>
                 <p>Friend Request to get started</p>

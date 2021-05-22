@@ -9,8 +9,9 @@ import { IChatListItem } from "../modules/ChatList/ChatListItem";
 import useChatList from "../stores/useChatList";
 import { Socket } from "socket.io-client";
 import useChat from "../stores/useChat";
+import { toast } from "react-toastify";
 
-export type CallStatus = "idle" | "call" | "call_outgoing" | "call_incoming";
+export type CallStatus = "idle" | "rtc_connecting" | "call" | "call_outgoing" | "call_incoming";
 export type RejectReason = "BUSY" | "REJECT";
 
 interface UserCallOptions {
@@ -105,7 +106,6 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     waitForMediaStream,
     checkDevicesExist,
     endMediaStream,
-    asyncEndMediaStream,
     setMediaStream,
   } = useMediaStream();
   const { socket } = useContext(WebSocketContext);
@@ -143,10 +143,16 @@ const PeerCallWrapper: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (!socket) return;
+
+    socket.on("reject_call", () => {
+      resetCallState();
+      toast("The user is unable to take calls right now", { type: "error" });
+    });
+
     socket.on("incoming_call", (receiverId: string) => {
       const peerCallState = usePeerCallState.getState();
 
-      if (peerCallState.callStatus === "call_incoming" || peerCallState.callStatus === "call") {
+      if (peerCallState.callStatus !== "idle") {
         rejectCall("BUSY", receiverId);
       } else {
         peerCallState.setReceiverProfile(findUserFromChat(useChatList.getState().chats, receiverId));
@@ -175,7 +181,6 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       const { chat, setChat } = useChat.getState();
 
       onCallDisconnect(msg);
-
       if (chats)
         setChats(
           chats.map((chat) => {
@@ -207,8 +212,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
   }, [socket]);
 
   const rejectCall = (reason: RejectReason, receiverId?: string) => {
-    socket.emit("reject_call", receiverId ?? peerCallState.receiverId, reason);
-    peerCallState.setReceiverId(null);
+    socket.emit("reject_call", receiverId ?? peerCallState.receiverId);
   };
 
   const acceptCall = async (video: boolean) => {
@@ -216,21 +220,19 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       const availableMedia = await checkDevicesExist(true, true);
       const mediaStream = await waitForMediaStream(availableMedia.videoEnabled, availableMedia.audioEnabled);
 
-      const newPeer = new Peer({ initiator: true, stream: mediaStream });
+      const newPeer = new Peer({ initiator: true, trickle: false, stream: mediaStream });
       peerCallState.setUserState({
         muted: !availableMedia.audioEnabled,
         video: availableMedia.videoEnabled && video,
         deafened: false,
         sharingScreen: false,
       });
+      newPeer.on("connect", () => {
+        peerCallState.setStatus("call");
+      });
       newPeer.on("signal", (signalData) => {
-        const { callStatus, receiverId, setStatus } = usePeerCallState.getState();
-        if (callStatus === "call_incoming") {
-          socket.emit("accept_call", receiverId, signalData);
-          setStatus("call");
-        } else {
-          socket.emit("signal_data", receiverId, signalData);
-        }
+        const { receiverId } = usePeerCallState.getState();
+        socket.emit("signal_data", receiverId, signalData);
       });
       newPeer.on("stream", (stream: MediaStream) => {
         const { receiverStream, setReceiverStream } = usePeerCallState.getState();
@@ -243,6 +245,8 @@ const PeerCallWrapper: React.FC = ({ children }) => {
         resetCallState();
       });
       peerCallState.setPeer(newPeer);
+      peerCallState.setStatus("rtc_connecting");
+      socket.emit("accept_call", peerCallState.receiverId);
     } catch (error) {
       console.error(error);
     }
@@ -261,7 +265,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       peerCallState.peer.end();
       peerCallState.setPeer(null);
     }
-    asyncEndMediaStream();
+    endMediaStream();
     asyncEndDisplayMediaStream();
   };
 
@@ -284,36 +288,36 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     }
   };
 
-  const callAccepted = async (socket: Socket, receiverId: string, signalData: Peer.SignalData) => {
+  const callAccepted = async (socket: Socket, receiverId: string) => {
     const callState = usePeerCallState.getState();
     const { mediaStream } = useMediaStreamState.getState();
     if (receiverId !== callState.receiverId) return;
     try {
-      const newPeer = new Peer({ initiator: false, stream: mediaStream });
-      newPeer.signal(signalData);
+      const newPeer = new Peer({ initiator: false, trickle: false, stream: mediaStream });
+      newPeer.on("connect", () => {
+        callState.setStatus("call");
+      });
       newPeer.on("signal", (data) => {
-        const callState = usePeerCallState.getState();
         socket.emit("signal_data", receiverId, data);
-        if (callState.callStatus === "call_outgoing") {
-          callState.setStatus("call");
-        }
       });
       newPeer.on("stream", (stream: MediaStream) => {
         const { receiverStream, setReceiverStream } = usePeerCallState.getState();
-        console.log(stream);
         setReceiverStream([...receiverStream, stream]);
       });
       newPeer.on("error", (error) => {
         console.error(error);
       });
       callState.setPeer(newPeer);
+      if (callState.callStatus === "call_outgoing") {
+        callState.setStatus("rtc_connecting");
+      }
     } catch (err) {
       console.log(err);
     }
   };
 
   const receiveSignalData = (_receiverId: string, signalData: Peer.SignalData) => {
-    const { peer } = usePeerCallState.getState();
+    const { peer, setStatus } = usePeerCallState.getState();
     if (peer) {
       try {
         peer.signal(signalData);
@@ -336,11 +340,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     const peerCallState = usePeerCallState.getState();
     if (!msg.online) {
       if (peerCallState.receiverId === msg.oauthId) {
-        peerCallState.setStatus("idle");
-        peerCallState.setReceiverId(null);
-        peerCallState.setReceiverProfile(null);
-        peerCallState.resetCallState();
-        endMediaStream();
+        resetCallState();
       }
     }
   };

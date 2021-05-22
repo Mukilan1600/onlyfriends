@@ -29,15 +29,6 @@ const useMediaStream = () => {
     setMediaStream(null);
   };
 
-  const asyncEndMediaStream = () => {
-    const { mediaStream, setMediaStream } = useMediaStreamState.getState();
-    if (mediaStream)
-      mediaStream.getTracks().forEach((track) => {
-        track.stop();
-      });
-    setMediaStream(null);
-  };
-
   const asyncEndDisplayMediaStream = () => {
     const { displayMediaStream, setDisplayMediaStream } = useMediaStreamState.getState();
     if (displayMediaStream){
@@ -156,7 +147,6 @@ const useMediaStream = () => {
     setMediaStream,
     checkDevicesExist,
     endMediaStream,
-    asyncEndMediaStream,
     waitForDisplayMediaStream,
     asyncEndDisplayMediaStream,
   };

@@ -306,6 +306,11 @@ class WebSocket {
         if (socketId) this.io.to(socketId).emit("end_call");
       });
 
+      socket.on("reject_call", async (receiverId: string) => {
+        const socketId = await getSocketId(receiverId);
+        if (socketId) this.io.to(socketId).emit("reject_call");
+      });
+
       try {
         const profile = await User.findOneAndUpdate(
           { oauthId: socket.oauthId },
