@@ -92,7 +92,7 @@ const CallPreview: React.FC = () => {
               <span style={{ width: "25px", height: "25px", margin: "0px 8px" }} />
             )}
           </CallStatus>
-          <div style={{ display: "flex" }} onDoubleClick={expandCallPreview}>
+          <div style={{ display: "flex", cursor: "pointer" }} onClick={expandCallPreview}>
             <VideoPreview width={160} height={130} avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
             <VideoPreview
               width={160}
