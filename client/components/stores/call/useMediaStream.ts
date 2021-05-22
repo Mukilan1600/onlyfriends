@@ -18,7 +18,7 @@ export const useMediaStreamState = create<IUseMediaStreamState>(
 );
 
 const useMediaStream = () => {
-  const { mediaStream, setMediaStream } = useMediaStreamState();
+  const { mediaStream, displayMediaStream, setMediaStream, setDisplayMediaStream } = useMediaStreamState();
   const { setAvailableDevices } = useMediaConfigurations();
 
   const endMediaStream = () => {
@@ -40,10 +40,11 @@ const useMediaStream = () => {
 
   const asyncEndDisplayMediaStream = () => {
     const { displayMediaStream, setDisplayMediaStream } = useMediaStreamState.getState();
-    if (displayMediaStream)
+    if (displayMediaStream){
       displayMediaStream.getTracks().forEach((track) => {
         track.stop();
       });
+    }
     setDisplayMediaStream(null);
   };
 
@@ -79,6 +80,7 @@ const useMediaStream = () => {
         muted: userState.muted || !newMediaConfigurations.audioEnabled,
         video: userState.video && newMediaConfigurations.videoEnabled,
         deafened: userState.deafened,
+        sharingScreen: userState.sharingScreen,
       });
       const stream = await navigator.mediaDevices.getUserMedia({
         video: newMediaConfigurations.videoEnabled,
@@ -140,6 +142,7 @@ const useMediaStream = () => {
     try {
       // @ts-ignore
       const stream: MediaStream = await navigator.mediaDevices.getDisplayMedia();
+      setDisplayMediaStream(stream);
       return stream;
     } catch (error) {
       console.log(error);
@@ -148,6 +151,7 @@ const useMediaStream = () => {
 
   return {
     mediaStream,
+    displayMediaStream,
     waitForMediaStream,
     setMediaStream,
     checkDevicesExist,

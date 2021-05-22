@@ -102,6 +102,13 @@ const CallControls: React.FC = () => {
     });
   };
 
+  const toggleScreenShare = () => {
+    callState.setUserState({
+      ...callState.userState,
+      sharingScreen: !callState.userState.sharingScreen,
+    });
+  };
+
   switch (callState.callStatus) {
     case "call_incoming":
       return (
@@ -125,6 +132,7 @@ const CallControls: React.FC = () => {
     case "call":
       return (
         <ButtonPanel>
+          <ControlButton onClick={toggleScreenShare}>{callState.userState.sharingScreen ? <VideoOn /> : <VideoOff />}</ControlButton>
           <ControlButton onClick={toggleVideo}>{callState.userState.video ? <VideoOn /> : <VideoOff />}</ControlButton>
           <ControlButton onClick={toggleSpeaker}>{callState.userState.deafened ? <SpeakerOff /> : <SpeakerOn />}</ControlButton>
           <ControlButton onClick={toggleAudio}>{callState.userState.muted ? <MicOff /> : <MicOn />}</ControlButton>

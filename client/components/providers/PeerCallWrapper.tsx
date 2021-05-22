@@ -17,6 +17,7 @@ interface UserCallOptions {
   muted: boolean;
   video: boolean;
   deafened: boolean;
+  sharingScreen: boolean;
 }
 
 interface IPeerCallState extends State {
@@ -33,6 +34,7 @@ const initialCallOptions: UserCallOptions = {
   muted: true,
   video: false,
   deafened: false,
+  sharingScreen: false,
 };
 
 const initialPeerCallState: IPeerCallState = {
@@ -95,7 +97,17 @@ export const findUserFromChat = (chats: IChatListItem[], userId: string) => {
 
 const PeerCallWrapper: React.FC = ({ children }) => {
   const peerCallState = usePeerCallState();
-  const { mediaStream, waitForMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream, setMediaStream } = useMediaStream();
+  const {
+    mediaStream,
+    displayMediaStream,
+    waitForDisplayMediaStream,
+    asyncEndDisplayMediaStream,
+    waitForMediaStream,
+    checkDevicesExist,
+    endMediaStream,
+    asyncEndMediaStream,
+    setMediaStream,
+  } = useMediaStream();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
 
@@ -112,8 +124,22 @@ const PeerCallWrapper: React.FC = ({ children }) => {
   }, [peerCallState.userState, mediaStream]);
 
   useEffect(() => {
-    if (socket && peerCallState.receiverId) socket.emit("receiver_state", peerCallState.receiverId, peerCallState.userState);
+    if (socket && peerCallState.receiverId) {
+      socket.emit("receiver_state", peerCallState.receiverId, peerCallState.userState);
+
+      if (peerCallState.userState.sharingScreen) {
+        addDisplayStreamToPeer();
+      } else if (displayMediaStream) {
+        peerCallState.peer.removeStream(displayMediaStream);
+        asyncEndDisplayMediaStream();
+      }
+    }
   }, [peerCallState.userState, peerCallState.receiverId]);
+
+  const addDisplayStreamToPeer = async () => {
+    const stream = await waitForDisplayMediaStream();
+    if (peerCallState.peer) peerCallState.peer.addStream(stream);
+  };
 
   useEffect(() => {
     if (!socket) return;
@@ -195,6 +221,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
         muted: !availableMedia.audioEnabled,
         video: availableMedia.videoEnabled && video,
         deafened: false,
+        sharingScreen: false,
       });
       newPeer.on("signal", (signalData) => {
         const { callStatus, receiverId, setStatus } = usePeerCallState.getState();
@@ -211,6 +238,9 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       });
       newPeer.on("error", (error) => {
         console.error(error);
+      });
+      newPeer.on("end", () => {
+        resetCallState();
       });
       peerCallState.setPeer(newPeer);
     } catch (error) {
@@ -232,6 +262,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       peerCallState.setPeer(null);
     }
     asyncEndMediaStream();
+    asyncEndDisplayMediaStream();
   };
 
   const makeCall = async (receiverId: string, video: boolean = false) => {
@@ -246,6 +277,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
         muted: availableMedia.audioEnabled,
         video: availableMedia.videoEnabled,
         deafened: false,
+        sharingScreen: false,
       });
     } catch (error) {
       console.error(error);
@@ -268,6 +300,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       });
       newPeer.on("stream", (stream: MediaStream) => {
         const { receiverStream, setReceiverStream } = usePeerCallState.getState();
+        console.log(stream);
         setReceiverStream([...receiverStream, stream]);
       });
       newPeer.on("error", (error) => {
@@ -291,7 +324,12 @@ const PeerCallWrapper: React.FC = ({ children }) => {
   };
 
   const updateReceiverState = (receiverState: UserCallOptions) => {
+    const peerCallState = usePeerCallState.getState();
     peerCallState.setReceiverState(receiverState);
+    if (!receiverState.sharingScreen) {
+      const receiverStreams = peerCallState.receiverStream;
+      if (receiverStreams && receiverStreams.length > 1) peerCallState.setReceiverStream([receiverStreams[0]]);
+    }
   };
 
   const onCallDisconnect = (msg) => {

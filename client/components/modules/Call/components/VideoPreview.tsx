@@ -39,7 +39,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ video, avatarUrl, muted, en
   const { volume } = useMediaConfigurations();
 
   useEffect(() => {
-    if (!video) return;
+    if (!video || video.getAudioTracks().length < 1) return;
     const audioEvents = hark(video);
 
     audioEvents.on("speaking", () => {

@@ -37,11 +37,33 @@ const CallBody: React.FC = () => {
   const callState = usePeerCallState();
   const { mediaStream } = useMediaStream();
 
+  const VIDEO_WIDTH = callState.receiverState.sharingScreen ? 350 : 525,
+    VIDEO_HEIGHT = callState.receiverState.sharingScreen ? 230 : 375;
+
   return (
     <CallBodyWrapper>
+      {callState.receiverState.sharingScreen && (
+        <VideoStreamWrapper>
+          <VideoPreview
+            width={711}
+            height={400}
+            avatarUrl={callState.receiverProfile.avatarUrl}
+            video={callState.receiverStream[1]}
+            enabled={callState.receiverState.sharingScreen}
+            muted={callState.userState.deafened}
+          />
+        </VideoStreamWrapper>
+      )}
       <VideoStreamWrapper>
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
-          <VideoPreview width={525} height={375} avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
+          <VideoPreview
+            width={VIDEO_WIDTH}
+            height={VIDEO_HEIGHT}
+            avatarUrl={user.avatarUrl}
+            muted={true}
+            video={mediaStream}
+            enabled={callState.userState.video}
+          />
           <p
             style={{
               fontSize: "18px",
@@ -55,10 +77,10 @@ const CallBody: React.FC = () => {
         </div>
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
           <VideoPreview
-            width={525}
-            height={375}
+            width={VIDEO_WIDTH}
+            height={VIDEO_HEIGHT}
             avatarUrl={callState.receiverProfile.avatarUrl}
-            video={callState.receiverStream}
+            video={callState.receiverStream[0]}
             enabled={callState.receiverState.video}
             muted={callState.userState.deafened}
           />
