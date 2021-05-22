@@ -74,7 +74,7 @@ const CallPreview: React.FC = () => {
           </>
         );
       case "rtc_connecting":
-        return "RTC Connecting...";
+        return "RTC connecting...";
     }
   };
 

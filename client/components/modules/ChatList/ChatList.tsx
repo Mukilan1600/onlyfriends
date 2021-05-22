@@ -101,7 +101,6 @@ const ChatsList: React.FC = () => {
       socket.off("is_typing");
       socket.off("chat_list");
       socket.off("receive_message");
-      socket.off("update_friend_status");
     };
   }, [socket]);
 
