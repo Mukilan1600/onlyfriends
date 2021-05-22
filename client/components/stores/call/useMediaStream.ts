@@ -40,7 +40,6 @@ const useMediaStream = () => {
       const devices = await navigator.mediaDevices.enumerateDevices();
       let hasVideo = false,
         hasAudio = false;
-      console.log(devices);
       devices.forEach((device) => {
         if (device.kind === "audioinput") hasAudio = true;
         if (device.kind === "videoinput") hasVideo = true;
@@ -89,7 +88,6 @@ const useMediaStream = () => {
             }
           });
 
-          console.log(stream.getTracks(), mediaStream.getTracks());
           mediaStream.getTracks().forEach((track) => {
             exists = false;
             stream.getTracks().forEach((track1) => {

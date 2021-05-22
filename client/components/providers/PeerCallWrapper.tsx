@@ -208,9 +208,6 @@ const PeerCallWrapper: React.FC = ({ children }) => {
       newPeer.on("error", (error) => {
         console.error(error);
       });
-      newPeer.on("close", () => {
-        console.log("Peer closed");
-      });
       peerCallState.setPeer(newPeer);
     } catch (error) {
       console.error(error);
@@ -280,7 +277,6 @@ const PeerCallWrapper: React.FC = ({ children }) => {
   const receiveSignalData = (_receiverId: string, signalData: Peer.SignalData) => {
     const { peer } = usePeerCallState.getState();
     if (peer) {
-      console.log(signalData);
       try {
         peer.signal(signalData);
       } catch (error) {

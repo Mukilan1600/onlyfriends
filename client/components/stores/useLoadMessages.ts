@@ -12,14 +12,11 @@ interface IUseLoadMessages {
 const useLoadMessages = (): IUseLoadMessages => {
   const { user } = useProfile();
   const { socket } = useContext(WebSocketContext);
-  const { messages, chat, reachedEnd, resetChat, setReachedEnd, setMessages } =
-    useChat();
+  const { messages, chat, reachedEnd, resetChat, setReachedEnd, setMessages } = useChat();
   const { setLoader } = useLoader();
 
   const sendMessageAcknowledgements = (newMessages: IMessage[]) => {
-    const unAcknowledgedMessages = newMessages.filter(
-      (message) => !message.readBy.includes(user._id)
-    );
+    const unAcknowledgedMessages = newMessages.filter((message) => !message.readBy.includes(user._id));
     if (unAcknowledgedMessages.length > 0)
       socket.emit(
         "acknowledge_messages",
@@ -39,23 +36,24 @@ const useLoadMessages = (): IUseLoadMessages => {
       sendMessageAcknowledgements(newMessages);
     });
 
-    socket.on(
-      "message_acks",
-      (chatId: string, messageIds: string[], userId: string) => {
-        if (chatId !== chat._id) return;
-        const { messages } = useChat.getState();
-        setMessages(
-          messages.map((message) => {
-            if (
-              messageIds.includes(message._id) &&
-              !message.readBy.includes(userId)
-            )
-              message.readBy.push(userId);
-            return message;
-          })
-        );
+    socket.on("message_acks", (chatId: string, messageIds: string[], userId: string) => {
+      if (chatId !== chat._id) return;
+      const { messages } = useChat.getState();
+      const { setChats, chats } = useChatList.getState();
+      if (chats) {
+        const newChats = [...chats].map((chatI) => {
+          if (chatI.chat._id === chat._id) return { ...chatI, unread: chatI.unread - messageIds.length };
+          else return chatI;
+        });
+        setChats(newChats);
       }
-    );
+      setMessages(
+        messages.map((message) => {
+          if (messageIds.includes(message._id) && !message.readBy.includes(userId)) message.readBy.push(userId);
+          return message;
+        })
+      );
+    });
 
     return () => {
       socket.off("messages");
