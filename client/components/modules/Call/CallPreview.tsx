@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import React from "react";
 import styled from "styled-components";
-import {usePeerCallState } from "../../providers/PeerCallWrapper";
+import { usePeerCallState } from "../../providers/PeerCallWrapper";
 import StatusDeafenedIcon from "../../statics/icons/StatusDeafenedIcon";
 import StatusMutedIcon from "../../statics/icons/StatusMutedIcon";
 import useMediaConfigurations from "../../stores/call/useMediaConfiguration";
@@ -96,7 +96,7 @@ const CallPreview: React.FC = () => {
               width={160}
               height={130}
               avatarUrl={callState.receiverProfile.avatarUrl}
-              video={callState.receiverStream}
+              video={callState.receiverStream[0]}
               enabled={callState.receiverState.video}
               muted={callState.userState.deafened}
             />

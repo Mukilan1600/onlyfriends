@@ -24,7 +24,7 @@ interface IPeerCallState extends State {
   callStatus: CallStatus;
   receiverId: string;
   receiverProfile: IUser;
-  receiverStream: MediaStream;
+  receiverStream: MediaStream[];
   receiverState: UserCallOptions;
   peer: Peer.Instance;
 }
@@ -40,7 +40,7 @@ const initialPeerCallState: IPeerCallState = {
   callStatus: "idle",
   receiverId: null,
   receiverProfile: null,
-  receiverStream: null,
+  receiverStream: [],
   peer: null,
   receiverState: initialCallOptions,
 };
@@ -50,7 +50,7 @@ interface IPeerCallStateSetters extends IPeerCallState {
   setReceiverProfile: (receiverProfile: IUser) => void;
   setStatus: (status: CallStatus) => void;
   setRejectReason: (rejectReason: RejectReason) => void;
-  setReceiverStream: (receiverStream: MediaStream) => void;
+  setReceiverStream: (receiverStream: MediaStream[]) => void;
   setPeer: (peer: Peer.Instance) => void;
   setReceiverState: (receiverState: UserCallOptions) => void;
   setUserState: (userState: UserCallOptions) => void;
@@ -63,7 +63,7 @@ export const usePeerCallState = create<IPeerCallStateSetters>(
     setStatus: (status: CallStatus) => set({ callStatus: status }),
     setRejectReason: (rejectReason: RejectReason) => set({ rejectReason }),
     setReceiverProfile: (receiverProfile: IUser) => set({ receiverProfile }),
-    setReceiverStream: (receiverStream: MediaStream) => set({ receiverStream }),
+    setReceiverStream: (receiverStream: MediaStream[]) => set({ receiverStream }),
     setPeer: (peer: Peer.Instance) => set({ peer }),
     setReceiverState: (receiverState: UserCallOptions) => set({ receiverState }),
     setUserState: (userState: UserCallOptions) => set({ userState }),
@@ -71,6 +71,7 @@ export const usePeerCallState = create<IPeerCallStateSetters>(
       set({
         receiverState: initialCallOptions,
         userState: initialCallOptions,
+        receiverStream: [],
       }),
   }))
 );
@@ -205,7 +206,8 @@ const PeerCallWrapper: React.FC = ({ children }) => {
         }
       });
       newPeer.on("stream", (stream: MediaStream) => {
-        peerCallState.setReceiverStream(stream);
+        const { receiverStream, setReceiverStream } = usePeerCallState.getState();
+        setReceiverStream([...receiverStream, stream]);
       });
       newPeer.on("error", (error) => {
         console.error(error);
@@ -265,7 +267,8 @@ const PeerCallWrapper: React.FC = ({ children }) => {
         }
       });
       newPeer.on("stream", (stream: MediaStream) => {
-        callState.setReceiverStream(stream);
+        const { receiverStream, setReceiverStream } = usePeerCallState.getState();
+        setReceiverStream([...receiverStream, stream]);
       });
       newPeer.on("error", (error) => {
         console.error(error);

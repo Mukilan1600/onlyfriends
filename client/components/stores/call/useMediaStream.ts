@@ -5,12 +5,15 @@ import { usePeerCallState } from "../../providers/PeerCallWrapper";
 
 interface IUseMediaStreamState extends State {
   mediaStream: MediaStream;
+  displayMediaStream: MediaStream;
   setMediaStream: (mediaStream: MediaStream) => void;
+  setDisplayMediaStream: (displayMediaStream: MediaStream) => void;
 }
 
 export const useMediaStreamState = create<IUseMediaStreamState>(
-  combine({ mediaStream: null }, (set) => ({
+  combine({ mediaStream: null, displayMediaStream: null }, (set) => ({
     setMediaStream: (mediaStream: MediaStream) => set({ mediaStream }),
+    setDisplayMediaStream: (displayMediaStream: MediaStream) => set({ displayMediaStream }),
   }))
 );
 
@@ -33,6 +36,15 @@ const useMediaStream = () => {
         track.stop();
       });
     setMediaStream(null);
+  };
+
+  const asyncEndDisplayMediaStream = () => {
+    const { displayMediaStream, setDisplayMediaStream } = useMediaStreamState.getState();
+    if (displayMediaStream)
+      displayMediaStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    setDisplayMediaStream(null);
   };
 
   const checkDevicesExist = async (video: boolean, audio: boolean) => {
@@ -124,7 +136,26 @@ const useMediaStream = () => {
     }
   };
 
-  return { mediaStream, waitForMediaStream, setMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream };
+  const waitForDisplayMediaStream = async () => {
+    try {
+      // @ts-ignore
+      const stream: MediaStream = await navigator.mediaDevices.getDisplayMedia();
+      return stream;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return {
+    mediaStream,
+    waitForMediaStream,
+    setMediaStream,
+    checkDevicesExist,
+    endMediaStream,
+    asyncEndMediaStream,
+    waitForDisplayMediaStream,
+    asyncEndDisplayMediaStream,
+  };
 };
 
 export default useMediaStream;
