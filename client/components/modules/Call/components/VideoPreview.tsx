@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import hark from "hark";
+import useMediaConfigurations from "../../../stores/call/useMediaConfiguration";
 
 interface VideoPreviewProps {
   video?: MediaStream;
@@ -35,6 +36,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ video, avatarUrl, muted, en
   const videoRef = useRef<HTMLVideoElement>();
   const audioRef = useRef<HTMLAudioElement>();
   const [speaking, setSpeaking] = useState<boolean>(false);
+  const { volume } = useMediaConfigurations();
 
   useEffect(() => {
     if (!video) return;
@@ -65,6 +67,11 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ video, avatarUrl, muted, en
       audioRef.current.muted = muted;
     }
   }, [video, videoRef.current, audioRef.current, muted]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume / 100;
+  }, [volume]);
+
   return (
     <>
       {video && video.getVideoTracks().length > 0 && enabled ? (

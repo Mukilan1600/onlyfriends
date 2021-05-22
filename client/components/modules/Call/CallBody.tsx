@@ -6,8 +6,9 @@ import StatusDeafenedIcon from "../../statics/icons/StatusDeafenedIcon";
 import StatusMutedIcon from "../../statics/icons/StatusMutedIcon";
 import useMediaStream from "../../stores/call/useMediaStream";
 import useProfile from "../../stores/useProfile";
-import CallControls from "./CallControls";
-import VideoPreview from "./VideoPreview";
+import CallControls from "./components/CallControls";
+import VideoPreview from "./components/VideoPreview";
+import VolumeSlider from "./components/VolumeSlider";
 
 const CallBodyWrapper = styled.div`
   padding: 30px 50px;
@@ -24,8 +25,8 @@ const VideoStreamWrapper = styled.div`
 `;
 
 const CallControlsWrapper = styled.div`
-  padding: 30px;
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -38,13 +39,19 @@ const CallBody: React.FC = () => {
 
   return (
     <CallBodyWrapper>
-      <div style={{ width: "100%", margin: "5px" }}>
-        <Link href="/home">Go back</Link>
-      </div>
       <VideoStreamWrapper>
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
           <VideoPreview width={525} height={375} avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
-          <p>{user.name}</p>
+          <p
+            style={{
+              fontSize: "18px",
+              lineHeight: "21px",
+              color: "#000000",
+              margin: "20px 0px",
+            }}
+          >
+            {user.name}
+          </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
           <VideoPreview
@@ -61,6 +68,7 @@ const CallBody: React.FC = () => {
                 fontSize: "18px",
                 lineHeight: "21px",
                 color: "#000000",
+                margin: "20px 0px",
               }}
             >
               {callState.receiverProfile.name}
@@ -76,7 +84,11 @@ const CallBody: React.FC = () => {
         </div>
       </VideoStreamWrapper>
       <CallControlsWrapper>
+        <div style={{ width: "100%" }}>
+          <span style={{ float: "right" }}></span>
+        </div>
         <CallControls />
+        <VolumeSlider />
       </CallControlsWrapper>
     </CallBodyWrapper>
   );

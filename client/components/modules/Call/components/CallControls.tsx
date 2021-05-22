@@ -1,16 +1,16 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
-import { CallStatus, PeerCallContext, usePeerCallState } from "../../providers/PeerCallWrapper";
-import CallAcceptIcon from "../../statics/icons/CallAcceptIcon";
-import CallRejectIcon from "../../statics/icons/CallRejectIcon";
-import EndCall from "../../statics/icons/EndCall";
-import MicOff from "../../statics/icons/MicOff";
-import MicOn from "../../statics/icons/MicOn";
-import SpeakerOff from "../../statics/icons/SpeakerOff";
-import SpeakerOn from "../../statics/icons/SpeakerOn";
-import VideoOff from "../../statics/icons/VideoOff";
-import VideoOn from "../../statics/icons/VideoOn";
-import useMediaStream from "../../stores/call/useMediaStream";
+import { PeerCallContext, usePeerCallState } from "../../../providers/PeerCallWrapper";
+import CallAcceptIcon from "../../../statics/icons/CallAcceptIcon";
+import CallRejectIcon from "../../../statics/icons/CallRejectIcon";
+import EndCall from "../../../statics/icons/EndCall";
+import MicOff from "../../../statics/icons/MicOff";
+import MicOn from "../../../statics/icons/MicOn";
+import SpeakerOff from "../../../statics/icons/SpeakerOff";
+import SpeakerOn from "../../../statics/icons/SpeakerOn";
+import VideoOff from "../../../statics/icons/VideoOff";
+import VideoOn from "../../../statics/icons/VideoOn";
+import useMediaStream from "../../../stores/call/useMediaStream";
 
 const ButtonPanel = styled.div`
   background: linear-gradient(95.16deg, #ff00c7 -24.95%, #3d98e7 124.85%);
