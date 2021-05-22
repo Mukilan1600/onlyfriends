@@ -5,17 +5,20 @@ import { usePeerCallState } from "../../providers/PeerCallWrapper";
 
 interface IUseMediaStreamState extends State {
   mediaStream: MediaStream;
+  displayMediaStream: MediaStream;
   setMediaStream: (mediaStream: MediaStream) => void;
+  setDisplayMediaStream: (displayMediaStream: MediaStream) => void;
 }
 
 export const useMediaStreamState = create<IUseMediaStreamState>(
-  combine({ mediaStream: null }, (set) => ({
+  combine({ mediaStream: null, displayMediaStream: null }, (set) => ({
     setMediaStream: (mediaStream: MediaStream) => set({ mediaStream }),
+    setDisplayMediaStream: (displayMediaStream: MediaStream) => set({ displayMediaStream }),
   }))
 );
 
 const useMediaStream = () => {
-  const { mediaStream, setMediaStream } = useMediaStreamState();
+  const { mediaStream, displayMediaStream, setMediaStream, setDisplayMediaStream } = useMediaStreamState();
   const { setAvailableDevices } = useMediaConfigurations();
 
   const endMediaStream = () => {
@@ -35,12 +38,21 @@ const useMediaStream = () => {
     setMediaStream(null);
   };
 
+  const asyncEndDisplayMediaStream = () => {
+    const { displayMediaStream, setDisplayMediaStream } = useMediaStreamState.getState();
+    if (displayMediaStream){
+      displayMediaStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+    setDisplayMediaStream(null);
+  };
+
   const checkDevicesExist = async (video: boolean, audio: boolean) => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       let hasVideo = false,
         hasAudio = false;
-      console.log(devices);
       devices.forEach((device) => {
         if (device.kind === "audioinput") hasAudio = true;
         if (device.kind === "videoinput") hasVideo = true;
@@ -68,6 +80,7 @@ const useMediaStream = () => {
         muted: userState.muted || !newMediaConfigurations.audioEnabled,
         video: userState.video && newMediaConfigurations.videoEnabled,
         deafened: userState.deafened,
+        sharingScreen: userState.sharingScreen,
       });
       const stream = await navigator.mediaDevices.getUserMedia({
         video: newMediaConfigurations.videoEnabled,
@@ -89,7 +102,6 @@ const useMediaStream = () => {
             }
           });
 
-          console.log(stream.getTracks(), mediaStream.getTracks());
           mediaStream.getTracks().forEach((track) => {
             exists = false;
             stream.getTracks().forEach((track1) => {
@@ -126,7 +138,28 @@ const useMediaStream = () => {
     }
   };
 
-  return { mediaStream, waitForMediaStream, setMediaStream, checkDevicesExist, endMediaStream, asyncEndMediaStream };
+  const waitForDisplayMediaStream = async () => {
+    try {
+      // @ts-ignore
+      const stream: MediaStream = await navigator.mediaDevices.getDisplayMedia();
+      setDisplayMediaStream(stream);
+      return stream;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return {
+    mediaStream,
+    displayMediaStream,
+    waitForMediaStream,
+    setMediaStream,
+    checkDevicesExist,
+    endMediaStream,
+    asyncEndMediaStream,
+    waitForDisplayMediaStream,
+    asyncEndDisplayMediaStream,
+  };
 };
 
 export default useMediaStream;

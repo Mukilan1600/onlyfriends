@@ -95,69 +95,6 @@ const WebSocketProvider: React.FC<{}> = ({ children }) => {
       useLoader.getState().clearLoaders();
     });
 
-    // newSocket.on("incoming_call", (receiverId: string) => {
-    //   if (
-    //     callState.callStatus === "call_incoming" ||
-    //     callState.callStatus === "call"
-    //   ) {
-    //     rejectCall("BUSY", receiverId);
-    //   } else {
-    //     callState.setReceiverProfile(
-    //       findUserFromChat(useChatList.getState().chats, receiverId)
-    //     );
-    //     callState.setReceiverId(receiverId);
-    //     callState.setStatus("call_incoming");
-    //   }
-    // });
-
-    // newSocket.on("call_rejected", (reason: RejectReason) => {
-    //   callState.setRejectReason(reason);
-    //   callState.setStatus("call_rejected");
-    // });
-
-    // newSocket.on("call_accepted", callAccepted.bind(this, newSocket));
-
-    // newSocket.on("signal_data", receiveSignalData);
-
-    // newSocket.on("receiver_state",updateReceiverState)
-
-    // newSocket.on("update_friend_status", (msg) => {
-    //   const { chats, setChats } = useChatList.getState();
-    //   const { chat, setChat } = useChat.getState();
-
-    //   onCallDisconnect(msg);
-
-    //   if (chats)
-    //     setChats(
-    //       chats.map((chat) => {
-    //         const newParticipants = chat.chat.participants.map(
-    //           (participant) => {
-    //             if (participant.user.oauthId === msg.oauthId) {
-    //               return {
-    //                 ...participant,
-    //                 user: { ...participant.user, ...msg, isTyping: false },
-    //               };
-    //             } else return participant;
-    //           }
-    //         );
-    //         chat.chat.participants = newParticipants;
-    //         return chat;
-    //       })
-    //     );
-    //   if (chat) {
-    //     const newParticipants = chat.participants.map((participant) => {
-    //       if (participant.user.oauthId === msg.oauthId) {
-    //         return {
-    //           ...participant,
-    //           user: { ...participant.user, ...msg, isTyping: false },
-    //         };
-    //       } else return participant;
-    //     });
-    //     chat.participants = newParticipants;
-    //     setChat(chat);
-    //   }
-    // });
-
     setSocketStatus("connected");
     setSocket(newSocket);
   }, [jwtTok, firebase.auth]);

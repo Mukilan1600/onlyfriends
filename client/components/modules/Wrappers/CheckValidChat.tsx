@@ -26,14 +26,6 @@ const CheckValidChat: React.FC = ({ children }) => {
       const newParticipants = chat.participants.filter((participant) => {
         return participant.user.oauthId !== user.oauthId;
       });
-      const { setChats, chats } = useChatList.getState();
-      if (chats) {
-        const newChats = [...chats].map((chatI) => {
-          if (chatI.chat._id === chat._id) return { ...chatI, unread: 0 };
-          else return chatI;
-        });
-        setChats(newChats);
-      }
       setChat({ ...chat, participants: newParticipants });
     });
 
