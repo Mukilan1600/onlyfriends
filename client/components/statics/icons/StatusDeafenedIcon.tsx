@@ -30,7 +30,7 @@ const StatusDeafenedIcon = () => {
       />
       <defs>
         <filter id="filter0_d" x="0" y="0" width="25" height="25" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
           <feOffset dy="1" />
           <feGaussianBlur stdDeviation="0.5" />

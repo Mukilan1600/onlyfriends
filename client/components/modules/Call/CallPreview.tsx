@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import React, { useContext } from "react";
 import styled from "styled-components";
 import { PeerCallContext, usePeerCallState } from "../../providers/PeerCallWrapper";
@@ -15,6 +16,7 @@ import VideoOn from "../../statics/icons/VideoOn";
 import useMediaConfigurations from "../../stores/call/useMediaConfiguration";
 import useMediaStream from "../../stores/call/useMediaStream";
 import useProfile from "../../stores/useProfile";
+import CallControls from "./CallControls";
 import VideoPreview from "./VideoPreview";
 
 const PreviewWrapper = styled.div<{ closed: boolean }>`
@@ -49,96 +51,15 @@ const CallStatus = styled.div`
   color: rgba(0, 0, 0, 0.54);
 `;
 
-const ButtonPanel = styled.div`
-  background: linear-gradient(95.16deg, #ff00c7 -24.95%, #3d98e7 124.85%);
-  border-radius: 12px;
-  padding: 0px 10px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const ControlButton = styled.button`
-  width: 50px;
-  height: 44px;
-  border: none;
-  background: transparent;
-  outline: none;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.2);
-  }
-`;
-
-const CallAcceptButton = styled.button`
-  width: 70px;
-  height: 42px;
-  border: 1px solid #18ff21;
-  box-sizing: border-box;
-  border-radius: 19px 0px 0px 19px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(24, 255, 33, 0.1);
-  }
-`;
-
-const CallRejectButton = styled.button<{ borderAll?: boolean }>`
-  width: 70px;
-  height: 42px;
-  border: 1px solid #ff1818;
-  box-sizing: border-box;
-  border-radius: ${({ borderAll }) => (borderAll ? "19px" : "0px 19px 19px 0px")};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  cursor: pointer;
-
-  &:hover {
-    background: rgba(255, 24, 24, 0.1);
-  }
-`;
-
 const CallPreview: React.FC = () => {
   const { user } = useProfile();
   const callState = usePeerCallState();
-  const { acceptCall, endCall } = useContext(PeerCallContext);
   const { mediaStream } = useMediaStream();
   const { hasAudio, hasVideo } = useMediaConfigurations();
+  const router = useRouter();
 
-  const toggleVideo = () => {
-    const videoTracks = mediaStream.getVideoTracks();
-    let video = !callState.userState.video;
-    if (videoTracks.length < 1 && video) video = false;
-    callState.setUserState({
-      ...callState.userState,
-      video,
-    });
-  };
-
-  const toggleAudio = () => {
-    const audioTracks = mediaStream.getAudioTracks();
-    let muted = !callState.userState.muted;
-    if (audioTracks.length < 1 && !muted) muted = true;
-    callState.setUserState({
-      ...callState.userState,
-      muted,
-      deafened: false,
-    });
-  };
-
-  const toggleSpeaker = () => {
-    callState.setUserState({
-      ...callState.userState,
-      deafened: !callState.userState.deafened,
-      muted: !callState.userState.deafened,
-    });
+  const expandCallPreview = () => {
+    router.push("/call");
   };
 
   const getPreviewStatus = () => {
@@ -164,41 +85,6 @@ const CallPreview: React.FC = () => {
     }
   };
 
-  const getCallControls = () => {
-    switch (callState.callStatus) {
-      case "call_incoming":
-        return (
-          <>
-            <CallAcceptButton onClick={acceptCall.bind(this, false)}>
-              <CallAcceptIcon />
-            </CallAcceptButton>
-            <CallRejectButton onClick={endCall}>
-              <CallRejectIcon />
-            </CallRejectButton>
-          </>
-        );
-      case "call_outgoing":
-        return (
-          <>
-            <CallRejectButton onClick={endCall} borderAll={true}>
-              <CallRejectIcon />
-            </CallRejectButton>
-          </>
-        );
-      case "call":
-        return (
-          <ButtonPanel>
-            <ControlButton onClick={toggleVideo}>{callState.userState.video ? <VideoOn /> : <VideoOff />}</ControlButton>
-            <ControlButton onClick={toggleSpeaker}>{callState.userState.deafened ? <SpeakerOff /> : <SpeakerOn />}</ControlButton>
-            <ControlButton onClick={toggleAudio}>{callState.userState.muted ? <MicOff /> : <MicOn />}</ControlButton>
-            <ControlButton onClick={endCall}>
-              <EndCall />
-            </ControlButton>
-          </ButtonPanel>
-        );
-    }
-  };
-
   return (
     <PreviewWrapper closed={callState.callStatus === "idle"}>
       {callState.callStatus !== "idle" && (
@@ -213,9 +99,11 @@ const CallPreview: React.FC = () => {
               <span style={{ width: "25px", height: "25px", margin: "0px 8px" }} />
             )}
           </CallStatus>
-          <div style={{ display: "flex" }}>
-            <VideoPreview avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
+          <div style={{ display: "flex" }} onDoubleClick={expandCallPreview}>
+            <VideoPreview width={160} height={130} avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
             <VideoPreview
+              width={160}
+              height={130}
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream}
               enabled={callState.receiverState.video}
@@ -223,7 +111,9 @@ const CallPreview: React.FC = () => {
             />
           </div>
 
-          <div style={{ display: "flex" }}>{getCallControls()}</div>
+          <div style={{ display: "flex" }}>
+            <CallControls />
+          </div>
         </>
       )}
     </PreviewWrapper>

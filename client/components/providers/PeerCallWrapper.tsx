@@ -10,7 +10,7 @@ import useChatList from "../stores/useChatList";
 import { Socket } from "socket.io-client";
 import useChat from "../stores/useChat";
 
-type CallStatus = "idle" | "call" | "call_outgoing" | "call_incoming";
+export type CallStatus = "idle" | "call" | "call_outgoing" | "call_incoming";
 export type RejectReason = "BUSY" | "REJECT";
 
 interface UserCallOptions {
