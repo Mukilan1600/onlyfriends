@@ -127,9 +127,9 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     if (socket && peerCallState.receiverId) {
       socket.emit("receiver_state", peerCallState.receiverId, peerCallState.userState);
 
-      if (peerCallState.userState.sharingScreen) {
+      if (peerCallState.userState.sharingScreen && !displayMediaStream) {
         addDisplayStreamToPeer();
-      } else if (displayMediaStream) {
+      } else if (!peerCallState.userState.sharingScreen && displayMediaStream) {
         peerCallState.peer.removeStream(displayMediaStream);
         asyncEndDisplayMediaStream();
       }
@@ -138,7 +138,10 @@ const PeerCallWrapper: React.FC = ({ children }) => {
 
   const addDisplayStreamToPeer = async () => {
     const stream = await waitForDisplayMediaStream();
-    if (peerCallState.peer) peerCallState.peer.addStream(stream);
+    if (peerCallState.peer && stream) {
+      peerCallState.peer.addStream(stream);
+    } else {
+    }
   };
 
   useEffect(() => {
