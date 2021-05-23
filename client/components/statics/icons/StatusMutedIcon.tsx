@@ -2,7 +2,7 @@ import React from "react";
 
 const StatusMutedIcon = () => {
   return (
-    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ margin: "0px 8px" }}>
+    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: "8px" }}>
       <g filter="url(#filter0_d)">
         <circle cx="12.5" cy="11.5" r="11.5" fill="white" />
       </g>
