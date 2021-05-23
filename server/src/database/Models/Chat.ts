@@ -8,6 +8,7 @@ interface IText extends Document {
   replyTo?: string;
   fileUrl?: string;
   fileName?: string;
+  fileType?: "file" | "image" | "video";
   message?: {
     type: "emote" | "text" | "link";
     id?: string;
@@ -36,6 +37,7 @@ const textSchema = new Schema(
     },
     fileUrl: String,
     fileName: String,
+    fileType: String,
     message: [
       {
         type: { type: String },

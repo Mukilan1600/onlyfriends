@@ -53,8 +53,7 @@ const MessageWrapper = styled.div<MessageProps>`
 `;
 
 const MessageBackground = styled.div<MessageProps>`
-  background: ${({ file }) =>
-    file ? "rgba(0, 0, 0, 0.1)" : "rgba(0, 0, 0, 0);"};
+  background: ${({ file }) => (file ? "rgba(0, 0, 0, 0.1)" : "rgba(0, 0, 0, 0);")};
   border-radius: 8px;
   user-select: ${({ file }) => (file ? "none" : "inherit")};
   cursor: ${({ file }) => (file ? "pointer" : "inherit")};
@@ -104,8 +103,7 @@ const TimeDiv = styled.div<MessageProps>`
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
-    color: ${({ sentByMe }) =>
-      sentByMe ? "rgba(82, 82, 82, 0.80)" : "rgba(255, 255, 255, 0.59)"};
+    color: ${({ sentByMe }) => (sentByMe ? "rgba(82, 82, 82, 0.80)" : "rgba(255, 255, 255, 0.59)")};
   }
 `;
 
@@ -123,11 +121,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
 
   const isToday = () => {
     const today = new Date();
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
+    return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
   };
 
   const getFormattedTime = () => {
@@ -145,7 +139,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
   };
 
   const downloadFile = () => {
-    if (message.type === "file") {
+    if (message.type === "file" && message.fileType !== "video") {
       fetch(message.fileUrl, {
         method: "GET",
       })
@@ -170,30 +164,14 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
       <ReplyMessage message={message} chat={chat} user={user}>
         <div style={{ position: "relative" }}>
           {sentByMe && (
-            <ReplyButton
-              onClick={replyToMessage.bind(this, message)}
-              sentByMe={sentByMe}
-            >
+            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
               <ReplyIcon />
             </ReplyButton>
           )}
-          <MessageDiv
-            sentByMe={sentByMe}
-            file={message.type === "file"}
-            single={message.message.length === 1}
-          >
-            <MessageBackground
-              file={message.type === "file"}
-              onClick={downloadFile}
-            >
-              {message.type === "file" ? (
-                formatFileMessage(message, false, sentByMe)
-              ) : (
-                <span>{message.message.map(formatMessage)}</span>
-              )}
-              {(message.message.length > 1 ||
-                (message.message.length === 1 &&
-                  message.message[0].type !== "emote")) && (
+          <MessageDiv sentByMe={sentByMe} file={message.type === "file"} single={message.message.length === 1}>
+            <MessageBackground file={message.type === "file"} onClick={downloadFile}>
+              {message.type === "file" ? formatFileMessage(message, false, sentByMe) : <span>{message.message.map(formatMessage)}</span>}
+              {(message.message.length > 1 || (message.message.length === 1 && message.message[0].type !== "emote")) && (
                 <span
                   style={{
                     width: rightPadding,
@@ -207,11 +185,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
               {sentByMe && (
                 <ReadReceipt
                   allRead={message.readBy.length > chat.participants.length}
-                  title={
-                    message.readBy.length > chat.participants.length
-                      ? "Read"
-                      : "Delivered"
-                  }
+                  title={message.readBy.length > chat.participants.length ? "Read" : "Delivered"}
                 >
                   <ReadTickIcon />
                 </ReadReceipt>
@@ -219,10 +193,7 @@ const Message: React.FC<IMessageProps> = ({ message, idx }) => {
             </TimeDiv>
           </MessageDiv>
           {!sentByMe && (
-            <ReplyButton
-              onClick={replyToMessage.bind(this, message)}
-              sentByMe={sentByMe}
-            >
+            <ReplyButton onClick={replyToMessage.bind(this, message)} sentByMe={sentByMe}>
               <ReplyIcon />
             </ReplyButton>
           )}
