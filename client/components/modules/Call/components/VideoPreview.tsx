@@ -3,7 +3,7 @@ import styled from "styled-components";
 import hark from "hark";
 import useMediaConfigurations from "../../../stores/call/useMediaConfiguration";
 
-interface VideoPreviewProps {
+export interface VideoPreviewProps {
   video?: MediaStream;
   avatarUrl: string;
   muted?: boolean;
