@@ -60,7 +60,11 @@ export const formatMessage = (messageFragment: IMessageFragment, index: number, 
 };
 
 export const formatFileMessage = (message: IMessage, prev: boolean = true, sentByMe: boolean = true) => {
-  if (message.fileType === "file" || prev) {
+  if (message.fileType === "video") {
+    return <video src={message.fileUrl} controls style={{ width: "100%", height: "100%" }} />;
+  } else if (message.fileType === "image") {
+    return <img src={message.fileUrl} alt="image message" style={{ width: "100%", height: "100%" }} />;
+  } else {
     return (
       <div
         style={{
@@ -94,10 +98,6 @@ export const formatFileMessage = (message: IMessage, prev: boolean = true, sentB
         </div>
       </div>
     );
-  } else if (message.fileType === "image") {
-    return <img src={message.fileUrl} alt="image message" style={{width: "100%", height: "100%"}}/>;
-  } else {
-    return <video src={message.fileUrl} controls style={{width: "100%", height: "100%"}}/>;
   }
 };
 
