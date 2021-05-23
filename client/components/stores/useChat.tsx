@@ -17,6 +17,7 @@ export interface IMessage {
   replyTo?: string | IMessage;
   fileUrl?: string;
   fileName?: string;
+  fileType?: "file" | "image" | "video";
   message?: IMessageFragment[];
   createdAt?: Date;
   readBy?: string[];
@@ -35,26 +36,23 @@ interface IUseChat extends State {
 }
 
 const useChat = create<IUseChat>(
-  combine(
-    { chat: null, messages: [], unacknowledgedMessages: [], reachedEnd: false },
-    (set, get) => ({
-      setChat: (chat: IChat) => {
-        set({ chat });
-      },
-      setMessages: (messages: IMessage[]) => {
-        set({ messages });
-      },
-      setUnacknowledgedMessages: (unacknowledgedMessages: IMessage[]) => {
-        set({ unacknowledgedMessages });
-      },
-      setReachedEnd: (reached: boolean) => {
-        set({ reachedEnd: reached });
-      },
-      resetChat: () => {
-        set({ chat: null, messages: [], reachedEnd: false });
-      },
-    })
-  )
+  combine({ chat: null, messages: [], unacknowledgedMessages: [], reachedEnd: false }, (set, get) => ({
+    setChat: (chat: IChat) => {
+      set({ chat });
+    },
+    setMessages: (messages: IMessage[]) => {
+      set({ messages });
+    },
+    setUnacknowledgedMessages: (unacknowledgedMessages: IMessage[]) => {
+      set({ unacknowledgedMessages });
+    },
+    setReachedEnd: (reached: boolean) => {
+      set({ reachedEnd: reached });
+    },
+    resetChat: () => {
+      set({ chat: null, messages: [], reachedEnd: false });
+    },
+  }))
 );
 
 export default useChat;

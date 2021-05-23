@@ -9,8 +9,8 @@ const UploadInput: React.FC = () => {
   const { setFile } = useFileUpload();
   const onFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.currentTarget.files && event.currentTarget.files[0] && chat) {
-      if (event.currentTarget.files[0].size > 15000000)
-        toast("File size cannot exceed 15mb", { type: "error" });
+      if (event.currentTarget.files[0].size > 25000000)
+        toast("File size cannot exceed 25mb", { type: "error" });
       else setFile(event.currentTarget.files[0]);
     }
   };

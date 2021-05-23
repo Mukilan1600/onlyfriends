@@ -7,6 +7,7 @@ import FileIcon from "../../../../statics/icons/FileIcon";
 import useChat, { IMessage } from "../../../../stores/useChat";
 import { WebSocketContext } from "../../../../providers/WebSocketProvider";
 import styled, { keyframes } from "styled-components";
+import { getFileType } from "../utils";
 
 const ProgressBarWrapper = styled.div`
   width: 50%;
@@ -87,10 +88,12 @@ const FileUploadDialog: React.FC = () => {
 
   const sendFile = async () => {
     const fileUrl = await uploadTask.current.snapshot.ref.getDownloadURL();
+    const fileType = getFileType(file.type);
     const newMessage: IMessage = {
       type: "file",
       fileUrl,
       fileName: file.name,
+      fileType
     };
     socket.emit("send_message", chat._id, newMessage);
     setFile(null);
