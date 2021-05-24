@@ -63,7 +63,7 @@ const VideoStreamsCarousel: React.FC<VideoStreamsCarouselProps> = ({ currentStre
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream[1]}
               enabled={callState.receiverState.sharingScreen}
-              muted={callState.userState.deafened}
+              muted={true}
             />
           </div>
           <StreamTitle>{callState.receiverProfile.name}</StreamTitle>
@@ -77,7 +77,7 @@ const VideoStreamsCarousel: React.FC<VideoStreamsCarouselProps> = ({ currentStre
             avatarUrl={callState.receiverProfile.avatarUrl}
             video={callState.receiverStream[0]}
             enabled={callState.receiverState.video}
-            muted={callState.userState.deafened}
+            muted={true}
           />
         </div>
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -99,7 +99,7 @@ const VideoStreamsCarousel: React.FC<VideoStreamsCarouselProps> = ({ currentStre
             avatarUrl={user.avatarUrl}
             muted={true}
             video={mediaStream}
-            enabled={callState.userState.video}
+            enabled={true}
           />
         </div>
         <StreamTitle>{user.name}</StreamTitle>

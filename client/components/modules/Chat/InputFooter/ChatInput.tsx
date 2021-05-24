@@ -93,10 +93,7 @@ const ChatInput: React.FC = () => {
       if (sel.getRangeAt && sel.rangeCount) {
         range = sel.getRangeAt(0);
         if (sel.anchorNode.parentElement === inputRef.current) {
-          message =
-            message.substr(0, range.startOffset) +
-            value +
-            message.substr(range.endOffset, message.length - range.endOffset);
+          message = message.substr(0, range.startOffset) + value + message.substr(range.endOffset, message.length - range.endOffset);
         } else {
           message += value;
         }
@@ -138,8 +135,7 @@ const ChatInput: React.FC = () => {
             !prevEmote &&
             i > 0 &&
             i < messageFragments.length - 1 &&
-            ((emoji && emoji.length > 0 && emoji[0].id === messageFrag) ||
-              isAnEmoji(messageFrag))
+            ((emoji && emoji.length > 0 && emoji[0].id === messageFrag) || isAnEmoji(messageFrag))
           ) {
             prevEmote = true;
             messageArray.push({ type: "emote", id: messageFrag });
@@ -171,12 +167,10 @@ const ChatInput: React.FC = () => {
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      setMessage((message) => {
-        if (message.length > 0) {
-          sendMessage(message);
-        }
-        return "";
-      });
+      if (message.length > 0) {
+        sendMessage(message);
+        setMessage("");
+      }
       inputRef.current.innerHTML = "";
     }
   };
@@ -191,7 +185,6 @@ const ChatInput: React.FC = () => {
   const removeListeners = () => {
     if (inputRef.current) {
       inputRef.current.removeEventListener("input", onMessage);
-      inputRef.current.removeEventListener("keydown", onKeyDown);
       inputRef.current.removeEventListener("paste", onPaste);
     }
   };
@@ -199,9 +192,18 @@ const ChatInput: React.FC = () => {
   useEffect(() => {
     if (!inputRef.current) return;
 
+    inputRef.current.removeEventListener("keydown", onKeyDown);
+    inputRef.current.addEventListener("keydown", onKeyDown);
+    return () => {
+      if (inputRef.current) inputRef.current.removeEventListener("keydown", onKeyDown);
+    };
+  }, [inputRef.current, message]);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+
     removeListeners();
 
-    inputRef.current.addEventListener("keydown", onKeyDown);
     inputRef.current.addEventListener("input", onMessage);
     inputRef.current.addEventListener("paste", onPaste);
     return () => {
@@ -232,15 +234,8 @@ const ChatInput: React.FC = () => {
         <UploadInput />
         <Emoji onEmojiSelect={onEmojiSelect} />
         <MessageContainer>
-          <MessagePlaceholder visible={message.length > 0}>
-            Type your message here
-          </MessagePlaceholder>
-          <MessageInput
-            spellCheck
-            contentEditable
-            ref={inputRef}
-            onBlur={setTyping.bind(this, false)}
-          />
+          <MessagePlaceholder visible={message.length > 0}>Type your message here</MessagePlaceholder>
+          <MessageInput spellCheck contentEditable ref={inputRef} onBlur={setTyping.bind(this, false)} />
         </MessageContainer>
       </ChatInputDiv>
       {file && (
