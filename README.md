@@ -19,7 +19,8 @@ An open source VoIP and personal messaging webapp.
 - WebRTC and WebSocket for realtime chat/calls
 
 ## Screenshot
-![Main page](https://user-images.githubusercontent.com/59092504/119303704-d2e6a280-bc83-11eb-9154-fded0448ff50.png)
+![Main page](https://user-images.githubusercontent.com/59092504/119367157-4cf04900-bccf-11eb-8d26-d91626bab68e.png)
+
 
 ## Contributions
 Feel free to make pull requests or send feature requests.
