@@ -31,7 +31,7 @@ const useMediaStream = () => {
 
   const asyncEndDisplayMediaStream = () => {
     const { displayMediaStream, setDisplayMediaStream } = useMediaStreamState.getState();
-    if (displayMediaStream){
+    if (displayMediaStream) {
       displayMediaStream.getTracks().forEach((track) => {
         track.stop();
       });
@@ -132,7 +132,7 @@ const useMediaStream = () => {
   const waitForDisplayMediaStream = async () => {
     try {
       // @ts-ignore
-      const stream: MediaStream = await navigator.mediaDevices.getDisplayMedia();
+      const stream: MediaStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       setDisplayMediaStream(stream);
       return stream;
     } catch (error) {
