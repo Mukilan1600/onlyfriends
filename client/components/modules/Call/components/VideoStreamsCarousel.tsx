@@ -13,8 +13,8 @@ interface VideoStreamsCarouselProps {
   currentStream: CurrentStream;
 }
 
-const VIDEO_WIDTH = 156,
-  VIDEO_HEIGHT = 114;
+const VIDEO_WIDTH = "156px",
+  VIDEO_HEIGHT = "114px";
 
 const StreamsWrapper = styled.div`
   height: 70vh;
@@ -63,7 +63,7 @@ const VideoStreamsCarousel: React.FC<VideoStreamsCarouselProps> = ({ currentStre
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream[1]}
               enabled={callState.receiverState.sharingScreen}
-              muted={true}
+              muted={callState.userState.deafened}
             />
           </div>
           <StreamTitle>{callState.receiverProfile.name}</StreamTitle>
@@ -77,7 +77,7 @@ const VideoStreamsCarousel: React.FC<VideoStreamsCarouselProps> = ({ currentStre
             avatarUrl={callState.receiverProfile.avatarUrl}
             video={callState.receiverStream[0]}
             enabled={callState.receiverState.video}
-            muted={true}
+            muted={callState.userState.deafened}
           />
         </div>
         <div style={{ display: "flex", alignItems: "center" }}>
