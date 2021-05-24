@@ -18,5 +18,8 @@ An open source VoIP and personal messaging webapp.
 - [Firebase](https://firebase.google.com/) for file storage
 - WebRTC and WebSocket for realtime chat/calls
 
+## Screenshot
+![Main page](https://user-images.githubusercontent.com/59092504/119303704-d2e6a280-bc83-11eb-9154-fded0448ff50.png)
+
 ## Contributions
 Feel free to make pull requests or send feature requests.
