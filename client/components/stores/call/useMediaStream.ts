@@ -22,6 +22,7 @@ const useMediaStream = () => {
   const { setAvailableDevices } = useMediaConfigurations();
 
   const endMediaStream = () => {
+    const { mediaStream } = useMediaStreamState.getState();
     if (mediaStream)
       mediaStream.getTracks().forEach((track) => {
         track.stop();

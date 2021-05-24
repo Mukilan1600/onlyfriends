@@ -99,7 +99,7 @@ const VideoStreamsCarousel: React.FC<VideoStreamsCarouselProps> = ({ currentStre
             avatarUrl={user.avatarUrl}
             muted={true}
             video={mediaStream}
-            enabled={true}
+            enabled={callState.userState.video}
           />
         </div>
         <StreamTitle>{user.name}</StreamTitle>
