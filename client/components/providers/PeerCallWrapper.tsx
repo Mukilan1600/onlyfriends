@@ -10,6 +10,7 @@ import useChatList from "../stores/useChatList";
 import { Socket } from "socket.io-client";
 import useChat from "../stores/useChat";
 import { toast } from "react-toastify";
+import useMediaConfigurations from "../stores/call/useMediaConfiguration";
 
 export type CallStatus = "idle" | "rtc_connecting" | "call" | "call_outgoing" | "call_incoming";
 export type RejectReason = "BUSY" | "REJECT";
@@ -107,9 +108,15 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     checkDevicesExist,
     endMediaStream,
     setMediaStream,
+    onMediaDeviceChange
   } = useMediaStream();
+  const { audioDevice, videoDevice } = useMediaConfigurations();
   const { socket } = useContext(WebSocketContext);
   const { chats } = useChatList();
+
+  useEffect(() => {
+    onMediaDeviceChange();
+  }, [audioDevice, videoDevice]);
 
   useEffect(() => {
     if (mediaStream) {

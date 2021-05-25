@@ -19,7 +19,8 @@ export const useMediaStreamState = create<IUseMediaStreamState>(
 
 const useMediaStream = () => {
   const { mediaStream, displayMediaStream, setMediaStream, setDisplayMediaStream } = useMediaStreamState();
-  const { setAvailableDevices } = useMediaConfigurations();
+  const { setAvailableDevices, setCurrentAudioDevice, setCurrentVideoDevice, setAvailableAudioDevices, setAvailableVideoDevices } =
+    useMediaConfigurations();
 
   const endMediaStream = () => {
     const { mediaStream } = useMediaStreamState.getState();
@@ -60,12 +61,38 @@ const useMediaStream = () => {
     }
   };
 
+  const updateDevicesList = async () => {
+    const { audioDevice, videoDevice } = useMediaConfigurations.getState();
+    let newAudioDevices: MediaDeviceInfo[] = [],
+      newVideoDevices: MediaDeviceInfo[] = [];
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    let hasCurrentAudio = false,
+      hasCurrentVideo = false;
+    devices.forEach((device) => {
+      if (device.kind === "audioinput") {
+        newAudioDevices.push(device);
+        if (device.deviceId === audioDevice) {
+          hasCurrentAudio = true;
+        }
+      } else if (device.kind === "videoinput") {
+        newVideoDevices.push(device);
+        if (device.deviceId === videoDevice) {
+          hasCurrentVideo = true;
+        }
+      }
+    });
+
+    if (!hasCurrentAudio) setCurrentAudioDevice("default");
+    if (!hasCurrentVideo) setCurrentVideoDevice("default");
+    setAvailableAudioDevices(newAudioDevices);
+    setAvailableVideoDevices(newVideoDevices);
+  };
+
   const onMediaDeviceChange = async () => {
     const { peer, setUserState, userState, callStatus } = usePeerCallState.getState();
     if (callStatus !== "call_outgoing" && callStatus !== "call") return;
-
     const { mediaStream } = useMediaStreamState.getState();
-
+    const { audioDevice, videoDevice } = useMediaConfigurations.getState();
     try {
       let newMediaConfigurations = await checkDevicesExist(true, true);
       setUserState({
@@ -75,41 +102,48 @@ const useMediaStream = () => {
         sharingScreen: userState.sharingScreen,
       });
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: newMediaConfigurations.videoEnabled,
-        audio: newMediaConfigurations.audioEnabled,
+        video: newMediaConfigurations.videoEnabled
+          ? {
+              deviceId: videoDevice,
+            }
+          : false,
+        audio: newMediaConfigurations.audioEnabled ? { deviceId: audioDevice } : false,
       });
 
-      if (peer) {
+      // @ts-ignore
+      if (peer && peer.streams[0]) {
         if (mediaStream) {
-          let exists = false;
-          stream.getTracks().forEach((track) => {
-            mediaStream.getTracks().forEach((track1) => {
-              if (track.id === track1.id) {
-                peer.replaceTrack(track1, track, mediaStream);
-                exists = true;
-              }
-            });
-            if (!exists) {
-              peer.addTrack(track, mediaStream);
+          // @ts-ignore
+          let mediaStreamTracks: MediaStreamTrack[] = peer.streams[0].getAudioTracks(),
+            streamTracks = stream.getAudioTracks();
+          if (streamTracks.length > 0) {
+            if (mediaStreamTracks.length > 0) {
+              // @ts-ignore
+              peer.replaceTrack(mediaStreamTracks[0], streamTracks[0], peer.streams[0]);
+              mediaStream.getAudioTracks().forEach(track => track.stop());
+            } else {
+              // @ts-ignore
+              peer.addTrack(streamTracks[0], peer.streams[0]);
             }
-          });
-
-          mediaStream.getTracks().forEach((track) => {
-            exists = false;
-            stream.getTracks().forEach((track1) => {
-              if (track.id === track1.id) {
-                exists = true;
-              }
-            });
-            if (!exists) {
-              peer.removeTrack(track, mediaStream);
+          }
+          // @ts-ignore
+          mediaStreamTracks = peer.streams[0].getVideoTracks();
+          streamTracks = stream.getVideoTracks();
+          if (streamTracks.length > 0) {
+            if (mediaStreamTracks.length > 0) {
+              // @ts-ignore
+              peer.replaceTrack(mediaStreamTracks[0], streamTracks[0], peer.streams[0]);
+              mediaStream.getVideoTracks().forEach(track => track.stop());
+            } else {
+              // @ts-ignore
+              peer.addTrack(streamTracks[0], peer.streams[0]);
             }
-          });
+          }
         } else {
           peer.addStream(stream);
         }
+        setMediaStream(stream);
       }
-      setMediaStream(stream);
     } catch (error) {
       console.error(error);
     }
@@ -117,12 +151,14 @@ const useMediaStream = () => {
 
   const waitForMediaStream = async (video: boolean, audio: boolean) => {
     try {
+      const { audioDevice, videoDevice } = useMediaConfigurations.getState();
+      updateDevicesList();
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: video,
-        audio: audio,
+        video: video ? { deviceId: videoDevice } : false,
+        audio: audio ? { deviceId: audioDevice } : false,
       });
       setMediaStream(stream);
-      navigator.mediaDevices.ondevicechange = onMediaDeviceChange;
+      navigator.mediaDevices.ondevicechange = updateDevicesList;
       return stream;
     } catch (error) {
       console.error(error);
@@ -150,6 +186,7 @@ const useMediaStream = () => {
     endMediaStream,
     waitForDisplayMediaStream,
     asyncEndDisplayMediaStream,
+    onMediaDeviceChange,
   };
 };
 
