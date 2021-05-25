@@ -39,9 +39,7 @@ const ChatBody: React.FC = () => {
 
   const sendMessageAcknowledgements = (newMessages: IMessage[]) => {
     const { chat } = useChat.getState();
-    const unAcknowledgedMessages = newMessages.filter(
-      (message) => !message.readBy.includes(user._id)
-    );
+    const unAcknowledgedMessages = newMessages.filter((message) => !message.readBy.includes(user._id));
     if (unAcknowledgedMessages.length > 0)
       socket.emit(
         "acknowledge_messages",
@@ -51,8 +49,7 @@ const ChatBody: React.FC = () => {
   };
 
   const handlePageVisibilityChange = () => {
-    const { unacknowledgedMessages, setUnacknowledgedMessages } =
-      useChat.getState();
+    const { unacknowledgedMessages, setUnacknowledgedMessages } = useChat.getState();
     if (!document.hidden && unacknowledgedMessages.length > 0) {
       sendMessageAcknowledgements(unacknowledgedMessages);
       setUnacknowledgedMessages([]);
@@ -60,26 +57,14 @@ const ChatBody: React.FC = () => {
   };
 
   useEffect(() => {
-    document.addEventListener(
-      "visibilitychange",
-      handlePageVisibilityChange,
-      false
-    );
+    document.addEventListener("visibilitychange", handlePageVisibilityChange, false);
     return () => {
-      document.removeEventListener(
-        "visibilitychange",
-        handlePageVisibilityChange,
-        false
-      );
+      document.removeEventListener("visibilitychange", handlePageVisibilityChange, false);
     };
   }, []);
 
   const onChatScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
-    if (
-      event.currentTarget.scrollHeight + event.currentTarget.scrollTop ===
-        event.currentTarget.clientHeight &&
-      !messagesLoading
-    ) {
+    if (event.currentTarget.scrollHeight + event.currentTarget.scrollTop <= event.currentTarget.clientHeight + 3 && !messagesLoading) {
       loadMoreMessages();
     }
   };

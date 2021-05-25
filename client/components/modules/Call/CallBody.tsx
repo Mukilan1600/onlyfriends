@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import { usePeerCallState } from "../../providers/PeerCallWrapper";
 import StatusDeafenedIcon from "../../statics/icons/StatusDeafenedIcon";
@@ -11,6 +11,7 @@ import VideoPreview from "./components/VideoPreview";
 import VideoStreamsCarousel, { StreamHolder, StreamTitle } from "./components/VideoStreamsCarousel";
 import VolumeSlider, { VolumeSliderWrapper } from "./components/VolumeSlider";
 import CallSettingsModal from "./components/CallSettingsModal";
+import useCallSounds from "../../stores/call/useCallSounds";
 
 const CallBodyWrapper = styled.div`
   padding: 15px;
@@ -52,6 +53,8 @@ const CallBody: React.FC = () => {
   const { user } = useProfile();
   const callState = usePeerCallState();
   const { mediaStream, displayMediaStream } = useMediaStream();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const { playToggleOn, playToggleOff } = useCallSounds(audioRef);
 
   const VIDEO_WIDTH = "100%",
     VIDEO_HEIGHT = currentStream === "receiver-screen" ? "calc(100vh - 154px)" : "calc(100vh - 205px)";
@@ -166,13 +169,14 @@ const CallBody: React.FC = () => {
                 </span>
               )}
             </div>
-            <CallControls />
+            <CallControls playToggleOn={playToggleOn} playToggleOff={playToggleOff} />
             <VolumeSlider />
           </CallControlsWrapper>
         </div>
         <VideoStreamsCarousel setStream={setCurrentStream} currentStream={currentStream} />
       </div>
       <CallSettingsModal open={settingsModalOpen} onClose={setSettingsModalOpen.bind(this, false)} />
+      <audio ref={audioRef} />
     </CallBodyWrapper>
   );
 };

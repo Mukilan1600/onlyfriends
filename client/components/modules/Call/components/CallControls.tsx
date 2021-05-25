@@ -72,7 +72,7 @@ const CallRejectButton = styled.button<{ borderAll?: boolean }>`
   }
 `;
 
-const CallControls: React.FC = () => {
+const CallControls: React.FC<{ playToggleOff: () => void; playToggleOn: () => void }> = ({ playToggleOff, playToggleOn }) => {
   const callState = usePeerCallState();
   const { mediaStream } = useMediaStream();
   const { acceptCall, endCall } = useContext(PeerCallContext);
@@ -85,6 +85,9 @@ const CallControls: React.FC = () => {
       ...callState.userState,
       video,
     });
+
+    if (callState.userState.video && !video) playToggleOff();
+    if (!callState.userState.video && video) playToggleOn();
   };
 
   const toggleAudio = () => {
@@ -96,6 +99,9 @@ const CallControls: React.FC = () => {
       muted,
       deafened: false,
     });
+
+    if (callState.userState.muted && !muted) playToggleOn();
+    if (!callState.userState.muted && muted) playToggleOff();
   };
 
   const toggleSpeaker = () => {
@@ -104,6 +110,9 @@ const CallControls: React.FC = () => {
       deafened: !callState.userState.deafened,
       muted: !callState.userState.deafened,
     });
+
+    if (callState.userState.deafened) playToggleOn();
+    if (!callState.userState.deafened) playToggleOff();
   };
 
   const toggleScreenShare = () => {

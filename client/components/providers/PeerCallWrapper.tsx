@@ -108,7 +108,7 @@ const PeerCallWrapper: React.FC = ({ children }) => {
     checkDevicesExist,
     endMediaStream,
     setMediaStream,
-    onMediaDeviceChange
+    onMediaDeviceChange,
   } = useMediaStream();
   const { audioDevice, videoDevice } = useMediaConfigurations();
   const { socket } = useContext(WebSocketContext);
