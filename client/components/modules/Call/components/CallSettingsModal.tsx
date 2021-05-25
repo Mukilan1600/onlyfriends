@@ -30,6 +30,12 @@ const ModalBody = styled.div`
 
   div {
     margin: 10px 0px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  select {
+    margin: 5px 0px 0px 20px;
   }
 `;
 
@@ -50,7 +56,7 @@ const CallSettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
     <ModalWrapper>
       <ModalContent>
         <ModalHeader>
-          <p>Media Settings</p>
+          <h3>Media Settings</h3>
           <span style={{ cursor: "pointer", width: "15px", textAlign: "center" }} onClick={onClose}>
             x
           </span>
@@ -61,16 +67,29 @@ const CallSettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
             <label htmlFor="audio-device-selector">Audio device</label>
             <select id="audio-device-selector" value={audioDevice} onChange={(e) => setCurrentAudioDevice(e.target.value)}>
               {availableAudioDevices.map((device) => (
-                <option value={device.deviceId} key={device.deviceId}>{device.label}</option>
+                <option value={device.deviceId} key={device.deviceId}>
+                  {device.label}
+                </option>
               ))}
             </select>
           </div>
           <div>
             <label htmlFor="video-device-selector">Video device</label>
-            <select id="video-device-selector" value={videoDevice} onChange={(e) => setCurrentVideoDevice(e.target.value)}>
-              {availableVideoDevices.map((device) => (
-                <option value={device.deviceId} key={device.deviceId}>{device.label}</option>
-              ))}
+            <select
+              id="video-device-selector"
+              value={videoDevice}
+              disabled={availableVideoDevices.length < 1}
+              onChange={(e) => setCurrentVideoDevice(e.target.value)}
+            >
+              {availableVideoDevices.length > 0 ? (
+                availableVideoDevices.map((device) => (
+                  <option value={device.deviceId} key={device.deviceId}>
+                    {device.label}
+                  </option>
+                ))
+              ) : (
+                <option>No video device found</option>
+              )}
             </select>
           </div>
         </ModalBody>

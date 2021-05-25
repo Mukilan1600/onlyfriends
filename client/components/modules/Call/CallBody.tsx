@@ -156,13 +156,15 @@ const CallBody: React.FC = () => {
           {getCurrentVideoStream()}
           <CallControlsWrapper>
             <div style={{ width: "100%" }}>
-              <span
-                className="settings-btn"
-                style={{ float: "right", margin: "0px 15px", cursor: "pointer", transition: "opacity 0.1s ease-in" }}
-                onClick={setSettingsModalOpen.bind(this, true)}
-              >
-                <GearIcon />
-              </span>
+              {callState.callStatus === "call" && (
+                <span
+                  className="settings-btn"
+                  style={{ float: "right", margin: "0px 15px", cursor: "pointer", transition: "opacity 0.1s ease-in" }}
+                  onClick={setSettingsModalOpen.bind(this, true)}
+                >
+                  <GearIcon />
+                </span>
+              )}
             </div>
             <CallControls />
             <VolumeSlider />
