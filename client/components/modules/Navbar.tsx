@@ -23,17 +23,11 @@ export default function Navbar() {
       </Link>
       <div className={styles.navbarOptions}>
         <div className={styles.profileDetails} onClick={onProfileToggle}>
-          <img
-            src={user.avatarUrl}
-            className={styles.profileImage}
-            alt="profile"
-            height="22"
-            width="22"
-          ></img>
+          <img src={user.avatarUrl} className={styles.profileImage} alt="profile" height="22" width="22"></img>
           <p className={styles.profileName}>{user?.name}</p>
         </div>
       </div>
-      <ProfileModal open={profileModalOpen}>
+      <ProfileModal open={profileModalOpen} onClose={setProfileModalOpen.bind(this, false)}>
         <NavbarProfileModal />
       </ProfileModal>
     </div>

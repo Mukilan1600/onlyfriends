@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
+import useOnClickOutside from "../../stores/useOnClickOutside";
 
 const ModalWrapper = styled.div`
   z-index: 10;
@@ -13,11 +14,14 @@ const ModalWrapper = styled.div`
 `;
 type ProfileModalProps = {
   open: boolean;
+  onClose: () => void;
 };
 
-const ProfileModal: React.FC<ProfileModalProps> = ({ open, children }) => {
+const ProfileModal: React.FC<ProfileModalProps> = ({ onClose, open, children }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(modalRef, onClose);
   if (!open) return null;
-  return <ModalWrapper>{children}</ModalWrapper>;
+  return <ModalWrapper ref={modalRef}>{children}</ModalWrapper>;
 };
 
 export default ProfileModal;
