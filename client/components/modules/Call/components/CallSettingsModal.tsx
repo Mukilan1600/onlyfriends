@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import useMediaConfigurations from "../../../stores/call/useMediaConfiguration";
+import useOnClickOutside from "../../../stores/useOnClickOutside";
 
 const ModalWrapper = styled.div`
   left: 0;
@@ -51,10 +52,14 @@ const ModalHeader = styled.div`
 const CallSettingsModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { audioDevice, videoDevice, setCurrentAudioDevice, setCurrentVideoDevice, availableAudioDevices, availableVideoDevices } =
     useMediaConfigurations();
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(modalRef, onClose);
+
   if (!open) return null;
   return (
     <ModalWrapper>
-      <ModalContent>
+      <ModalContent ref={modalRef}>
         <ModalHeader>
           <h3>Media Settings</h3>
           <span style={{ cursor: "pointer", width: "15px", textAlign: "center" }} onClick={onClose}>
