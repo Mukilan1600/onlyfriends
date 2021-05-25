@@ -1,9 +1,10 @@
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
 import { usePeerCallState } from "../../providers/PeerCallWrapper";
 import StatusDeafenedIcon from "../../statics/icons/StatusDeafenedIcon";
 import StatusMutedIcon from "../../statics/icons/StatusMutedIcon";
+import useCallSounds from "../../stores/call/useCallSounds";
 import useMediaConfigurations from "../../stores/call/useMediaConfiguration";
 import useMediaStream from "../../stores/call/useMediaStream";
 import useProfile from "../../stores/useProfile";
@@ -43,11 +44,12 @@ const CallStatus = styled.div`
 `;
 
 const CallPreview: React.FC = () => {
+  const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useProfile();
   const callState = usePeerCallState();
   const { mediaStream } = useMediaStream();
-  const { hasAudio, hasVideo } = useMediaConfigurations();
   const router = useRouter();
+  const { playToggleOn, playToggleOff } = useCallSounds(audioRef);
 
   const expandCallPreview = () => {
     router.push("/call");
@@ -112,10 +114,11 @@ const CallPreview: React.FC = () => {
           </div>
 
           <div style={{ display: "flex" }}>
-            <CallControls />
+            <CallControls playToggleOn={playToggleOn} playToggleOff={playToggleOff} />
           </div>
         </>
       )}
+      <audio ref={audioRef} />
     </PreviewWrapper>
   );
 };
