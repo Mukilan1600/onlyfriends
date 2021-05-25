@@ -18,7 +18,7 @@ const ModalWrapper = styled.div`
 
 const ModalContent = styled.div`
   background: white;
-  width: 60%;
+  width: 45%;
   display: flex;
   flex-direction: column;
   align-items: center;
