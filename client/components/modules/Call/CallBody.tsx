@@ -3,18 +3,21 @@ import styled from "styled-components";
 import { usePeerCallState } from "../../providers/PeerCallWrapper";
 import StatusDeafenedIcon from "../../statics/icons/StatusDeafenedIcon";
 import StatusMutedIcon from "../../statics/icons/StatusMutedIcon";
+import GearIcon from "../../statics/icons/GearIcon";
 import useMediaStream from "../../stores/call/useMediaStream";
 import useProfile from "../../stores/useProfile";
 import CallControls from "./components/CallControls";
 import VideoPreview from "./components/VideoPreview";
 import VideoStreamsCarousel, { StreamHolder, StreamTitle } from "./components/VideoStreamsCarousel";
-import VolumeSlider from "./components/VolumeSlider";
+import VolumeSlider, { VolumeSliderWrapper } from "./components/VolumeSlider";
+import CallSettingsModal from "./components/CallSettingsModal";
 
 const CallBodyWrapper = styled.div`
-  padding: 30px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: calc(100vh - 70px);
 `;
 
 const CallControlsWrapper = styled.div`
@@ -23,18 +26,35 @@ const CallControlsWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-around;
+
+  .settings-btn {
+    opacity: 0;
+  }
+
+  &:hover .settings-btn {
+    opacity: 100%;
+  }
+
+  &:hover ${VolumeSliderWrapper} {
+    opacity: 100%;
+
+    input {
+      width: 60%;
+    }
+  }
 `;
 
 export type CurrentStream = "user-video" | "receiver-video" | "user-screen" | "receiver-screen";
 
-const VIDEO_WIDTH = 657,
-  VIDEO_HEIGHT = 370;
-
 const CallBody: React.FC = () => {
+  const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
+  const [currentStream, setCurrentStream] = useState<CurrentStream>("receiver-video");
   const { user } = useProfile();
   const callState = usePeerCallState();
   const { mediaStream, displayMediaStream } = useMediaStream();
-  const [currentStream, setCurrentStream] = useState<CurrentStream>("receiver-video");
+
+  const VIDEO_WIDTH = "100%",
+    VIDEO_HEIGHT = currentStream === "receiver-screen" ? "calc(100vh - 154px)" : "calc(100vh - 205px)";
 
   const getCurrentVideoStream = () => {
     switch (currentStream) {
@@ -47,9 +67,9 @@ const CallBody: React.FC = () => {
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream[1]}
               enabled={callState.receiverState.sharingScreen}
-              muted={callState.userState.deafened}
+              muted={true}
             />
-            <StreamTitle>{callState.receiverProfile.name}</StreamTitle>
+            <div style={{ height: "10px" }}></div>
           </StreamHolder>
         );
       case "receiver-video":
@@ -61,7 +81,7 @@ const CallBody: React.FC = () => {
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream[0]}
               enabled={callState.receiverState.video}
-              muted={callState.userState.deafened}
+              muted={true}
             />
             <div style={{ display: "flex", alignItems: "center" }}>
               <StreamTitle>{callState.receiverProfile.name}</StreamTitle>
@@ -132,16 +152,27 @@ const CallBody: React.FC = () => {
   return (
     <CallBodyWrapper>
       <div style={{ display: "flex", justifyContent: "space-evenly", width: "100%", alignItems: "center" }}>
-        {getCurrentVideoStream()}
+        <div style={{ width: "100%", maxHeight: "calc(100vh - 100px)", padding: "0px 100px" }}>
+          {getCurrentVideoStream()}
+          <CallControlsWrapper>
+            <div style={{ width: "100%" }}>
+              {callState.callStatus === "call" && (
+                <span
+                  className="settings-btn"
+                  style={{ float: "right", margin: "0px 15px", cursor: "pointer", transition: "opacity 0.1s ease-in" }}
+                  onClick={setSettingsModalOpen.bind(this, true)}
+                >
+                  <GearIcon />
+                </span>
+              )}
+            </div>
+            <CallControls />
+            <VolumeSlider />
+          </CallControlsWrapper>
+        </div>
         <VideoStreamsCarousel setStream={setCurrentStream} currentStream={currentStream} />
       </div>
-      <CallControlsWrapper>
-        <div style={{ width: "100%" }}>
-          <span style={{ float: "right" }}></span>
-        </div>
-        <CallControls />
-        <VolumeSlider />
-      </CallControlsWrapper>
+      <CallSettingsModal open={settingsModalOpen} onClose={setSettingsModalOpen.bind(this, false)} />
     </CallBodyWrapper>
   );
 };

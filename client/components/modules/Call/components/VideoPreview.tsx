@@ -8,15 +8,15 @@ export interface VideoPreviewProps {
   avatarUrl: string;
   muted?: boolean;
   enabled?: boolean;
-  width: number;
-  height: number;
+  width: string;
+  height: string;
 }
 
-const VideoTemplate = styled.div<{ width: number; height: number }>`
-  max-height: ${({ height }) => `${height}px`};
-  max-width: ${({ width }) => `${width}px`};
-  height: ${({ height }) => `${height}px`};
-  width: ${({ width }) => `${width}px`};
+const VideoTemplate = styled.div<{ width: string; height: string }>`
+  max-height: ${({ height }) => `${height}`};
+  max-width: ${({ width }) => `${width}`};
+  height: ${({ height }) => `${height}`};
+  width: ${({ width }) => `${width}`};
   background-color: black;
   display: flex;
   align-items: center;
@@ -80,7 +80,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ video, avatarUrl, muted, en
     <>
       {video && video.getVideoTracks().length > 0 && enabled ? (
         <VideoTemplate width={width} height={height}>
-          <video ref={videoRef} height={height} width={width} autoPlay muted />
+          <video ref={videoRef} height="100%" width="100%" autoPlay muted />
         </VideoTemplate>
       ) : (
         <VideoTemplate width={width} height={height}>

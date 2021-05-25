@@ -6,6 +6,8 @@ import CallRejectIcon from "../../../statics/icons/CallRejectIcon";
 import EndCall from "../../../statics/icons/EndCall";
 import MicOff from "../../../statics/icons/MicOff";
 import MicOn from "../../../statics/icons/MicOn";
+import ScreenShareIcon from "../../../statics/icons/ScreenShareIcon";
+import ScreenShareOffIcon from "../../../statics/icons/ScreenShareOffIcon";
 import SpeakerOff from "../../../statics/icons/SpeakerOff";
 import SpeakerOn from "../../../statics/icons/SpeakerOn";
 import VideoOff from "../../../statics/icons/VideoOff";
@@ -20,6 +22,7 @@ const ButtonPanel = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  image-rendering: optimizeQuality;
 `;
 
 const ControlButton = styled.button`
@@ -133,7 +136,9 @@ const CallControls: React.FC = () => {
     case "call":
       return (
         <ButtonPanel>
-          <ControlButton onClick={toggleScreenShare}>{callState.userState.sharingScreen ? <VideoOn /> : <VideoOff />}</ControlButton>
+          <ControlButton onClick={toggleScreenShare}>
+            {callState.userState.sharingScreen ? <ScreenShareOffIcon /> : <ScreenShareIcon />}
+          </ControlButton>
           <ControlButton onClick={toggleVideo}>{callState.userState.video ? <VideoOn /> : <VideoOff />}</ControlButton>
           <ControlButton onClick={toggleSpeaker}>{callState.userState.deafened ? <SpeakerOff /> : <SpeakerOn />}</ControlButton>
           <ControlButton onClick={toggleAudio}>{callState.userState.muted ? <MicOff /> : <MicOn />}</ControlButton>

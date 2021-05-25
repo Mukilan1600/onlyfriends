@@ -93,10 +93,17 @@ const CallPreview: React.FC = () => {
             )}
           </CallStatus>
           <div style={{ display: "flex", cursor: "pointer" }} onClick={expandCallPreview}>
-            <VideoPreview width={160} height={130} avatarUrl={user.avatarUrl} muted={true} video={mediaStream} enabled={callState.userState.video} />
             <VideoPreview
-              width={160}
-              height={130}
+              width="160px"
+              height="130px"
+              avatarUrl={user.avatarUrl}
+              muted={true}
+              video={mediaStream}
+              enabled={callState.userState.video}
+            />
+            <VideoPreview
+              width="160px"
+              height="130px"
               avatarUrl={callState.receiverProfile.avatarUrl}
               video={callState.receiverStream[0]}
               enabled={callState.receiverState.video}
