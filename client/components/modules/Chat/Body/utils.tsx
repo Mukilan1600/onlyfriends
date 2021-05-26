@@ -61,7 +61,7 @@ export const formatMessage = (messageFragment: IMessageFragment, index: number, 
 
 export const formatFileMessage = (message: IMessage, prev: boolean = true, sentByMe: boolean = true) => {
   if (message.fileType === "video" && !prev) {
-    return <video src={message.fileUrl} controls style={{ width: "100%", height: "100%", marginBottom: '20px' }} />;
+    return <video preload="metadata" src={message.fileUrl} controls style={{ width: "100%", height: "100%", marginBottom: '20px' }} />;
   } else if (message.fileType === "image" && !prev) {
     return <img src={message.fileUrl} alt="image message" style={{ width: "100%", height: "100%", marginBottom: '15px' }} />;
   } else {
