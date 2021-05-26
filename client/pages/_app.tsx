@@ -29,6 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
   }
   useEffect(() => {
     if (typeof window === undefined) return;
+    setWidth(window.innerWidth);
     window.addEventListener("resize", handleWindowSizeChange);
     return () => {
       window.removeEventListener("resize", handleWindowSizeChange);
