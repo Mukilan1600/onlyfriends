@@ -47,13 +47,14 @@ router.get("/logout", ensureLoggedIn, (req, res) => {
         return res.status(500).send({ msg: "Internal server error" });
       }
 
-      req.logOut();
-      req.session.destroy((err) => {
-        if (err) {
-          logger.error(err);
-          return res.status(500).send({ msg: "Internal server error" });
-        }
-        return res.redirect(`${process.env.CLIENT}/`);
+      req.logOut((err) => {
+        req.session.destroy((err) => {
+          if (err) {
+            logger.error(err);
+            return res.status(500).send({ msg: "Internal server error" });
+          }
+          return res.redirect(`${process.env.CLIENT}/`);
+        });
       });
     }
   );
